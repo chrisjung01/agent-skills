@@ -48,6 +48,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 - Own skills carry the `cj-` prefix. `name` in the frontmatter must match the folder name (lowercase letters, digits, hyphens).
 - A model-invoked skill's `description` starts with "Use when ..." and lists only triggers. It decides whether the skill fires; a workflow summary there makes agents skip the body.
 - Text meant for humans goes through the `unslop` skill.
+- A skill that shows a summary in chat (decision list, report, ledger) carries this sentence inline at that step, word for word, because `AGENTS.md` is not loaded when the skill runs in another repo: "Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines." Tables and the "Next:" block keep their own format.
 - Write instructions tool-neutrally and reference files relative to `SKILL.md`. Call scripts via `bash scripts/x.sh`.
 - Write skills in English.
 - No secrets, tokens or absolute paths (`/Users/...`).

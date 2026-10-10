@@ -58,7 +58,7 @@ After each PR: more ready units and the window still light, take the next; other
 
 ## 4. Report
 
-Per PR: link, base (stacked on which PR), acceptance table, checks, review outcome. Then deviations, units left and why, and the next step: `/clear` + `/cj-implement <issue>` while work is left; once every ticket is merged, ask the user to close the spec's issue (or close it after their explicit yes) and run `/cj-retro`. Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command per line, each followed by ` · ` and its reason in a few words. No table.
+Per PR: link, base (stacked on which PR), acceptance table, checks, review outcome. Then deviations, units left and why. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. Then the next step: `/clear` + `/cj-implement <issue>` while work is left; once every ticket is merged, ask the user to close the spec's issue (or close it after their explicit yes) and run `/cj-retro`. Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command per line, each followed by ` · ` and its reason in a few words. No table.
 
 ## After a merge (per-ticket stacks)
 
