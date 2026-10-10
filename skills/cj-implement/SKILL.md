@@ -21,7 +21,7 @@ The argument after the issue picks the mode. No mode given and the spec has more
 | Links | `Closes #<ticket>`, `Part of #<spec issue>` | `Closes` for each done ticket of this repo, `Part of #<spec issue>` |
 | When | the recommended answer | trying it out, or a wide refactor whose steps are not green on their own |
 
-Call the Skill tool with "cj-project-context" for: commands, conventions, issue-tracker. Call the Skill tool with "cj-posting" before any outbound action. The user started this skill for draft PRs, so it carries the yes for the linked remote branches (`gh issue develop`), pushes to them, the draft PRs and their descriptions, deviation comments on the spec's issue, and the restack in "After a merge"; every other outbound action needs its own yes. When a situation tempts you to bend a step, check [WRONG-TURNS.md](WRONG-TURNS.md).
+Call the Skill tool with "cj-project-context" for: commands, conventions, issue-tracker. Call the Skill tool with "cj-posting" before any outbound action. The user started this skill for draft PRs, so it carries the yes for the linked remote branches (`gh issue develop`), pushes to them, the draft PRs and their descriptions, deviation comments on the spec's issue, dropping the `[Epic] ` prefix of a one-ticket spec, and the restack in "After a merge"; every other outbound action needs its own yes. When a situation tempts you to bend a step, check [WRONG-TURNS.md](WRONG-TURNS.md).
 
 Keep a TODO list with the harness's task tool: one entry per PR unit, each with its steps. Before the final report nothing is open, or the report names it with the reason.
 
@@ -31,7 +31,7 @@ Keep a TODO list with the harness's task tool: one entry per PR unit, each with 
 - Read the issue, its latest `## Spec` comment and every comment after it (deviations, answers), the sub-issues with their blocked-by edges and state, the applicable `AGENTS.md`, the glossary and the ADRs the spec names, and the affected code.
 - **No spec comment.** A trivial change (typo, copy, a one-line fix whose expected behaviour the issue states) may use the issue as its spec: say so in one line and go on with its criteria as AC-1… Anything else: stop and name `/cj-grill-with-docs <issue>` and `/cj-to-spec <issue>`.
 - The spec has an open question, or a criterion you cannot verify: stop and ask. Code or docs answer facts; only product decisions go to the user.
-- No sub-issues (the spec fits one ticket): the spec's issue is the one ticket; both modes give one PR.
+- No sub-issues (the spec fits one ticket): the spec's issue is the one ticket; both modes give one PR. It is no epic: drop a leading `[Epic] ` from its title, and the PR only `Closes #<issue>`, without `Part of`.
 
 ## 2. Pick the work
 
