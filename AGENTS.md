@@ -63,6 +63,7 @@ git config core.hooksPath .githooks   # once per checkout: runs validate.sh befo
 ./install.sh --dry-run       # shows what would be linked
 # in skills/cj-whetstone/skill-metrics/ when the crate changes (also in CI):
 cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test --locked
+cargo test -- --ignored      # manual, not in CI, after a report layout change: writes target/tmp/report-check.html from sample data; look at it as the test's doc comment says
 ```
 
 Skills are installed as symlinks. Edits here take effect immediately, no reinstall needed.

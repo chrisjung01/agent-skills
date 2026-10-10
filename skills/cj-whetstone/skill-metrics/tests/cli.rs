@@ -1577,6 +1577,15 @@ fn report_charts_a_weekly_trend_per_skill_and_a_scatter_across_skills() {
     assert_eq!(scatter("model"), ["cj-ci-triage, unslop, x"]);
 }
 
+/// A row an older parser wrote, its transcript gone: every metric NULL, no start kind, no skill
+/// version, a start time that does not parse. Its window loaded a skill that never ran on its own.
+const HOSTILE: &str =
+    "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
+         user_prompts, parser_version)
+     VALUES ('h1', 'hostile', 's9', '10 o''clock', '10 o''clock', 1, 2);
+     INSERT INTO nested_skills (start_uuid, position, skill, loaded_at)
+     VALUES ('h1', 0, 'hostile-nested', '10 o''clock');";
+
 #[test]
 fn report_survives_a_call_with_every_gap_in_every_view() {
     let dir = tempfile::tempdir().unwrap();
@@ -1587,18 +1596,11 @@ fn report_survives_a_call_with_every_gap_in_every_view() {
     );
     fs::create_dir_all(&projects).unwrap();
     run(&projects, &db);
-    // A row an older parser wrote, its transcript gone: every metric NULL, no start kind, no
-    // skill version, a start time that does not parse. Its window loaded a skill that never ran
-    // on its own. Each a skill of its own, so a NULL counted as zero shows as a percentage.
+    // The hostile call and its nested skill, each a skill of its own, so a NULL counted as zero
+    // shows as a percentage.
     Connection::open(&db)
         .unwrap()
-        .execute_batch(
-            "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
-                 user_prompts, parser_version)
-             VALUES ('h1', 'hostile', 's9', '10 o''clock', '10 o''clock', 1, 2);
-             INSERT INTO nested_skills (start_uuid, position, skill, loaded_at)
-             VALUES ('h1', 0, 'hostile-nested', '10 o''clock');",
-        )
+        .execute_batch(HOSTILE)
         .unwrap();
 
     let (ok, _) = cli(&["report", "--out", out.to_str().unwrap()], &db);
@@ -1630,5 +1632,85 @@ fn report_survives_a_call_with_every_gap_in_every_view() {
         let view = view(&html, kind);
         assert!(!view.contains("<circle class=\"dot\""));
         assert!(!view.contains('%'), "{view}");
+        // Every table is the direct child of its scroll container, so it never makes the page
+        // scroll sideways on a phone. `all` has both kinds: overview and version tables.
+        let tables = view.matches("<table").count();
+        assert!(tables > usize::from(kind == "all"), "{view}");
+        assert_eq!(
+            tables,
+            view.matches("<div class=\"scroll\"><table>").count(),
+            "{view}"
+        );
+        assert_eq!(
+            view.matches("</table>").count(),
+            view.matches("</table></div>").count(),
+            "{view}"
+        );
     }
+}
+
+/// Writes the report for a sample database to `target/tmp/report-check.html` for a look by hand:
+/// `cargo test -- --ignored`, open the file, then in the browser's DevTools check light and dark,
+/// 375 px and 1280 px wide, and each of the three switch settings (all, slash, model). The page
+/// must not scroll sideways and all text must stay readable. Never opens the real database.
+#[test]
+#[ignore]
+fn report_check_page() {
+    let dir = tempfile::tempdir().unwrap();
+    let (projects, db) = (
+        dir.path().join("projects"),
+        dir.path().join("metrics.sqlite"),
+    );
+    let out = Path::new(env!("CARGO_TARGET_TMPDIR")).join("report-check.html");
+    let folder = projects.join("-home-x-repo");
+    fs::create_dir_all(&folder).unwrap();
+    fs::write(folder.join("s1.jsonl"), SESSION).unwrap();
+    fs::write(folder.join("s2.jsonl"), NESTING).unwrap();
+    fs::write(
+        folder.join("s6.jsonl"),
+        include_str!("fixtures/corrections.jsonl"),
+    )
+    .unwrap();
+    run(&projects, &db);
+    // A long-named skill over three weeks under three versions, and the hostile call.
+    let long = "cj-a-skill-with-a-name-long-enough-to-wrap-on-a-phone";
+    Connection::open(&db)
+        .unwrap()
+        .execute_batch(&format!(
+            "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
+                 user_prompts, parser_version, input_tokens, output_tokens, active_ms,
+                 interrupts, tool_calls, tool_errors, questions, recommended_answers,
+                 start_kind, skill_version)
+             VALUES
+                 ('l1', '{long}', 's9', '2026-09-14T10:00:00Z', '2026-09-14T10:05:00Z', 2, 9,
+                  1000, 100, 300000, 1, 10, 1, 2, 1, 'slash',
+                  '0123456789abcdef0123456789abcdef01234567'),
+                 ('l2', '{long}', 's9', '2026-09-22T10:00:00Z', '2026-09-22T10:05:00Z', 1, 9,
+                  2000, 200, 200000, 0, 8, 0, 1, 1, 'model', 'uncommitted'),
+                 ('l3', '{long}', 's9', '2026-09-30T10:00:00Z', '2026-09-30T10:05:00Z', 1, 9,
+                  3000, 300, 100000, 0, 6, 2, 0, 0, 'slash', NULL);
+             {HOSTILE}"
+        ))
+        .unwrap();
+    // A file from an earlier run is overwritten.
+    fs::write(&out, "stale").unwrap();
+
+    let (ok, _) = cli(&["report", "--out", out.to_str().unwrap()], &db);
+    assert!(ok);
+    let html = fs::read_to_string(&out).unwrap();
+    let all = view(&html, "all");
+    let skills: Vec<String> = overview(all)
+        .into_iter()
+        .map(|row| row[0].clone())
+        .collect();
+    assert!(skills.len() > 3, "{skills:?}");
+    for skill in [long, "hostile"] {
+        assert!(skills.iter().any(|s| s == skill), "{skills:?}");
+    }
+    // Weeks 38, 39 and 40, one version each.
+    let weeks = trend_points(all, long);
+    for week in ["2026-W38", "2026-W39", "2026-W40"] {
+        assert!(weeks.iter().any(|p| p.contains(week)), "{weeks:?}");
+    }
+    assert_eq!(version_table(all, long).0.len(), 3);
 }
