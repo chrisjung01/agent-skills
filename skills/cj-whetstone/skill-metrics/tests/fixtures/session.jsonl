@@ -1,0 +1,22 @@
+{"type":"mode","mode":"normal","sessionId":"s1"}
+{"type":"user","uuid":"u01","parentUuid":null,"timestamp":"2026-10-01T10:00:00.000Z","message":{"role":"user","content":"hello"}}
+{"type":"user","uuid":"u02","parentUuid":"u01","timestamp":"2026-10-01T10:01:00.000Z","message":{"role":"user","content":"<command-message>cj-review-loop</command-message>\n<command-name>/cj-review-loop</command-name>\n<command-args>main</command-args>"}}
+{"type":"user","uuid":"u03","parentUuid":"u02","isMeta":true,"timestamp":"2026-10-01T10:01:00.000Z","message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: /home/x/.claude/skills/cj-review-loop\n\n# Review loop\n\nCall the Skill tool with \"cj-reviewing\"."}]}}
+{"type":"assistant","uuid":"u04","parentUuid":"u03","timestamp":"2026-10-01T10:02:00.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Reviewing."}]}}
+{"type":"user","uuid":"u05","parentUuid":"u04","timestamp":"2026-10-01T10:03:00.000Z","message":{"role":"user","content":"go on"}}
+{"type":"future-entry","uuid":"u06","parentUuid":"u05","timestamp":"2026-10-01T10:30:00.000Z","message":{"role":"user","content":"looks like a prompt"}}
+{"type":"user","uuid":"u07","parentUuid":"u05","timestamp":"2026-10-01T10:04:00.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"ok"}]}}
+{"type":"user","uuid":"u08","parentUuid":"u07","timestamp":"2026-10-01T10:04:30.000Z","message":{"role":"user","content":[{"type":"text","text":"[Request interrupted by user]"}]}}
+{"type":"user","uuid":"u09","parentUuid":"u08","timestamp":"2026-10-01T10:05:00.000Z","message":{"role":"user","content":"second"}}
+{"type":"user","uuid":"u10","parentUuid":"u09","timestamp":"2026-10-01T10:06:00.000Z","message":{"role":"user","content":"<command-name>/model</command-name>\n<command-message>model</command-message>\n<command-args></command-args>"}}
+{"type":"user","uuid":"u11","parentUuid":"u10","timestamp":"2026-10-01T10:06:00.000Z","message":{"role":"user","content":"<local-command-stdout>Set model to opus</local-command-stdout>"}}
+{"type":"user","uuid":"u12","parentUuid":"u11","timestamp":"2026-10-01T10:10:00.000Z","message":{"role":"user","content":"<command-message>cj-ci-triage</command-message>\n<command-name>/cj-ci-triage</command-name>\n<command-args></command-args>"}}
+{"type":"user","uuid":"u13","parentUuid":"u12","isMeta":true,"timestamp":"2026-10-01T10:10:00.000Z","message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: /home/x/.claude/skills/cj-ci-triage\n\n# CI triage"}]}}
+{"type":"user","uuid":"u14","parentUuid":"u13","timestamp":"2026-10-01T10:11:00.000Z","message":{"role":"user","content":"third"}}
+{"type":"assistant","uuid":"u15","parentUuid":"u14","timestamp":"2026-10-01T10:12:00.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]}}
+{"type":"user","uuid":"u16","parentUuid":"u15","timestamp":"2026-10-01T10:20:00.000Z","message":{"role":"user","content":"<command-name>/clear</command-name>\n<command-message>clear</command-message>\n<command-args></command-args>"}}
+{"type":"user","uuid":"u17","parentUuid":"u16","timestamp":"2026-10-01T10:21:00.000Z","message":{"role":"user","content":"after clear"}}
+{"type":"assistant","uuid":"u18","parentUuid":"u17","timestamp":"2026-10-01T10:22:00.000Z","message":{"role":"assistant","content":[{"type":"tool_use","id":"t2","name":"Skill","input":{"skill":"unslop"}}]}}
+{"type":"user","uuid":"u19","parentUuid":"u18","timestamp":"2026-10-01T10:22:00.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t2","content":"Launching skill: unslop"}]}}
+{"type":"user","uuid":"u20","parentUuid":"u19","isMeta":true,"sourceToolUseID":"t2","timestamp":"2026-10-01T10:22:00.000Z","message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: /home/x/.claude/skills/unslop\n\n# Unslop"}]}}
+{"type":"user","uuid":"u21","parentUuid":"u20","isSidechain":true,"timestamp":"2026-10-01T10:23:00.000Z","message":{"role":"user","content":"sidechain prompt"}}

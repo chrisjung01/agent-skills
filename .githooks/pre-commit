@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Blocks the commit when scripts/validate.sh fails. Set up once: git config core.hooksPath .githooks
+exec bash scripts/validate.sh

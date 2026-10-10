@@ -1,0 +1,20 @@
+name: skill-metrics
+on:
+  push:
+    paths: ["skills/cj-whetstone/skill-metrics/**", ".github/workflows/skill-metrics.yml"]
+  pull_request:
+    paths: ["skills/cj-whetstone/skill-metrics/**", ".github/workflows/skill-metrics.yml"]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: skills/cj-whetstone/skill-metrics
+    steps:
+      - uses: actions/checkout@v4
+        # The report test orders HEAD~1 and HEAD by commit date.
+        with:
+          fetch-depth: 2
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test --locked

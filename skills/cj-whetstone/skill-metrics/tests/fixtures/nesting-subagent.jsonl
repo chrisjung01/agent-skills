@@ -1,0 +1,4 @@
+{"type":"user","uuid":"a01","parentUuid":null,"timestamp":"2026-10-02T10:02:30.000Z","isSidechain":true,"message":{"role":"user","content":"Review the diff"}}
+{"type":"assistant","uuid":"a02","parentUuid":"a01","timestamp":"2026-10-02T10:02:40.000Z","isSidechain":true,"message":{"role":"assistant","content":[{"type":"tool_use","id":"t9","name":"Skill","input":{"skill":"cj-filing-issues"}}]}}
+{"type":"user","uuid":"a03","parentUuid":"a02","timestamp":"2026-10-02T10:02:40.000Z","isSidechain":true,"message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t9","content":"Launching skill: cj-filing-issues"}]}}
+{"type":"user","uuid":"a04","parentUuid":"a03","timestamp":"2026-10-02T10:02:40.000Z","isMeta":true,"sourceToolUseID":"t9","isSidechain":true,"message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: /home/x/.claude/skills/cj-filing-issues\n\n# Filing issues"}]}}
