@@ -49,7 +49,7 @@ Impact tier (one reporter does not mean one affected user; tiers 1 and 2 are abo
 
 ## Phase 4: output
 
-1. **Report** in the user's language, through the `unslop` skill: verdict per claim, evidence per source, reproduction status (traced / reproduced live / neither), impact numbers, tier, confidence, open questions. Every claim cites its source. The user asked only "is it a bug?": stop here and offer the draft.
+1. **Report** in the user's language, through the `unslop` skill: verdict per claim, evidence per source, reproduction status (traced / reproduced live / neither), impact numbers, tier, confidence, open questions. Every claim cites its source. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. Sources stay. The user asked only "is it a bug?": stop here and offer the draft.
 2. **Issue** on "Confirmed bug" or "UX finding": call the Skill tool with "cj-filing-issues" (File) with the presets in [ISSUE.md](ISSUE.md) and the relations found. The issue describes the problem; a reporter's proposed fix is a proposal. Never file on "Not enough data".
 3. **Close the chat loop** when the input came from or was alerted in the chat: a thread reply in the thread's language with the verdict in one sentence and the issue link, or the concrete questions on "Not enough data". Ask the user to mark the alert or thread done, except on "Not enough data", which stays open.
 

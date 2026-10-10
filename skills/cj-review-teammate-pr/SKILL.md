@@ -69,10 +69,12 @@ Per finding: location, what goes wrong with the input that triggers it, suggesti
 
 Run the `unslop` skill over items 1 to 4. Items 1 to 3 in the user's language, item 4 in the review language from `conventions`, else the language of the PR title:
 
-1. One paragraph: what the PR does, whether it matches the issue.
+1. What the PR does and whether it matches the issue, in one or two lines.
 2. Findings by section, each with severity and your one-line take, in plain words: a code name the user may not know gets half a sentence on what it is. A command you hand the user says what it does and what it changes.
 3. The proposed verdict.
 4. Draft comments to the author, written as the user would write them (first person, their tone), each in a fenced `markdown` block ready to paste: one per finding, anchored to its location, plus a short summary for the review body. Zero findings: one sentence saying what you checked.
+
+For the chat summary in items 1 to 3: Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines.
 
 Call the Skill tool with "cj-posting" before any outbound action. Ask one question at a time, each as a choice: first which findings to post (all, pick per finding, none), then the form (a review with the summary as body, inline comments per finding, or both). Close by telling the user to click approve themselves if they agree, naming the reviewed commit.
 

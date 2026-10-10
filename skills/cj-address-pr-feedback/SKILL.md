@@ -47,7 +47,7 @@ Per entry: read the code at `file:line` (outdated or `line` null: grep a distinc
 
 A nit phrased as a statement is fix or explain. A question is clarify unless the code makes the intended answer obvious; ask rather than guess a fix.
 
-Run the `unslop` skill over the ledger and the final output; replies go through it via cj-posting. Show the ledger with classes, evidence per entry, and which fix entries share a root cause and would share a commit. Draft the explain and clarify replies now. Done when the user confirmed or changed the classes.
+Run the `unslop` skill over the ledger and the final output; replies go through it via cj-posting. Show the ledger with classes, evidence per entry, and which fix entries share a root cause and would share a commit. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. A table keeps its shape. Draft the explain and clarify replies now. Done when the user confirmed or changed the classes.
 
 ## Phase 2: fix
 

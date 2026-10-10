@@ -45,7 +45,7 @@ Done when the user has decided per finding.
    - round limit: after 5 rounds, stop with everything still open
    Otherwise the next round.
 
-Report with the templates in [REPORT.md](REPORT.md): the escalation report on escalate, the final report otherwise.
+Report with the templates in [REPORT.md](REPORT.md): the escalation report on escalate, the final report otherwise. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. Tables keep their shape.
 
 Done when one stop condition holds and its report is shown.
 
