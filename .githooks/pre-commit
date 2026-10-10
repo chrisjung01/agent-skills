@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
-# Blocks the commit when scripts/validate.sh fails. Set up once: git config core.hooksPath .githooks
-exec bash scripts/validate.sh
+# Blocks the commit when scripts/validate.sh fails, or when staged crate files are not formatted.
+# Set up once: git config core.hooksPath .githooks
+set -e
+bash scripts/validate.sh
+if git diff --cached --name-only | grep -q '^skills/cj-whetstone/skill-metrics/'; then
+  (cd skills/cj-whetstone/skill-metrics && cargo fmt --check)
+fi

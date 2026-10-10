@@ -59,7 +59,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 
 ```bash
 bash scripts/validate.sh     # format of all skills (also runs in CI): invocation rules, no calls to user-invoked skills; locally also no word from the gitignored .org-terms file in any tracked file
-git config core.hooksPath .githooks   # once per checkout: runs validate.sh before each commit
+git config core.hooksPath .githooks   # once per checkout: runs validate.sh, and cargo fmt --check when the crate changes, before each commit
 ./install.sh --dry-run       # shows what would be linked
 # in skills/cj-whetstone/skill-metrics/ when the crate changes (also in CI):
 cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test --locked
