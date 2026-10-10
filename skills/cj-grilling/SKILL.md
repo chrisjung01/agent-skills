@@ -30,7 +30,7 @@ Anything the code, the docs or a tool can answer, look up yourself; dispatch a s
 
 ## Done when
 
-The frontier is empty and the user confirms the shared understanding. Summarise the decisions before anything acts on them. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines.
+The frontier is empty and the user confirms the shared understanding. Give a summary of the decisions before anything acts on them. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines.
 
 ## Domain language
 

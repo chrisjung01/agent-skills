@@ -61,7 +61,7 @@ Show the user:
 3. Rows routed elsewhere, and rows rejected with one-word reasons.
 4. The proposed status and finding for every call (step 5).
 
-Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines.
+Diff snippets keep their shape. For the rest of the summary: Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines.
 
 Ask for approval one change at a time, each as a choice (apply, change, reject), then the statuses as one more question. No pattern: say so in one sentence; "no change" is a valid result, even when the user asked for an improvement.
 
