@@ -1130,8 +1130,8 @@ fn report_writes_the_overview_with_intervals_and_no_url() {
     .unwrap();
     run(&projects, &db);
 
-    // Skill x: three measured calls, one interrupted, one with a denial, plus a row an older
-    // parser wrote whose counters are NULL. Its questions: 2 of 4 recommended.
+    // Skill x: three measured calls, one interrupted, one with a denial. Its questions: 2 of 4
+    // recommended.
     let conn = Connection::open(&db).unwrap();
     conn.execute_batch(
         "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
@@ -1144,9 +1144,7 @@ fn report_writes_the_overview_with_intervals_and_no_url() {
              ('x2', 'x', 's9', '2026-10-01T11:00:00Z', '2026-10-01T11:01:00Z', 1, 9,
               200, 20, 0, 0, 120000, 5, 0, 0, 1, 1),
              ('x3', 'x', 's9', '2026-10-01T12:00:00Z', '2026-10-01T12:01:00Z', 1, 9,
-              300, 30, 0, 0, 600000, 5, 0, 0, 0, 0),
-             ('x4', 'x', 's9', '2026-10-01T13:00:00Z', '2026-10-01T13:01:00Z', 1, 2,
-              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+              300, 30, 0, 0, 600000, 5, 0, 0, 0, 0);
          INSERT INTO denials (start_uuid, kind, count) VALUES ('x2', 'permission', 2);",
     )
     .unwrap();
@@ -1171,11 +1169,11 @@ fn report_writes_the_overview_with_intervals_and_no_url() {
         ]
     );
     // Calls, correction, interrupt, denial, tool error, recommended, median tokens, median active
-    // duration. The NULL row counts as a call and stays out of every denominator.
+    // duration.
     assert_eq!(
         rows[0][1..],
         [
-            "4",
+            "3",
             "0 % (0–56 %)",
             "33 % (6–79 %)",
             "33 % (6–79 %)",
@@ -1297,15 +1295,6 @@ fn report_switch_limits_every_number_to_one_start_kind() {
     fs::write(folder.join("s1.jsonl"), SESSION).unwrap();
     fs::write(folder.join("s2.jsonl"), NESTING).unwrap();
     run(&projects, &db);
-    // A row an older parser wrote, its transcript gone: no start kind, counted only under all.
-    Connection::open(&db)
-        .unwrap()
-        .execute_batch(
-            "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
-                 user_prompts, parser_version)
-             VALUES ('old1', 'old', 's9', '2026-09-01T10:00:00Z', '2026-09-01T10:01:00Z', 1, 2);",
-        )
-        .unwrap();
 
     let (ok, _) = cli(&["report", "--out", out.to_str().unwrap()], &db);
     assert!(ok);
@@ -1329,7 +1318,6 @@ fn report_switch_limits_every_number_to_one_start_kind() {
             ("cj-review-loop", "2", "50 % (9–91 %)"),
             ("cj-project-context (nested)", "1", "0 % (0–79 %)"),
             ("cj-reviewing (nested)", "1", "0 % (0–79 %)"),
-            ("old", "1", "–"),
             ("unslop", "1", "0 % (0–79 %)"),
         ])
     );
@@ -1341,7 +1329,6 @@ fn report_switch_limits_every_number_to_one_start_kind() {
             ("cj-ci-triage", "1", "0 % (0–79 %)"),
             ("cj-project-context (nested)", "1", "0 % (0–79 %)"),
             ("cj-reviewing (nested)", "1", "0 % (0–79 %)"),
-            ("old", "0", "–"),
             ("unslop", "0", "–"),
         ])
     );
@@ -1353,7 +1340,6 @@ fn report_switch_limits_every_number_to_one_start_kind() {
             ("cj-project-context (nested)", "0", "–"),
             ("cj-review-loop", "0", "–"),
             ("cj-reviewing (nested)", "0", "–"),
-            ("old", "0", "–"),
         ])
     );
 }
@@ -1523,9 +1509,7 @@ fn report_charts_a_weekly_trend_per_skill_and_a_scatter_across_skills() {
                  ('x3', 'x', 's9', '2026-10-06T10:00:00Z', '2026-10-06T10:01:00Z', 1, 9, 0, 1, 1,
                   'slash'),
                  ('x4', 'x', 's9', '2027-01-01T10:00:00Z', '2027-01-01T10:01:00Z', 1, 9, NULL,
-                  1, 0, 'model'),
-                 -- A start time that does not parse: counted in the tables, not in the trend.
-                 ('y1', 'y', 's9', '10 o''clock', '10 o''clock', 1, 9, 0, 1, 0, 'slash');",
+                  1, 0, 'model');",
         )
         .unwrap();
 
@@ -1564,7 +1548,6 @@ fn report_charts_a_weekly_trend_per_skill_and_a_scatter_across_skills() {
         .collect();
     assert_eq!(xs.len(), 3);
     assert!(((xs[1] - xs[0]) * 13.0 - (xs[2] - xs[0])).abs() < 0.5);
-    assert!(trend_points(view(&html, "all"), "y").is_empty());
     assert_eq!(of("Correction").len(), 3);
     assert_eq!(of("Denial").len(), 3);
     // The switch: model keeps only the W53 call.
@@ -1589,7 +1572,63 @@ fn report_charts_a_weekly_trend_per_skill_and_a_scatter_across_skills() {
     };
     assert_eq!(
         scatter("all"),
-        ["x", "cj-ci-triage, cj-review-loop", "unslop, y"]
+        ["x", "cj-ci-triage, cj-review-loop", "unslop"]
     );
     assert_eq!(scatter("model"), ["cj-ci-triage, unslop, x"]);
+}
+
+#[test]
+fn report_survives_a_call_with_every_gap_in_every_view() {
+    let dir = tempfile::tempdir().unwrap();
+    let (projects, db, out) = (
+        dir.path().join("projects"),
+        dir.path().join("metrics.sqlite"),
+        dir.path().join("report.html"),
+    );
+    fs::create_dir_all(&projects).unwrap();
+    run(&projects, &db);
+    // A row an older parser wrote, its transcript gone: every metric NULL, no start kind, no
+    // skill version, a start time that does not parse. Its window loaded a skill that never ran
+    // on its own. Each a skill of its own, so a NULL counted as zero shows as a percentage.
+    Connection::open(&db)
+        .unwrap()
+        .execute_batch(
+            "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
+                 user_prompts, parser_version)
+             VALUES ('h1', 'hostile', 's9', '10 o''clock', '10 o''clock', 1, 2);
+             INSERT INTO nested_skills (start_uuid, position, skill, loaded_at)
+             VALUES ('h1', 0, 'hostile-nested', '10 o''clock');",
+        )
+        .unwrap();
+
+    let (ok, _) = cli(&["report", "--out", out.to_str().unwrap()], &db);
+    assert!(ok);
+    let html = fs::read_to_string(&out).unwrap();
+
+    let row = |skill: &str, calls: &str| {
+        let mut row = vec![skill.to_owned(), calls.to_owned()];
+        row.extend(["–"; 7].map(String::from));
+        row
+    };
+    assert_eq!(
+        overview(view(&html, "all")),
+        [row("hostile", "1"), row("hostile-nested (nested)", "1")]
+    );
+    for kind in ["slash", "model"] {
+        assert_eq!(
+            overview(view(&html, kind)),
+            [row("hostile", "0"), row("hostile-nested (nested)", "0")]
+        );
+    }
+    for skill in ["hostile", "hostile-nested (nested)"] {
+        assert!(trend_points(view(&html, "all"), skill).is_empty());
+        assert_eq!(version_table(view(&html, "all"), skill).0, ["no version"]);
+    }
+    // Only hostile rows exist, so a percentage anywhere in a view is a NULL counted as zero,
+    // also in a view added later.
+    for kind in ["all", "slash", "model"] {
+        let view = view(&html, kind);
+        assert!(!view.contains("<circle class=\"dot\""));
+        assert!(!view.contains('%'), "{view}");
+    }
 }
