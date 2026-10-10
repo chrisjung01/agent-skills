@@ -1653,6 +1653,9 @@ fn report_survives_a_call_with_every_gap_in_every_view() {
 /// `cargo test -- --ignored`, open the file, then in the browser's DevTools check light and dark,
 /// 375 px and 1280 px wide, and each of the three switch settings (all, slash, model). The page
 /// must not scroll sideways and all text must stay readable. Never opens the real database.
+/// Without DevTools, in headless Chrome: its window is at least 485 px wide, so load the page as
+/// `srcdoc` of a 375 px iframe; it follows the system theme, so swap the `prefers-color-scheme`
+/// media query to force one; per-skill sections are `<details>`, closed until opened.
 #[test]
 #[ignore]
 fn report_check_page() {
