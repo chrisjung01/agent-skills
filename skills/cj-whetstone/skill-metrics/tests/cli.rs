@@ -1402,7 +1402,19 @@ fn report_shows_each_skill_version_side_by_side() {
             .unwrap();
         String::from_utf8(out.stdout).unwrap().trim().to_owned()
     };
-    let (head, parent) = (git(&["rev-parse", "HEAD"]), git(&["rev-parse", "HEAD~1"]));
+    let head = git(&["rev-parse", "HEAD"]);
+    // A squashed history has no HEAD~1: then x6 and helper's HEAD~1 load are left out.
+    let parent = Some(git(&["rev-parse", "--verify", "-q", "HEAD~1"])).filter(|p| !p.is_empty());
+    let parent_rows = parent.as_ref().map_or(String::new(), |parent| {
+        format!(
+            "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
+                 user_prompts, parser_version, interrupts, start_kind, skill_version)
+             VALUES ('x6', 'x', 's9', '2026-10-01T15:00:00Z', '2026-10-01T15:01:00Z', 1, 9, 0,
+                  'slash', '{parent}');
+             INSERT INTO nested_skills (start_uuid, position, skill, loaded_at, skill_version)
+             VALUES ('x4', 0, 'helper', '2026-10-01T13:00:10Z', '{parent}');"
+        )
+    });
     let gone = "0123456789abcdef0123456789abcdef01234567";
     Connection::open(&db)
         .unwrap()
@@ -1419,12 +1431,10 @@ fn report_shows_each_skill_version_side_by_side() {
                  ('x4', 'x', 's9', '2026-10-01T13:00:00Z', '2026-10-01T13:01:00Z', 1, 9, 1,
                   'slash', '{head}'),
                  ('x5', 'x', 's9', '2026-10-01T14:00:00Z', '2026-10-01T14:01:00Z', 1, 9, 0,
-                  'model', '{head}'),
-                 ('x6', 'x', 's9', '2026-10-01T15:00:00Z', '2026-10-01T15:01:00Z', 1, 9, 0,
-                  'slash', '{parent}');
+                  'model', '{head}');
              INSERT INTO nested_skills (start_uuid, position, skill, loaded_at, skill_version)
-             VALUES ('x4', 1, 'helper', '2026-10-01T13:00:30Z', 'uncommitted'),
-                 ('x4', 0, 'helper', '2026-10-01T13:00:10Z', '{parent}');"
+             VALUES ('x4', 1, 'helper', '2026-10-01T13:00:30Z', 'uncommitted');
+             {parent_rows}"
         ))
         .unwrap();
 
@@ -1436,25 +1446,25 @@ fn report_shows_each_skill_version_side_by_side() {
         format!("{} {day}", &commit[..7])
     };
     // Commit dates order the columns; equal times fall back to the hash.
-    let mut dated = [parent.clone(), head.clone()];
+    let mut dated: Vec<String> = parent.iter().chain([&head]).cloned().collect();
     dated.sort_by_key(|commit| (git(&["show", "-s", "--format=%ct", commit]), commit.clone()));
 
     let (heads, rows) = version_table(view(&html, "all"), "x");
-    assert_eq!(
-        heads,
-        [
-            column(&dated[0]),
-            column(&dated[1]),
-            gone[..7].to_owned(),
-            "uncommitted".to_owned(),
-            "no version".to_owned()
-        ]
+    let mut columns: Vec<String> = dated.iter().map(|commit| column(commit)).collect();
+    columns.extend([
+        gone[..7].to_owned(),
+        "uncommitted".to_owned(),
+        "no version".to_owned(),
+    ]);
+    assert_eq!(heads, columns);
+    let mut calls = vec!["Calls"];
+    calls.extend(
+        dated
+            .iter()
+            .map(|commit| if *commit == head { "2" } else { "1" }),
     );
-    let calls = |commit: &str| if *commit == head { "2" } else { "1" };
-    assert_eq!(
-        rows[0],
-        ["Calls", calls(&dated[0]), calls(&dated[1]), "1", "1", "1"]
-    );
+    calls.extend(["1", "1", "1"]);
+    assert_eq!(rows[0], calls);
     let head_column = 1 + dated.iter().position(|c| *c == head).unwrap();
     assert_eq!(rows[2][head_column], "50 % (9–91 %)");
     // The switch: model keeps only x5.
@@ -1463,7 +1473,8 @@ fn report_shows_each_skill_version_side_by_side() {
     assert_eq!(rows[0], ["Calls", "1"]);
     // A nested-only skill takes the version of its first load in the window.
     let (heads, _) = version_table(view(&html, "all"), "helper (nested)");
-    assert_eq!(heads, [column(&parent)]);
+    let first_load = parent.as_deref().map_or("uncommitted".to_owned(), column);
+    assert_eq!(heads, [first_load]);
     // unslop is no skill of the repo: only the no-version column.
     let (heads, _) = version_table(view(&html, "all"), "unslop");
     assert_eq!(heads, ["no version"]);
