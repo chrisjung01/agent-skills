@@ -40,7 +40,7 @@ Paper exercises built from a real run (October 2026). The agent under test descr
 
 ## 4. Readable findings followed by a clickable choice
 
-**Setup:** A game project's retro has two small documentation findings: reduce planning overhead for reversible playtesting changes, and include log checking in the local smoke-check instructions. A choice tool is available in the active harness. The user wants a quick, readable decision.
+**Setup:** A project's retro has two small documentation findings: reduce planning overhead for reversible playtesting changes, and include log checking in the local smoke-check instructions. A choice tool is available in the active harness. The user wants a quick, readable decision.
 
 **Prompt:** "/cj-retro"
 
