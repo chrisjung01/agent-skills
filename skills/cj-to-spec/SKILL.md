@@ -32,7 +32,7 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
    - The issue that holds the spec is marked by this title prefix only, never by a label: a new label would have to be created in every repo the flow runs in.
    - Apply the ready label from `issue-tracker`, if the repo has one.
 
-Done when the spec is posted, its link is in the reply, and the reply ends with the next step: `/cj-to-tickets <issue>` now, in this session, without `/clear` first, when the spec needs more than one ticket (more than one fresh context window of work, or work in more than one repo); else `/clear`, then `/cj-implement <issue>` (`cj-implement` reads the issue and the spec comment itself and needs a fresh context window). Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command per line, each followed by ` · ` and its reason in a few words. No table.
+Done when the spec is posted, its link is in the reply, and the reply ends with the next step: `/cj-to-tickets <issue>` now, in this session, without `/clear` first, when the spec needs more than one ticket (more than one fresh context window of work, or work in more than one repo); else `/clear`, then `/cj-implement <issue>` (`cj-implement` reads the issue and the spec comment itself and needs a fresh context window). Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command per line, each followed by ` · ` and its reason in a few words. A step that names a PR, issue or comment carries its full link, even when the link appears earlier in the reply. No table.
 
 ## Changing a posted spec
 
