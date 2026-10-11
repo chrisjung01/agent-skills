@@ -54,3 +54,15 @@ Run on the real notes, read-only, by a fresh subagent: 8 in-scope sessions (16 o
 **Prompt:** "/cj-whetstone cj-implement"
 
 **Expected with skill:** `bash scripts/skill-metrics.sh` runs before `open`; both sessions appear with their latest window; statuses are set with `status`, never by editing files. The binary side is covered by `full_scan_stores_killed_and_resumed_sessions_with_their_latest_window` in `skill-metrics/tests/cli.rs`.
+
+## Approved retro finding (2026-10-11)
+
+**Setup:** `open cj-implement` lists 13 calls; none has a user text about the size rule. In session `4ffad4ea` a `cj-retro` call reported "cj-implement: the 400-line size rule counts moved lines", quoted the moment and the skill line, and the user answered "Alle (Recommended)" to "Welche Retro-Punkte soll ich umsetzen?".
+
+**Prompt:** "/cj-whetstone cj-implement"
+
+**Baseline:** Did not read the `cj-retro` call ("no rule makes me read it"), counted the finding as agent text, proposed no change; noted that the skill gives no path for retro findings. In the real run the user asked why the retro recommended a whetstone run that could never act on it.
+
+**Expected with skill:** Reads the `cj-retro` window of that session, counts the approved finding as one piece of evidence for `cj-implement`, and proposes the smallest change for it (or says why it is already fixed).
+
+**With skill (2026-10-11):** Read the `cj-retro` window from `closed cj-retro`, gave the finding its own ledger row (defect, §3 Size), counted it under the approved-retro rule, and checked `git log` for an earlier fix before proposing a diff.
