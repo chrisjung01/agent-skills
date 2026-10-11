@@ -40,11 +40,15 @@ _Avoid_: Tool error (a tool that ran and failed)
 A tool call that ran and returned an error.
 _Avoid_: Denial
 
+**Bare question**:
+A choice question the agent asks with no visible text since the last tool call in the same turn; thinking does not count as visible. A question the bare-question hook blocked is a bare question, not a denial.
+_Avoid_: Empty question, Question without context
+
 **User text**:
 Text the user wrote in a window, stored redacted with its kind: `prompt` (what the user typed), `denial reason` (what the user said when rejecting a tool call) or `own-word answer` (the words of a question answer that are no option). A message the user queued while a turn ran is a prompt. Each user text carries a `correction` flag and a `strong` flag from the old hook's patterns; a flag marks text to read, not a verdict. Never agent text, tool output or skill text.
 _Avoid_: Quote, Transcript text
 _Code_: `UserText`
 
 **Rate**:
-The share of skill calls with at least one event of a kind (correction, interrupt, denial, tool error), shown with its 95 % Wilson interval. A call whose parser did not measure the kind stays out of the denominator.
+The share of skill calls with at least one event of a kind (correction, interrupt, denial, tool error, bare question), shown with its 95 % Wilson interval. A call whose parser did not measure the kind stays out of the denominator.
 _Avoid_: Count, Frequency (events per call; events inside one call are not independent)
