@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Symlinks every skill in ./skills into the skill directories of Claude Code and Codex, builds
-# the cj-whetstone metrics binary and prints its SessionEnd hook line (settings stay untouched).
+# the cj-whetstone metrics binary and prints its SessionEnd and PreToolUse hook lines (settings
+# stay untouched).
 #
 #   ./install.sh                      global: ~/.claude/skills + ~/.agents/skills
 #   ./install.sh --project <path>     per project: <path>/.claude/skills + <path>/.agents/skills
@@ -21,7 +22,7 @@ while [[ $# -gt 0 ]]; do
     --force)     FORCE=1 ;;
     --project)   TARGET_ROOT="$(cd "${2:?path missing}" && pwd)"; shift ;;
     --skill)     ONLY="${2:?name missing}"; shift ;;
-    -h|--help)   sed -n '2,11p' "$0"; exit 0 ;;
+    -h|--help)   sed -n '2,12p' "$0"; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
@@ -70,7 +71,7 @@ for skill_path in "$SKILLS_DIR"/*/; do
   done
 done
 
-# cj-whetstone's metrics binary; the hook does nothing until it exists.
+# cj-whetstone's metrics binary; the hooks do nothing until it exists.
 if [[ "$MODE" == "install" && ( -z "$ONLY" || "$ONLY" == "cj-whetstone" ) ]]; then
   manifest="$SKILLS_DIR/cj-whetstone/skill-metrics/Cargo.toml"
   if command -v cargo >/dev/null; then
@@ -81,9 +82,11 @@ if [[ "$MODE" == "install" && ( -z "$ONLY" || "$ONLY" == "cj-whetstone" ) ]]; th
     echo "⚠ cargo not found, skill-metrics not built (https://rustup.rs)"
   fi
   hook="$SKILLS_DIR/cj-whetstone/scripts/session-end-hook.sh"
+  bare="$SKILLS_DIR/cj-whetstone/scripts/bare-question-hook.sh"
   cat <<HOOK
 
-Add this SessionEnd hook to ~/.claude/settings.json under "hooks", if it is not there yet:
-  "SessionEnd": [{ "hooks": [{ "type": "command", "command": "bash \"$hook\"" }] }]
+Add these hooks to ~/.claude/settings.json under "hooks", if they are not there yet:
+  "SessionEnd": [{ "hooks": [{ "type": "command", "command": "bash \"$hook\"" }] }],
+  "PreToolUse": [{ "matcher": "AskUserQuestion", "hooks": [{ "type": "command", "command": "bash \"$bare\"" }] }]
 HOOK
 fi
