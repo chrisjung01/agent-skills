@@ -37,3 +37,15 @@ Paper exercises built from a real run (October 2026). The agent under test descr
 **Expected with skill:** The turn that asks shows the numbered findings list as reply text first, then calls the choice tool; options name findings by number and a few words.
 
 **Status:** verify in next real run. A paper exercise does not reproduce it: an agent describing its plan lists the findings, the failure shows only when the harness's choice tool is at hand.
+
+## 4. Readable findings followed by a clickable choice
+
+**Setup:** A project's retro has two small documentation findings: reduce planning overhead for reversible playtesting changes, and include log checking in the local smoke-check instructions. A choice tool is available in the active harness. The user wants a quick, readable decision.
+
+**Prompt:** "/cj-retro"
+
+**Baseline (real Codex run, session `01a12c9e-6dca-7c50-8ce4-4ec7373a8846`, 2026-10-11):** Each finding put a bold title and a file path on the same line, followed by a dense explanation. The agent ended with all three answer options embedded in one sentence instead of calling the available choice tool. The user approved both findings but explicitly criticised the list's readability and the missing selectable question.
+
+**Expected with skill:** Show a numbered list with a short bold title per finding, one plain explanation sentence beneath it, and a blank line between findings. Include a linked destination in the explanation only when it helps the decision. After the list, use the available choice tool, with one question and selectable options. When the harness has no available choice tool, put the question and each answer option on separate lines.
+
+**Status:** verify in next real run. The baseline failed in the live harness. The revised template can be inspected, but a paper exercise cannot verify the rendered list or actual choice-tool use. The current scanner does not store this Codex call, so no metrics call UUID is available.
