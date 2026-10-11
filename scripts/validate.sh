@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Checks every skill: SKILL.md exists, frontmatter has name + description, name == folder name,
-# the description matches the invocation kind, no skill calls a user-invoked one, no organisation term in any tracked file.
+# the description matches the invocation kind, no skill calls a user-invoked one, no organisation term in any tracked file,
+# every copy of the scannable sentence matches the one in AGENTS.md.
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 errors=0
@@ -53,5 +54,19 @@ if [[ -f $terms ]]; then
   done < "$terms"
 else
   echo "! .org-terms missing: org term scan skipped"
+fi
+# Scannable sentence: AGENTS.md holds the source, quoted. Every tracked line that holds one of two fragments counts
+# as a copy and must hold the whole sentence; the second fragment catches a copy whose opening words changed.
+# Scans the index like the org term scan. This file names the fragments, so it is excluded.
+# ponytail: scoped to this one sentence; generalize once a second sentence has to be copied word for word.
+sentence="$(git show :AGENTS.md 2>/dev/null | grep -oE '"Write it scannable[^"]*"' | head -n1)"
+sentence="${sentence//\"/}"
+if [[ -z "$sentence" ]]; then
+  echo "✗ scannable sentence: source missing in AGENTS.md"; errors=$((errors+1))
+else
+  hits="$(git grep --cached -nF -e "Write it scannable" -e "in the reader's terms" -- ':!scripts/validate.sh')"; rc=$?
+  (( rc > 1 )) && { echo "✗ scannable sentence scan failed (git grep exit $rc)"; errors=$((errors+1)); }
+  hits="$(grep -vF -e "$sentence" <<<"$hits")"
+  [[ -n "$hits" ]] && { echo "✗ scannable sentence drifted from AGENTS.md:"; cut -d: -f1,2 <<<"$hits"; errors=$((errors+1)); }
 fi
 [[ $errors -eq 0 ]]
