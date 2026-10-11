@@ -9,6 +9,7 @@
 //!   skill-metrics show [--projects-dir <dir>] [--db <file>] <start uuid>
 //!   skill-metrics import-notes [<notes dir>] [--db <file>]
 //!   skill-metrics report [--out <file>] [--db <file>]
+//!   skill-metrics hook    (PreToolUse hook: payload on stdin, blocks a bare choice question)
 //!
 //! Pipeline: transcript (JSONL into events) → window (events into skill calls) → metrics (what
 //! happened in each window) → version (git) → store (SQLite).
@@ -16,6 +17,7 @@
 
 mod metrics;
 mod notes;
+mod question;
 mod report;
 mod store;
 mod transcript;
@@ -29,9 +31,19 @@ use std::{env, fs, io, process::ExitCode};
 use user_text::redact_keys;
 
 /// Bump whenever what is extracted changes: rows of an older parser version are replaced.
-const PARSER_VERSION: i64 = 9;
+const PARSER_VERSION: i64 = 10;
 
 fn main() -> ExitCode {
+    // Before any argument or database work: the hook exits 0 whatever happens.
+    if env::args().skip(1).eq(["hook"]) {
+        let mut payload = String::new();
+        if io::Read::read_to_string(&mut io::stdin(), &mut payload).is_ok() {
+            if let Some(decision) = question::hook(&payload) {
+                println!("{decision}");
+            }
+        }
+        return ExitCode::SUCCESS;
+    }
     match run() {
         Ok(()) => ExitCode::SUCCESS,
         Err(err) => {

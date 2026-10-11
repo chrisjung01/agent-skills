@@ -88,7 +88,7 @@ cd ~/code/agent-skills
 
 Because they are symlinks, `git pull` updates every installed skill immediately. Run `./install.sh` again after adding or renaming a skill, and after a pull that changes `skills/cj-whetstone/skill-metrics`.
 
-With `cargo` installed, `install.sh` also builds the cj-whetstone metrics binary and prints a SessionEnd hook line. Add that line to `~/.claude/settings.json` yourself; the script never edits it. The hook stores each ending session's skill calls in the background.
+With `cargo` installed, `install.sh` also builds the cj-whetstone metrics binary and prints two hook lines. Add them to `~/.claude/settings.json` yourself; the script never edits it. The SessionEnd hook stores each ending session's skill calls in the background. The PreToolUse hook blocks a bare question, a choice question asked with no visible text since the last tool call, and tells the agent to write its list or context first. To turn it off, remove its line.
 
 Moving from the old Python hook, once:
 

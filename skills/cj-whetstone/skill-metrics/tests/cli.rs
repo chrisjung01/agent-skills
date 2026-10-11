@@ -119,7 +119,7 @@ fn reruns_add_no_rows_and_keep_rows_of_deleted_transcripts() {
             r.get(0)
         })
         .unwrap();
-    assert_eq!((version, parser), (9, 9));
+    assert_eq!((version, parser), (10, 10));
 }
 
 #[test]
@@ -327,6 +327,166 @@ fn tools_denials_questions_and_prs_are_stored() {
             ("x24".into(), "https://github.com/o/r/pull/8".into())
         ]
     );
+}
+
+const QUESTIONS: &str = include_str!("fixtures/questions.jsonl");
+
+/// (choice questions, bare questions, tool errors, denials) per call.
+fn question_counts(db: &Path) -> Vec<(Option<i64>, Option<i64>, i64, i64)> {
+    let conn = Connection::open(db).unwrap();
+    let mut stmt = conn
+        .prepare(
+            "SELECT choice_questions, bare_questions, tool_errors,
+                 (SELECT count(*) FROM denials d WHERE d.start_uuid = c.start_uuid)
+             FROM skill_calls c ORDER BY started_at",
+        )
+        .unwrap();
+    stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)))
+        .unwrap()
+        .map(Result::unwrap)
+        .collect()
+}
+
+#[test]
+fn choice_and_bare_questions_are_counted_and_older_rows_re_extracted() {
+    let dir = tempfile::tempdir().unwrap();
+    let (projects, db) = (
+        dir.path().join("projects"),
+        dir.path().join("metrics.sqlite"),
+    );
+    let session = projects.join("-home-x-repo/s7.jsonl");
+    fs::create_dir_all(session.parent().unwrap()).unwrap();
+    fs::write(&session, QUESTIONS).unwrap();
+    run(&projects, &db);
+    // Seven choice calls, the one with two questions once, the subagent's not at all. Bare: right
+    // after an answer, after text and a tool call, after whitespace, and the two the hook blocked
+    // although text came first; neither blocked one is a tool error or a denial. A failed shell
+    // call that quotes the hook's reason stays a tool error.
+    assert_eq!(question_counts(&db), [(Some(7), Some(5), 1, 0)]);
+
+    Connection::open(&db)
+        .unwrap()
+        .execute(
+            "UPDATE skill_calls SET choice_questions = NULL, bare_questions = NULL,
+                 parser_version = 9",
+            [],
+        )
+        .unwrap();
+    run(&projects, &db);
+    assert_eq!(question_counts(&db), [(Some(7), Some(5), 1, 0)]);
+}
+
+/// Runs `skill-metrics hook` with `payload` on stdin; returns exit success and stdout.
+fn hook(payload: &serde_json::Value) -> (bool, String) {
+    hook_while(payload, || {})
+}
+
+/// Like `hook`, running `meanwhile` after the hook got its payload.
+fn hook_while(payload: &serde_json::Value, meanwhile: impl FnOnce()) -> (bool, String) {
+    use std::io::Write;
+    let mut child = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+        .arg("hook")
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(payload.to_string().as_bytes())
+        .unwrap();
+    meanwhile();
+    let output = child.wait_with_output().unwrap();
+    (
+        output.status.success(),
+        String::from_utf8_lossy(&output.stdout).into_owned(),
+    )
+}
+
+#[test]
+fn the_hook_blocks_a_bare_question_and_lets_the_rest_through() {
+    let dir = tempfile::tempdir().unwrap();
+    let transcript = dir.path().join("s7.jsonl");
+    fs::write(&transcript, QUESTIONS).unwrap();
+    let payload = |id: &str| {
+        serde_json::json!({
+            "hook_event_name": "PreToolUse",
+            "tool_name": "AskUserQuestion",
+            "tool_use_id": id,
+            "transcript_path": transcript,
+        })
+    };
+    // Text before it: through. Right after an answer, after text and a tool call, after
+    // whitespace only: blocked, with a reason that asks for visible text first.
+    assert_eq!(hook(&payload("q1")), (true, String::new()));
+    for id in ["q2", "q3", "q4"] {
+        let (ok, stdout) = hook(&payload(id));
+        assert!(ok);
+        let decision: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+        let output = &decision["hookSpecificOutput"];
+        assert_eq!(output["permissionDecision"], "deny", "{id}");
+        assert!(output["permissionDecisionReason"]
+            .as_str()
+            .unwrap()
+            .contains("as visible text first"));
+    }
+
+    // A subagent's question, another tool, an unreadable transcript, a broken payload: through.
+    let mut subagent = payload("q2");
+    subagent["agent_id"] = "a1".into();
+    assert_eq!(hook(&subagent), (true, String::new()));
+    let mut other = payload("q2");
+    other["tool_name"] = "Read".into();
+    assert_eq!(hook(&other), (true, String::new()));
+    let mut gone = payload("q2");
+    gone["transcript_path"] = dir.path().join("missing.jsonl").to_str().into();
+    assert_eq!(hook(&gone), (true, String::new()));
+    assert_eq!(
+        hook(&serde_json::json!("not a payload")),
+        (true, String::new())
+    );
+}
+
+#[test]
+fn the_hook_waits_for_its_question_to_reach_the_transcript() {
+    use std::io::Write;
+    let dir = tempfile::tempdir().unwrap();
+    let transcript = dir.path().join("s7.jsonl");
+    // Up to the thinking before q2; Claude Code writes q2 a moment after the hook starts.
+    let (before, after) = QUESTIONS.split_at(QUESTIONS.find("\"id\": \"q2\"").unwrap());
+    let cut = before.rfind('\n').unwrap() + 1;
+    fs::write(&transcript, &QUESTIONS[..cut]).unwrap();
+    let rest = format!("{}{after}", &before[cut..]);
+    let payload = serde_json::json!({
+        "tool_name": "AskUserQuestion",
+        "tool_use_id": "q2",
+        "transcript_path": transcript,
+    });
+    let (ok, stdout) = hook_while(&payload, || {
+        std::thread::sleep(std::time::Duration::from_millis(300));
+        fs::OpenOptions::new()
+            .append(true)
+            .open(&transcript)
+            .unwrap()
+            .write_all(rest.as_bytes())
+            .unwrap();
+    });
+    assert!(ok);
+    assert!(stdout.contains("\"deny\""), "{stdout}");
+}
+
+#[test]
+fn the_hook_lets_a_question_through_that_never_reaches_the_transcript() {
+    let dir = tempfile::tempdir().unwrap();
+    let transcript = dir.path().join("s7.jsonl");
+    fs::write(&transcript, QUESTIONS).unwrap();
+    let payload = serde_json::json!({
+        "tool_name": "AskUserQuestion",
+        "tool_use_id": "never-written",
+        "transcript_path": transcript,
+    });
+    assert_eq!(hook(&payload), (true, String::new()));
 }
 
 #[test]
@@ -1130,21 +1290,21 @@ fn report_writes_the_overview_with_intervals_and_no_url() {
     .unwrap();
     run(&projects, &db);
 
-    // Skill x: three measured calls, one interrupted, one with a denial. Its questions: 2 of 4
-    // recommended.
+    // Skill x: three measured calls, one interrupted, one with a denial, one with a bare
+    // question. Its questions: 2 of 4 recommended.
     let conn = Connection::open(&db).unwrap();
     conn.execute_batch(
         "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
              user_prompts, parser_version, input_tokens, output_tokens, cache_read_tokens,
              cache_write_tokens, active_ms, tool_calls, tool_errors, interrupts, questions,
-             recommended_answers)
+             recommended_answers, choice_questions, bare_questions)
          VALUES
-             ('x1', 'x', 's9', '2026-10-01T10:00:00Z', '2026-10-01T10:01:00Z', 1, 9,
-              100, 10, 0, 0, 30000, 5, 0, 1, 3, 1),
-             ('x2', 'x', 's9', '2026-10-01T11:00:00Z', '2026-10-01T11:01:00Z', 1, 9,
-              200, 20, 0, 0, 120000, 5, 0, 0, 1, 1),
-             ('x3', 'x', 's9', '2026-10-01T12:00:00Z', '2026-10-01T12:01:00Z', 1, 9,
-              300, 30, 0, 0, 600000, 5, 0, 0, 0, 0);
+             ('x1', 'x', 's9', '2026-10-01T10:00:00Z', '2026-10-01T10:01:00Z', 1, 10,
+              100, 10, 0, 0, 30000, 5, 0, 1, 3, 1, 2, 1),
+             ('x2', 'x', 's9', '2026-10-01T11:00:00Z', '2026-10-01T11:01:00Z', 1, 10,
+              200, 20, 0, 0, 120000, 5, 0, 0, 1, 1, 1, 0),
+             ('x3', 'x', 's9', '2026-10-01T12:00:00Z', '2026-10-01T12:01:00Z', 1, 10,
+              300, 30, 0, 0, 600000, 5, 0, 0, 0, 0, 0, 0);
          INSERT INTO denials (start_uuid, kind, count) VALUES ('x2', 'permission', 2);",
     )
     .unwrap();
@@ -1168,8 +1328,8 @@ fn report_writes_the_overview_with_intervals_and_no_url() {
             "unslop"
         ]
     );
-    // Calls, correction, interrupt, denial, tool error, recommended, median tokens, median active
-    // duration.
+    // Calls, correction, interrupt, denial, tool error, bare question, recommended, median tokens,
+    // median active duration.
     assert_eq!(
         rows[0][1..],
         [
@@ -1178,6 +1338,7 @@ fn report_writes_the_overview_with_intervals_and_no_url() {
             "33 % (6–79 %)",
             "33 % (6–79 %)",
             "0 % (0–56 %)",
+            "33 % (6–79 %)",
             "50 % (15–85 %)",
             "220",
             "2 min"
@@ -1186,7 +1347,7 @@ fn report_writes_the_overview_with_intervals_and_no_url() {
     // The correction flag of the fixture's first prompt.
     assert_eq!(rows[2][2], "100 % (21–100 %)");
     // No questions at all.
-    assert_eq!(rows[4][6], "–");
+    assert_eq!(rows[4][7], "–");
 }
 
 #[test]
@@ -1609,7 +1770,7 @@ fn report_survives_a_call_with_every_gap_in_every_view() {
 
     let row = |skill: &str, calls: &str| {
         let mut row = vec![skill.to_owned(), calls.to_owned()];
-        row.extend(["–"; 7].map(String::from));
+        row.extend(["–"; 8].map(String::from));
         row
     };
     assert_eq!(
@@ -1680,15 +1841,15 @@ fn report_check_page() {
             "INSERT INTO skill_calls (start_uuid, skill, session_id, started_at, ended_at,
                  user_prompts, parser_version, input_tokens, output_tokens, active_ms,
                  interrupts, tool_calls, tool_errors, questions, recommended_answers,
-                 start_kind, skill_version)
+                 start_kind, skill_version, choice_questions, bare_questions)
              VALUES
-                 ('l1', '{long}', 's9', '2026-09-14T10:00:00Z', '2026-09-14T10:05:00Z', 2, 9,
+                 ('l1', '{long}', 's9', '2026-09-14T10:00:00Z', '2026-09-14T10:05:00Z', 2, 10,
                   1000, 100, 300000, 1, 10, 1, 2, 1, 'slash',
-                  '0123456789abcdef0123456789abcdef01234567'),
-                 ('l2', '{long}', 's9', '2026-09-22T10:00:00Z', '2026-09-22T10:05:00Z', 1, 9,
-                  2000, 200, 200000, 0, 8, 0, 1, 1, 'model', 'uncommitted'),
-                 ('l3', '{long}', 's9', '2026-09-30T10:00:00Z', '2026-09-30T10:05:00Z', 1, 9,
-                  3000, 300, 100000, 0, 6, 2, 0, 0, 'slash', NULL);
+                  '0123456789abcdef0123456789abcdef01234567', 2, 2),
+                 ('l2', '{long}', 's9', '2026-09-22T10:00:00Z', '2026-09-22T10:05:00Z', 1, 10,
+                  2000, 200, 200000, 0, 8, 0, 1, 1, 'model', 'uncommitted', 1, 0),
+                 ('l3', '{long}', 's9', '2026-09-30T10:00:00Z', '2026-09-30T10:05:00Z', 1, 10,
+                  3000, 300, 100000, 0, 6, 2, 0, 0, 'slash', NULL, 1, 1);
              {HOSTILE}"
         ))
         .unwrap();

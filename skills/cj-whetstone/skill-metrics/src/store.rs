@@ -82,6 +82,10 @@ const MIGRATIONS: &[&str] = &[
     ALTER TABLE user_texts ADD COLUMN strong INTEGER;",
     // NULL on rows an older parser wrote and that are never re-extracted.
     "ALTER TABLE skill_calls ADD COLUMN start_kind TEXT CHECK (start_kind IN ('slash', 'model'));",
+    // Choice tool calls, not questions (`questions` counts those). NULL on rows an older parser
+    // wrote and that are never re-extracted.
+    "ALTER TABLE skill_calls ADD COLUMN choice_questions INTEGER;
+    ALTER TABLE skill_calls ADD COLUMN bare_questions INTEGER;",
 ];
 
 /// Whetstone's statuses; a call without one is `offen`.
@@ -154,9 +158,9 @@ pub fn upsert(
                  cache_write_tokens, active_ms, claude_code_version, entrypoint, cwd, git_branch,
                  tool_calls, tool_errors, interrupts, questions, recommended_answers,
                  own_word_answers, subagents, commits, pushes, prs_created, skill_version, status,
-                 finding, start_kind)
+                 finding, start_kind, choice_questions, bare_questions)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16,
-                 ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30)",
+                 ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30, ?31, ?32)",
             params![
                 call.start_uuid,
                 call.skill,
@@ -188,6 +192,8 @@ pub fn upsert(
                 status,
                 finding,
                 call.start_kind,
+                call.metrics.choice_questions,
+                call.metrics.bare_questions,
             ],
         )?;
         for (kind, count) in &call.metrics.denials {
@@ -519,6 +525,7 @@ pub struct ReportCall {
     pub interrupted: Option<bool>,
     pub denied: Option<bool>,
     pub tool_error: Option<bool>,
+    pub bare_question: Option<bool>,
     pub questions: Option<i64>,
     pub recommended_answers: Option<i64>,
     /// Input, output, cache read and cache write summed.
@@ -548,6 +555,7 @@ pub fn report_calls(conn: &Connection) -> rusqlite::Result<Vec<ReportCall>> {
                          WHERE d.start_uuid = c.start_uuid AND d.count > 0)
                  END AS denied,
                  tool_errors > 0 AS tool_error,
+                 bare_questions > 0 AS bare_question,
                  questions, recommended_answers,
                  input_tokens + output_tokens + cache_read_tokens + cache_write_tokens AS tokens,
                  active_ms
@@ -560,13 +568,13 @@ pub fn report_calls(conn: &Connection) -> rusqlite::Result<Vec<ReportCall>> {
              GROUP BY start_uuid, skill
          )
          SELECT skill, 0, start_kind, skill_version, week, week_monday,
-             corrected, interrupted, denied, tool_error,
+             corrected, interrupted, denied, tool_error, bare_question,
              questions, recommended_answers, tokens, active_ms
          FROM measured
          UNION ALL
          SELECT n.skill, 1, m.start_kind, n.skill_version, week,
              week_monday, corrected, interrupted, denied,
-             tool_error, questions, recommended_answers, tokens, active_ms
+             tool_error, bare_question, questions, recommended_answers, tokens, active_ms
          FROM nested_only n JOIN measured m ON m.start_uuid = n.start_uuid",
     )?;
     let calls = stmt.query_map([FLAGS_SINCE_PARSER], |row| {
@@ -581,10 +589,11 @@ pub fn report_calls(conn: &Connection) -> rusqlite::Result<Vec<ReportCall>> {
             interrupted: row.get(7)?,
             denied: row.get(8)?,
             tool_error: row.get(9)?,
-            questions: row.get(10)?,
-            recommended_answers: row.get(11)?,
-            tokens: row.get(12)?,
-            active_ms: row.get(13)?,
+            bare_question: row.get(10)?,
+            questions: row.get(11)?,
+            recommended_answers: row.get(12)?,
+            tokens: row.get(13)?,
+            active_ms: row.get(14)?,
         })
     })?;
     calls.collect()
