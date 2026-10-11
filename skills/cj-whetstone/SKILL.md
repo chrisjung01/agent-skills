@@ -64,7 +64,7 @@ Show the user:
 
 Diff snippets keep their shape. For the rest of the summary: Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines.
 
-Ask for approval one change at a time, each as a choice (apply, change, reject), then the statuses as one more question. No pattern: say so in one sentence; "no change" is a valid result, even when the user asked for an improvement.
+Number the patterns in the reply text. Ask for approval one change at a time, each as a choice (apply, change, reject) whose question names the pattern by its number and a few words, then the statuses as one more question. No pattern: say so in one sentence; "no change" is a valid result, even when the user asked for an improvement.
 
 ## 4. Apply
 
