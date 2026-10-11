@@ -1813,7 +1813,10 @@ fn report_survives_a_call_with_every_gap_in_every_view() {
 /// Writes the report for a sample database to `target/tmp/report-check.html` for a look by hand:
 /// `cargo test -- --ignored`, open the file, then in the browser's DevTools check light and dark,
 /// 375 px and 1280 px wide, and each of the three switch settings (all, slash, model). The page
-/// must not scroll sideways and all text must stay readable. Never opens the real database.
+/// must not scroll sideways and all text must stay readable. Without DevTools, take screenshots
+/// and look at them: `<chrome> --headless=new --hide-scrollbars --window-size=375,2000
+/// [--force-dark-mode] --screenshot=<png> file://<abs path>`, also at 1280 wide. Never opens the
+/// real database.
 #[test]
 #[ignore]
 fn report_check_page() {
