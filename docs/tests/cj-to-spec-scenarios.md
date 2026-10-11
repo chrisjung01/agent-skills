@@ -35,3 +35,20 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Prompt:** "ja, posten" (write the reply after posting).
 **Expected:** the spec goes out as a comment on #6031, no new issue and no `cj-filing-issues`. The reply ends with an instruction: `/clear`, then `/cj-implement <issue>`. A reply that names `/cj-implement` without `/clear`, or files an issue, fails.
 **Origin:** 2026-10-09, a user asked why the flow skipped `cj-filing-issues` and got no word on `/clear`.
+
+## 5. A number in an AC comes with its counting definition
+
+**Setup:** repo `acme/notes-cli`. Issue #88 "Warn before a choice prompt that has no context line" is grilled. Early in the conversation the agent ran a quick scan, `scripts/scan_prompts.py logs/`, which marks a choice prompt as "with context" when any text line appears earlier in the same turn → "120 of 300 choice prompts had no context line". The decision list later adds an edge-case row: "context line, then a tool call, then the prompt → counts as no context". The quick scan counted that case as having context.
+**Prompt:** "/cj-to-spec #88" (draft only, do not post).
+**Expected:** an AC that states a baseline names the command or query that produced it, and the number is recomputed with the spec's own definition (or the draft says it must be recomputed before posting and does not post 120 as the baseline). A draft that writes "baseline 120 of 300" with no definition or command fails.
+**Origin:** sessions 5752094e and 254a75c0: AC-8 said 170 of 311 from an ad-hoc scan; under the spec's definition it was 206; it cost a question to the user and a spec change.
+
+## 6. A check mechanism is tried against the case it must catch
+
+**Setup:** repo `acme/tower-game`, a Godot game. Issue #219 "Tests leave save files behind" is grilled. The decision list says: "The runner contract counts the files in the user directory before and after the full test run and fails on a difference, listing the new files." The conversation also notes that some tests write files with fixed names (`settings.cfg`, `profile.onboarding`) and that about 200,000 leftovers from earlier runs already sit in that directory.
+**Prompt:** "/cj-to-spec #219" (draft only, do not post).
+**Expected:** before the draft fixes the counting mechanism, it checks it against the hard case: a file with a fixed name that an earlier run already left there is rewritten, so the count does not change and the leak goes unseen. The draft either picks a mechanism that catches it (for example a timestamp marker before the run and every file written since), or names the gap and sends the decision back to grilling. A draft that fixes "count before and after" without a word on fixed-name files fails.
+**Origin:** sessions b21b5e0f (spec) and 0648b81d (implement): the review found the gap (F1), the implementation switched to a timestamp marker, retro 3b92833d.
+- 2026-10-11, scenario 5 before the change: two runs (the first with an obviously wrong `grep`, the second with a plausible scan whose definition differs). Both noticed the mismatch and did not post the baseline. Pass already; the real run had the definition only implicit in an earlier tool call. Verify in next real run.
+- 2026-10-11, scenario 6 before the change: one run. Kept "count before and after" and claimed in an edge-case row that a fixed-name file written by a test is caught. Fail.
+- 2026-10-11, scenario 6 after the change: one run. Held the draft back: an overwritten fixed-name file leaves the count unchanged; proposed name-plus-mtime snapshot or an empty user directory and asked for one try on the hard case. Pass.
