@@ -43,6 +43,7 @@ Done when every open call has a row.
 A change is justified by one of:
 - the same `defect` or `wish` in **2+ sessions**, earlier `beobachtet` findings from `closed` included
 - **one** explicit rule from the user ("immer", "nie", "grundsätzlich", "always", "never") about this skill
+- **one** `cj-retro` finding about this skill that the user approved in that retro; read the `cj-retro` windows from `open cj-retro` and `closed cj-retro` whose report names this skill, and give each such finding its own ledger row
 - **one** `defect` that caused data loss, a wrong push, or work the user had to throw away
 
 Everything else is a single observation (`beobachtet`): it goes in the report and changes nothing.
