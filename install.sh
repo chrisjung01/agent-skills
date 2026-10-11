@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
     --force)     FORCE=1 ;;
     --project)   TARGET_ROOT="$(cd "${2:?path missing}" && pwd)"; shift ;;
     --skill)     ONLY="${2:?name missing}"; shift ;;
-    -h|--help)   sed -n '2,12p' "$0"; exit 0 ;;
+    -h|--help)   sed -n '2,11p' "$0"; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
