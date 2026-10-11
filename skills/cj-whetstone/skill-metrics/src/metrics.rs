@@ -1,6 +1,7 @@
 //! What happened in each window: tokens, models, active duration, where Claude Code ran, tools,
 //! denials, questions, pull requests and the user's own text.
 
+use crate::question::{is_bare, CHOICE_TOOL};
 use crate::transcript::{Answer, Context, Event, Kind, Tokens, ToolResult};
 use crate::user_text::{UserText, DENIAL_REASON, OWN_WORD_ANSWER, PROMPT};
 use crate::window::SkillCall;
@@ -33,6 +34,10 @@ pub struct Metrics {
     /// Questions of answered `AskUserQuestion` calls.
     pub questions: i64,
     pub recommended_answers: i64,
+    /// Choice tool calls, however many questions each holds, and those of them that were bare
+    /// (the hook blocked them, or no agent text came since the last tool call).
+    pub choice_questions: i64,
+    pub bare_questions: i64,
     pub own_word_answers: i64,
     pub subagents: i64,
     /// Shell calls that ran `git commit`, `git push` or `gh pr create` without a tool error.
@@ -58,22 +63,38 @@ pub fn measure(calls: &mut [SkillCall], events: &[Event]) {
             _ => None,
         })
         .collect();
+    // Only a choice tool's result can be a blocked question; other output may quote the reason.
+    let choice_ids: HashSet<&str> = events
+        .iter()
+        .filter_map(|e| match &e.kind {
+            Kind::ToolUse { id, name, .. } if name == CHOICE_TOOL => Some(id.as_str()),
+            _ => None,
+        })
+        .collect();
     for call in calls {
-        let window = &events[call.span.clone()];
+        let (start, window) = (call.span.start, &events[call.span.clone()]);
         let metrics = &mut call.metrics;
         if let Some(start) = window.first() {
             metrics.context = start.context.clone();
         }
         // Latest entry time so far. An entry earlier than it adds nothing.
         let mut last_ms: Option<i64> = None;
-        for event in window {
+        for (offset, event) in window.iter().enumerate() {
             if let Some(ms) = millis(&event.timestamp) {
                 if let Some(last) = last_ms {
                     metrics.active_ms += (ms - last).clamp(0, IDLE_CAP_MS);
                 }
                 last_ms = last_ms.max(Some(ms));
             }
-            count_event(metrics, &event.kind, &results);
+            count_event(metrics, &event.kind, &results, &choice_ids);
+            if let Kind::ToolUse { id, name, .. } = &event.kind {
+                if name == CHOICE_TOOL {
+                    let blocked = results.get(id.as_str()).is_some_and(|r| r.blocked);
+                    metrics.choice_questions += 1;
+                    metrics.bare_questions +=
+                        i64::from(blocked || is_bare(&events[..start + offset]));
+                }
+            }
             let Some(request) = &event.request else {
                 continue;
             };
@@ -89,7 +110,12 @@ pub fn measure(calls: &mut [SkillCall], events: &[Event]) {
 }
 
 /// Tools, denials, interrupts, answers, pull requests and user text of one event.
-fn count_event(metrics: &mut Metrics, kind: &Kind, results: &HashMap<&str, &ToolResult>) {
+fn count_event(
+    metrics: &mut Metrics,
+    kind: &Kind,
+    results: &HashMap<&str, &ToolResult>,
+    choice_ids: &HashSet<&str>,
+) {
     match kind {
         Kind::SkillTool { .. } => metrics.tool_calls += 1,
         Kind::ToolUse { id, name, input } => {
@@ -110,6 +136,9 @@ fn count_event(metrics: &mut Metrics, kind: &Kind, results: &HashMap<&str, &Tool
                 metrics.prs_created += i64::from(actions.pr_create);
             }
         }
+        // A question the bare-question hook blocked counts as bare, not as a denial.
+        Kind::ToolResult(result)
+            if result.blocked && choice_ids.contains(result.tool_use_id.as_str()) => {}
         Kind::ToolResult(result) => {
             if let Some(denial) = &result.denial {
                 *metrics.denials.entry(denial.clone()).or_default() += 1;

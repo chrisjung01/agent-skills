@@ -31,14 +31,15 @@ fn rate(hits: i64, n: i64) -> String {
     format!("{share} % ({}–{} %)", percent(low), percent(high))
 }
 
-/// The four rates: name and the call's flag, `None` where its parser did not measure it.
+/// The five rates: name and the call's flag, `None` where its parser did not measure it.
 type Flag = fn(&ReportCall) -> Option<bool>;
 const CORRECTION: Flag = |c| c.corrected;
-const SERIES: [(&str, Flag); 4] = [
+const SERIES: [(&str, Flag); 5] = [
     ("Correction", CORRECTION),
     ("Interrupt", |c| c.interrupted),
     ("Denial", |c| c.denied),
     ("Tool error", |c| c.tool_error),
+    ("Bare question", |c| c.bare_question),
 ];
 
 /// Calls where the event happened, and the calls that measured it.
@@ -86,13 +87,14 @@ fn escape(text: &str) -> String {
         .replace('"', "&quot;")
 }
 
-const HEADERS: [&str; 9] = [
+const HEADERS: [&str; 10] = [
     "Skill",
     "Calls",
     "Correction",
     "Interrupt",
     "Denial",
     "Tool error",
+    "Bare question",
     "Recommended",
     "Median tokens",
     "Median active",
@@ -122,21 +124,21 @@ fn name((skill, nested): (&str, bool)) -> String {
     format!("{}{mark}", escape(skill))
 }
 
-/// Correction, interrupt, denial and tool-error rate, then the recommended share.
-fn rates(calls: &[&ReportCall]) -> [String; 5] {
+/// Correction, interrupt, denial, tool-error and bare-question rate, then the recommended share.
+fn rates(calls: &[&ReportCall]) -> [String; 6] {
     // Questions and recommended answers of the calls that measured both.
     let (questions, recommended) = calls
         .iter()
         .filter_map(|c| Some((c.questions?, c.recommended_answers?)))
         .fold((0, 0), |(q, r), (cq, cr)| (q + cq, r + cr));
-    let [a, b, c, d] = SERIES.map(|(_, flag)| {
+    let [a, b, c, d, e] = SERIES.map(|(_, flag)| {
         let (hits, n) = hits(calls, flag);
         rate(hits, n)
     });
-    [a, b, c, d, rate(recommended, questions)]
+    [a, b, c, d, e, rate(recommended, questions)]
 }
 
-/// Calls, the four rates and the recommended share: the columns overview and versions share.
+/// Calls, the five rates and the recommended share: the columns overview and versions share.
 fn counted(calls: &[&ReportCall]) -> Vec<String> {
     let mut cells = vec![calls.len().to_string()];
     cells.extend(rates(calls));
@@ -218,7 +220,7 @@ fn per_skill(skills: &[Skill], dates: &Dates) -> String {
             .collect();
         let cells: Vec<_> = columns.values().map(|(_, calls)| counted(calls)).collect();
         let mut rows = String::new();
-        for (i, label) in HEADERS[1..7].iter().enumerate() {
+        for (i, label) in HEADERS[1..8].iter().enumerate() {
             let _ = write!(rows, "<tr><th scope=\"row\">{label}</th>");
             for column in &cells {
                 let _ = write!(rows, "<td>{}</td>", column[i]);
@@ -295,7 +297,7 @@ fn trend(calls: &[&ReportCall], nested: bool) -> String {
         return String::new();
     }
     let (width, height) = (360.0, 180.0);
-    let (left, right, top, bottom) = (44.0, 96.0, 10.0, 24.0);
+    let (left, right, top, bottom) = (44.0, 116.0, 10.0, 24.0);
     let (plot_w, plot_h) = (width - left - right, height - top - bottom);
     let names: Vec<(i64, &str)> = weeks.keys().copied().collect();
     let (first, last) = (names[0], names[names.len() - 1]);
@@ -488,10 +490,10 @@ fn scatter(skills: &[Skill]) -> String {
 
 const STYLE: &str = "
 :root { color-scheme: light dark; --bg: #fff; --fg: #1a1a1a; --muted: #666; --line: #ddd;
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; }
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #8b5cd6; }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #161616; --fg: #e8e8e8; --muted: #9a9a9a; --line: #333;
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; }
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #9d72e8; }
 }
 body { margin: 0 auto; max-width: 72rem; padding: 1rem; background: var(--bg); color: var(--fg);
   font: 15px/1.45 system-ui, sans-serif; }
@@ -515,9 +517,9 @@ polyline { fill: none; stroke-width: 2; }
 svg line[class^=s] { stroke-width: 2; }
 circle { stroke: var(--bg); stroke-width: 2; }
 .s1 { stroke: var(--s1); } .s2 { stroke: var(--s2); }
-.s3 { stroke: var(--s3); } .s4 { stroke: var(--s4); }
+.s3 { stroke: var(--s3); } .s4 { stroke: var(--s4); } .s5 { stroke: var(--s5); }
 circle.s1, .dot { fill: var(--s1); } circle.s2 { fill: var(--s2); }
-circle.s3 { fill: var(--s3); } circle.s4 { fill: var(--s4); }
+circle.s3 { fill: var(--s3); } circle.s4 { fill: var(--s4); } circle.s5 { fill: var(--s5); }
 #view-slash, #view-model { display: none; }
 body:has(#kind-slash:checked) #view-slash, body:has(#kind-model:checked) #view-model {
   display: block; }
@@ -564,7 +566,9 @@ pub fn html(calls: &[ReportCall], dates: &Dates) -> String {
     } else {
         format!(
             "<p>A rate is the share of skill calls with at least one such event, with its 95 % \
-             Wilson interval. Recommended is recommended answers over questions. A skill marked \
+             Wilson interval. A bare question is a choice question asked with no visible text since \
+             the last tool call; its rate counts every call, also those that asked nothing. \
+             Recommended is recommended answers over questions. A skill marked \
              nested never had a call of its own; its row counts the windows of other skills' \
              calls that loaded it. Those calls still count only in their own skill's row. Calls \
              whose parser did not measure a value stay out of its share. The switch limits every \
