@@ -26,12 +26,21 @@ Call the Skill tool with "cj-project-context" for: commands, standards.
 
    ```
    **<topic heading>**
-   1. <the change in a few words> · <where: file, check, issue or /cj-whetstone <skill>>
-      <what happened, with the moment in the session>
+
+   1. **<short change title>**
+      <one plain sentence explaining the change and why it helps>
+
+   2. **<short change title>**
+      <one plain sentence explaining the change and why it helps>
    ```
+
+   Keep a blank line between findings. Include a linked destination in the explanation only when it helps the user decide.
 
    More than three findings: also call the Skill tool with "cj-html-report" for one card per finding; the page adds to the list in chat.
 5. **Ask.** The turn that asks holds, in this order: the numbered list from step 4 as reply text, then the choice. Ask which to do, one question at a time, each as a choice: all, pick per finding (one finding per question), none. Option texts name findings by their number and a few words, never by number alone.
+
+   If the harness provides an available choice tool, use it for the question after showing the findings. If no choice tool is available, put the question and each answer option on separate lines.
+
 6. **Do what got a yes.** Small edits to agent docs or standards: on a branch with a draft PR. A new check or a larger change: call the Skill tool with "cj-filing-issues" for an issue in that repo. Skill findings: name `/cj-whetstone <skill>` and quote the finding with its evidence (the moment in the session, the skill line) in the report, so whetstone finds it in this window; never edit a skill from here. Call the Skill tool with "cj-posting" before any outbound action; the yes from step 5 covers exactly the actions it named, and this skill carries it into `cj-filing-issues`.
 
 Done when every finding is done, filed, routed or declined by the user, and the report lists each with its link.
