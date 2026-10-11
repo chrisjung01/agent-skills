@@ -4,6 +4,7 @@
 //! running session) are skipped. A session's own transcript also skips subagent entries kept
 //! inline (`isSidechain`); a subagent's transcript consists of nothing else.
 
+use crate::question;
 use serde_json::Value;
 
 const KNOWN_TYPES: [&str; 4] = ["user", "assistant", "system", "attachment"];
@@ -67,6 +68,9 @@ pub struct ToolResult {
     pub denial_reason: Option<String>,
     /// The tool ran and failed. A denial is never an error.
     pub error: bool,
+    /// Failed or denied with the bare-question hook's reason; it stopped the call when the call
+    /// was the choice tool's.
+    pub blocked: bool,
     /// One per question of an answered `AskUserQuestion`.
     pub answers: Vec<Answer>,
     /// `https://github.com/<owner>/<repo>/pull/<number>` in the result text, in order.
@@ -315,9 +319,11 @@ fn tool_result(entry: &Value, content: &Value) -> Option<Kind> {
         .map(|(_, reason)| reason.trim())
         .filter(|reason| !reason.is_empty() && !reason.starts_with(CLARIFY_PREFIX))
         .map(str::to_owned);
+    let failed = denial.is_some() || block["is_error"] == true;
     Some(Kind::ToolResult(ToolResult {
         tool_use_id: block["tool_use_id"].as_str()?.to_owned(),
         error: denial.is_none() && block["is_error"] == true,
+        blocked: failed && text.contains(question::BLOCKED),
         denial,
         denial_reason,
         answers: answers(&entry["toolUseResult"]),
