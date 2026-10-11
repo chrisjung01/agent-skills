@@ -13,7 +13,16 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 ## Steps
 
 1. **Synthesize, do not interview.** Work from the conversation and the code. Use the glossary's terms and respect the ADRs in the area. If this session did not grill (no decision list in the conversation), call the Skill tool with "cj-grilling" first; a spec built on guesses is the failure this flow exists to prevent.
-2. **Test seams.** Propose where the behaviour is tested: the highest public interface that observes it, existing seams before new ones, as few as possible. Per seam: what it catches, what it misses. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. Ask the user to confirm them as one question with a choice (confirm, change a seam), before the draft.
+2. **Test seams.** Propose where the behaviour is tested: the highest public interface that observes it, existing seams before new ones, as few as possible. Per seam: what it catches, what it misses. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. Show the seams in the reply text, never as a prose paragraph and never only inside the question, numbered so the user can name one, in this shape (labels in the reply's language):
+
+   ```
+   **Test seams**
+   1. <seam in a few words> · <where: command, file or interface>
+      catches: <what breaks it>
+      misses: <what it does not see>
+   ```
+
+   Then ask the user to confirm them as one question with a choice (confirm, change seam <n>), before the draft.
 3. **Size.** One spec is one goal that ships on its own. Two goals that could ship separately: propose two specs, one per issue, and continue with the one the user picks first.
 4. **Draft** the spec in the shape of [SPEC.md](SPEC.md) and run its checks.
 5. **Show and post.** Show the full text. Call the Skill tool with "cj-posting":
