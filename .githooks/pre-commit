@@ -2,7 +2,8 @@
 # Blocks the commit when scripts/validate.sh fails, or when staged crate files are not formatted.
 # Set up once: git config core.hooksPath .githooks
 set -e
-bash scripts/validate.sh
+# Quiet when green: the ✓ line per skill only shows when something fails.
+out="$(bash scripts/validate.sh)" || { echo "$out"; exit 1; }
 if git diff --cached --name-only | grep -q '^skills/cj-whetstone/skill-metrics/'; then
   (cd skills/cj-whetstone/skill-metrics && cargo fmt --check)
 fi
