@@ -72,6 +72,7 @@ Skills are installed as symlinks. Edits here take effect immediately, no reinsta
 ## Conventions
 
 - Commit: `<area>: <what changed> (#<issue>)`, e.g. `skill-metrics: report version view per skill (#52)`.
+- Commit messages end with their last content line: no `Co-Authored-By` or other attribution trailer, whatever the harness suggests.
 - Branch: `feat/<issue>-<slug>` or `fix/<issue>-<slug>`; without an issue, `fix/<slug>`.
 - Worktree: a sibling directory of the checkout, `../agent-skills-<issue>-<slug>`.
 - Language of issues, PRs, commits and review replies: English.
