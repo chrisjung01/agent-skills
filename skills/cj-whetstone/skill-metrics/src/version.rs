@@ -43,7 +43,7 @@ fn matches(loaded: &str, revision: &str) -> bool {
         })
 }
 
-fn without_frontmatter(content: &str) -> &str {
+pub fn without_frontmatter(content: &str) -> &str {
     let body = content
         .strip_prefix("---\n")
         .and_then(|rest| rest.split_once("\n---\n"))

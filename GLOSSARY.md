@@ -1,16 +1,16 @@
 # Agent skills
 
-Terms for how skills run and how their use is measured from Claude Code transcripts.
+Terms for how skills run and how their use is measured from Claude Code and Codex transcripts.
 
 ## Skill metrics
 
 **Skill call**:
-One use of a skill, started by a user slash command or by a model `Skill` tool call that is not a nested skill. One row in the metrics database.
+One use of a skill, started by a user slash command (in Codex: a prompt with `$<skill>` that Codex attached the skill to) or by a model `Skill` tool call that is not a nested skill. Codex shows no activation for a skill the model reads on its own, so a Codex session holds only user-started calls. One row in the metrics database.
 _Avoid_: Invocation, Run, Session (a session can hold several skill calls)
 _Code_: `SkillCall`
 
 **Start kind**:
-How a skill call started: `slash` when the user typed the skill's slash command, `model` when the model called the `Skill` tool outside any window whose loaded skill texts name the skill.
+How a skill call started: `slash` when the user typed the skill's slash command (or picked it with `$<skill>` in Codex), `model` when the model called the `Skill` tool outside any window whose loaded skill texts name the skill.
 _Avoid_: Trigger, Source
 
 **Window**:

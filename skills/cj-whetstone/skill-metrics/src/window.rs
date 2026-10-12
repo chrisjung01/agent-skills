@@ -5,6 +5,9 @@ use crate::transcript::{Event, Kind};
 use std::collections::HashMap;
 use std::ops::Range;
 
+/// `SkillCall::source` of a call from a Claude Code transcript.
+pub const CLAUDE_CODE: &str = "claude-code";
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct SkillCall {
     /// Uuid of the message that starts the skill call; the row key.
@@ -12,6 +15,8 @@ pub struct SkillCall {
     pub skill: String,
     /// `slash` when the user typed the slash command, `model` for a `Skill` tool call.
     pub start_kind: &'static str,
+    /// `CLAUDE_CODE`, or `codex::SOURCE` for a call from a Codex transcript.
+    pub source: &'static str,
     pub session_id: String,
     pub started_at: String,
     pub ended_at: String,
@@ -68,6 +73,7 @@ pub fn skill_calls(session_id: &str, events: &[Event], subagents: &[Vec<Event>])
                     start_uuid: event.uuid.clone(),
                     skill: skill.clone(),
                     start_kind: if by_user { "slash" } else { "model" },
+                    source: CLAUDE_CODE,
                     session_id: session_id.to_owned(),
                     started_at: event.timestamp.clone(),
                     ended_at: event.timestamp.clone(),

@@ -1,20 +1,22 @@
 //! Reads every Claude Code session transcript and upserts one row per skill call into SQLite, and
-//! holds whetstone's status per skill call.
+//! holds whetstone's status per skill call. `--session` also finds a Codex session (in
+//! `--codex-dir`, default `$CODEX_HOME/sessions` or `~/.codex/sessions`).
 //!
 //! Usage:
-//!   skill-metrics [extract] [--session <id>] [--projects-dir <dir>] [--db <file>]
+//!   skill-metrics [extract] [--session <id>] [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>]
 //!   skill-metrics open [<skill>] [--db <file>]
 //!   skill-metrics closed [<skill>] [--db <file>]
 //!   skill-metrics status [--db <file>] [--] <start uuid> <status> <finding>
-//!   skill-metrics show [--projects-dir <dir>] [--db <file>] <start uuid>
+//!   skill-metrics show [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>] <start uuid>
 //!   skill-metrics import-notes [<notes dir>] [--db <file>]
 //!   skill-metrics report [--out <file>] [--db <file>]
 //!   skill-metrics hook    (PreToolUse hook: payload on stdin, blocks a bare choice question)
 //!
-//! Pipeline: transcript (JSONL into events) → window (events into skill calls) → metrics (what
+//! Pipeline: transcript or codex (JSONL into events) → window (events into skill calls) → metrics (what
 //! happened in each window) → version (git) → store (SQLite).
 //! Everything between reading the files and writing the database is pure, except git in version.
 
+mod codex;
 mod metrics;
 mod notes;
 mod question;
@@ -54,8 +56,8 @@ fn main() -> ExitCode {
 }
 
 fn run() -> Result<(), Box<dyn Error>> {
-    let (mut projects, mut db, mut session, mut out, mut positional) =
-        (None, None, None, None, Vec::new());
+    let (mut projects, mut codex_dir, mut db, mut session, mut out, mut positional) =
+        (None, None, None, None, None, Vec::new());
     let mut args = env::args().skip(1);
     while let Some(arg) = args.next() {
         // After `--` everything is positional, so a finding may start with `--`.
@@ -70,6 +72,7 @@ fn run() -> Result<(), Box<dyn Error>> {
         let value = args.next().ok_or(format!("{arg} needs a value"))?;
         match arg.as_str() {
             "--projects-dir" => projects = Some(PathBuf::from(value)),
+            "--codex-dir" => codex_dir = Some(PathBuf::from(value)),
             "--db" => db = Some(PathBuf::from(value)),
             "--session" => session = Some(value),
             "--out" => out = Some(PathBuf::from(value)),
@@ -85,15 +88,22 @@ fn run() -> Result<(), Box<dyn Error>> {
         Some(path) => Ok(path),
         None => home().map(|home| home.join(".claude/projects")),
     };
+    let codex_dir = || match codex_dir {
+        Some(path) => Ok(path),
+        None => match env::var("CODEX_HOME") {
+            Ok(codex_home) => Ok(PathBuf::from(codex_home).join("sessions")),
+            Err(_) => home().map(|home| home.join(".codex/sessions")),
+        },
+    };
     let positional: Vec<&str> = positional.iter().map(String::as_str).collect();
     match positional.as_slice() {
-        [] | ["extract"] => extract(&projects()?, &db, session.as_deref()),
+        [] | ["extract"] => extract(&projects()?, &codex_dir()?, &db, session.as_deref()),
         ["open"] => open(&db, None),
         ["open", skill] => open(&db, Some(skill)),
         ["closed"] => closed(&db, None),
         ["closed", skill] => closed(&db, Some(skill)),
         ["status", start_uuid, status, finding] => set_status(&db, start_uuid, status, finding),
-        ["show", start_uuid] => show(&db, &projects()?, start_uuid),
+        ["show", start_uuid] => show(&db, &projects()?, &codex_dir()?, start_uuid),
         ["import-notes"] => import_notes(&db, &home()?.join(".claude/whetstone/notes")),
         ["import-notes", folder] => import_notes(&db, Path::new(folder)),
         ["report"] => {
@@ -160,7 +170,12 @@ fn set_status(
 /// The call's user texts from the database, then the agent text and tool calls of its window
 /// from the transcript while it exists. Tool output is never printed. The transcript part gets
 /// only the key and token patterns, so paths stay readable.
-fn show(db: &Path, projects: &Path, start_uuid: &str) -> Result<(), Box<dyn Error>> {
+fn show(
+    db: &Path,
+    projects: &Path,
+    codex_dir: &Path,
+    start_uuid: &str,
+) -> Result<(), Box<dyn Error>> {
     // A mistyped folder is an error, not a deleted transcript.
     if !projects.is_dir() {
         return Err(format!("no projects folder at {}", projects.display()).into());
@@ -198,14 +213,21 @@ fn show(db: &Path, projects: &Path, start_uuid: &str) -> Result<(), Box<dyn Erro
         println!("  {}{flags}: {}", user_text.kind, indent(&user_text.text));
     }
 
-    let transcript = session_files(projects)?
+    let claude_code = session_files(projects)?
         .into_iter()
         .find(|path| is_session(path, &call.session_id));
-    let Some(text) = transcript.and_then(|path| read(&path)) else {
+    let events = match claude_code {
+        Some(path) => read(&path).map(|text| transcript::parse(&text)),
+        None => codex_files(codex_dir)
+            .into_iter()
+            .find(|path| codex::session_id(path) == call.session_id)
+            .and_then(|path| read(&path))
+            .map(|text| codex::parse(&call.session_id, &text)),
+    };
+    let Some(events) = events else {
         println!("transcript deleted, only the user texts are left");
         return Ok(());
     };
-    let events = transcript::parse(&text);
     let window = window::skill_calls(&call.session_id, &events, &[])
         .into_iter()
         .find(|window| window.start_uuid == start_uuid);
@@ -331,12 +353,21 @@ fn open_db(db: &Path) -> Result<rusqlite::Connection, Box<dyn Error>> {
     store::open(db)
 }
 
-/// Every transcript, or with `session` only that one; rows of other sessions stay.
-fn extract(projects: &Path, db: &Path, session: Option<&str>) -> Result<(), Box<dyn Error>> {
+/// Every Claude Code transcript, or with `session` only that one, a Codex session included; rows
+/// of other sessions stay.
+fn extract(
+    projects: &Path,
+    codex_dir: &Path,
+    db: &Path,
+    session: Option<&str>,
+) -> Result<(), Box<dyn Error>> {
     let mut files = session_files(projects)?;
+    let mut codex_sessions = Vec::new();
     if let Some(session) = session {
         files.retain(|path| is_session(path, session));
-        if files.is_empty() {
+        codex_sessions = codex_files(codex_dir);
+        codex_sessions.retain(|path| codex::session_id(path) == session);
+        if files.is_empty() && codex_sessions.is_empty() {
             return Err(format!("no transcript for session {session}").into());
         }
     }
@@ -358,15 +389,50 @@ fn extract(projects: &Path, db: &Path, session: Option<&str>) -> Result<(), Box<
         versions.fill(&mut session_calls);
         calls.extend(session_calls);
     }
+    for path in &codex_sessions {
+        let Some(text) = read(path) else {
+            continue;
+        };
+        let session_id = codex::session_id(path);
+        let events = codex::parse(&session_id, &text);
+        let mut session_calls = window::skill_calls(&session_id, &events, &[]);
+        metrics::measure(&mut session_calls, &events);
+        versions.fill(&mut session_calls);
+        for call in &mut session_calls {
+            call.source = codex::SOURCE;
+        }
+        calls.extend(session_calls);
+    }
 
     store::upsert(&mut open_db(db)?, &calls, PARSER_VERSION)?;
     println!(
         "{} skill calls extracted from {} transcripts into {}",
         calls.len(),
-        files.len(),
+        files.len() + codex_sessions.len(),
         db.display()
     );
     Ok(())
+}
+
+/// `<sessions>/YYYY/MM/DD/rollout-*.jsonl`, at any depth; none when the folder is missing.
+fn codex_files(dir: &Path) -> Vec<PathBuf> {
+    let mut files = Vec::new();
+    let mut dirs = vec![dir.to_path_buf()];
+    while let Some(dir) = dirs.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else {
+            continue;
+        };
+        for path in entries.flatten().map(|entry| entry.path()) {
+            let name = path.file_name().unwrap_or_default().to_string_lossy();
+            if path.is_dir() {
+                dirs.push(path);
+            } else if name.starts_with("rollout-") && name.ends_with(".jsonl") {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    files
 }
 
 fn is_session(path: &Path, session: &str) -> bool {

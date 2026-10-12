@@ -2,6 +2,7 @@
 //! `PRAGMA user_version`, never by drop and rebuild: it is the only record of calls whose
 //! transcripts Claude Code has deleted.
 
+use crate::codex;
 use crate::notes::Entry;
 use crate::window::SkillCall;
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
@@ -148,6 +149,10 @@ pub fn upsert(
         }
         let (status, finding) =
             stored.map_or((None, None), |(.., status, finding)| (status, finding));
+        // Codex transcripts hold no denials, answers or tool errors as Claude Code writes them:
+        // those counters stay NULL, not 0. `tool_calls` NULL also leaves denials unmeasured.
+        let tools = (call.source != codex::SOURCE).then_some(&call.metrics);
+        let tool = |count: fn(&crate::metrics::Metrics) -> i64| tools.map(count);
         tx.execute(
             "DELETE FROM skill_calls WHERE start_uuid = ?1",
             [&call.start_uuid],
@@ -174,26 +179,27 @@ pub fn upsert(
                 call.metrics.tokens.cache_read,
                 call.metrics.tokens.cache_write,
                 call.metrics.active_ms,
+                // The CLI version of the transcript's tool, Codex's on a Codex row.
                 call.metrics.context.version,
                 call.metrics.context.entrypoint,
                 call.metrics.context.cwd,
                 call.metrics.context.git_branch,
-                call.metrics.tool_calls,
-                call.metrics.tool_errors,
+                tool(|m| m.tool_calls),
+                tool(|m| m.tool_errors),
                 call.metrics.interrupts,
-                call.metrics.questions,
-                call.metrics.recommended_answers,
-                call.metrics.own_word_answers,
-                call.metrics.subagents,
-                call.metrics.commits,
-                call.metrics.pushes,
-                call.metrics.prs_created,
+                tool(|m| m.questions),
+                tool(|m| m.recommended_answers),
+                tool(|m| m.own_word_answers),
+                tool(|m| m.subagents),
+                tool(|m| m.commits),
+                tool(|m| m.pushes),
+                tool(|m| m.prs_created),
                 call.skill_version,
                 status,
                 finding,
                 call.start_kind,
-                call.metrics.choice_questions,
-                call.metrics.bare_questions,
+                tool(|m| m.choice_questions),
+                tool(|m| m.bare_questions),
             ],
         )?;
         for (kind, count) in &call.metrics.denials {
