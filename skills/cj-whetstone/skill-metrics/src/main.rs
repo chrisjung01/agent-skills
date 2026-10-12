@@ -13,12 +13,16 @@
 //!   skill-metrics hook    (PreToolUse hook: payload on stdin, blocks a bare choice question)
 //!   skill-metrics codex-hook [--db <file>]    (Codex SessionEnd hook: payload on stdin, collects
 //!                                              its transcript; bad input is an error)
+//!   skill-metrics codex-hooks install|uninstall <command> [--dry-run]
+//!                                             (adds or removes the SessionEnd hook running
+//!                                              <command> in `$CODEX_HOME/hooks.json`)
 //!
 //! Pipeline: transcript or codex (JSONL into events) → window (events into skill calls) → metrics (what
 //! happened in each window) → version (git) → store (SQLite).
 //! Everything between reading the files and writing the database is pure, except git in version.
 
 mod codex;
+mod codex_hooks;
 mod metrics;
 mod notes;
 mod question;
@@ -60,6 +64,7 @@ fn main() -> ExitCode {
 fn run() -> Result<(), Box<dyn Error>> {
     let (mut projects, mut codex_dir, mut db, mut session, mut out, mut positional) =
         (None, None, None, None, None, Vec::new());
+    let mut dry_run = false;
     let mut args = env::args().skip(1);
     while let Some(arg) = args.next() {
         // After `--` everything is positional, so a finding may start with `--`.
@@ -69,6 +74,10 @@ fn run() -> Result<(), Box<dyn Error>> {
         }
         if !arg.starts_with("--") {
             positional.push(arg);
+            continue;
+        }
+        if arg == "--dry-run" {
+            dry_run = true;
             continue;
         }
         let value = args.next().ok_or(format!("{arg} needs a value"))?;
@@ -82,6 +91,12 @@ fn run() -> Result<(), Box<dyn Error>> {
         }
     }
     let home = || env::var("HOME").map(PathBuf::from);
+    let codex_home = || -> Result<PathBuf, Box<dyn Error>> {
+        match env::var("CODEX_HOME") {
+            Ok(codex_home) => Ok(PathBuf::from(codex_home)),
+            Err(_) => Ok(home()?.join(".codex")),
+        }
+    };
     let db = match db {
         Some(path) => path,
         None => home()?.join(".claude/whetstone/skill-metrics.sqlite"),
@@ -102,13 +117,13 @@ fn run() -> Result<(), Box<dyn Error>> {
                 Err(format!("no Codex sessions folder at {}", path.display()).into())
             }
             Some(path) => Ok(path),
-            None => match env::var("CODEX_HOME") {
-                Ok(codex_home) => Ok(PathBuf::from(codex_home).join("sessions")),
-                Err(_) => Ok(home()?.join(".codex/sessions")),
-            },
+            None => Ok(codex_home()?.join("sessions")),
         }
     };
     let positional: Vec<&str> = positional.iter().map(String::as_str).collect();
+    if dry_run && positional.first() != Some(&"codex-hooks") {
+        return Err("--dry-run works only with codex-hooks".into());
+    }
     match positional.as_slice() {
         [] | ["extract"] => extract(&projects()?, &codex_dir()?, &db, session.as_deref()),
         ["open"] => open(&db, None),
@@ -118,6 +133,9 @@ fn run() -> Result<(), Box<dyn Error>> {
         ["status", start_uuid, status, finding] => set_status(&db, start_uuid, status, finding),
         ["show", start_uuid] => show(&db, &projects()?, &codex_dir()?, start_uuid),
         ["codex-hook"] => codex_hook(&db),
+        ["codex-hooks", action @ ("install" | "uninstall"), command] => {
+            codex_hooks(&codex_home()?, *action == "install", command, dry_run)
+        }
         ["import-notes"] => import_notes(&db, &home()?.join(".claude/whetstone/notes")),
         ["import-notes", folder] => import_notes(&db, Path::new(folder)),
         ["report"] => {
@@ -461,6 +479,79 @@ fn codex_hook(db: &Path) -> Result<(), Box<dyn Error>> {
     let mut versions = version::Versions::in_repo_of(Path::new(env!("CARGO_MANIFEST_DIR")));
     let calls = codex_calls(path, &text, &mut versions);
     store::upsert(&mut open_db(db)?, &calls, PARSER_VERSION)?;
+    Ok(())
+}
+
+/// Adds or removes the SessionEnd hook running `command` in `<codex home>/hooks.json`. An existing
+/// file is copied to `hooks.json.bak-<nanoseconds>` before it changes; one it cannot read as hooks
+/// is an error and stays as it is.
+fn codex_hooks(
+    codex_home: &Path,
+    install: bool,
+    command: &str,
+    dry_run: bool,
+) -> Result<(), Box<dyn Error>> {
+    if !codex_home.is_dir() {
+        println!("no Codex at {}, hook skipped", codex_home.display());
+        return Ok(());
+    }
+    let file = codex_home.join("hooks.json");
+    let untouched = |why: String| format!("{} {why}, left untouched", file.display());
+    let original = match fs::read_to_string(&file) {
+        Ok(text) => Some(text),
+        Err(err) if err.kind() == io::ErrorKind::NotFound => None,
+        Err(err) => return Err(untouched(err.to_string()).into()),
+    };
+    let mut config = match &original {
+        Some(text) => serde_json::from_str(text)
+            .map_err(|err| untouched(format!("is not valid JSON ({err})")))?,
+        None => serde_json::json!({}),
+    };
+    let changed = if install {
+        codex_hooks::add(&mut config, command)
+    } else {
+        codex_hooks::remove(&mut config, command)
+    }
+    .map_err(untouched)?;
+    let (done, would, unchanged) = if install {
+        (
+            "registered the Codex SessionEnd hook in",
+            "would register the Codex SessionEnd hook in",
+            "Codex SessionEnd hook already registered in",
+        )
+    } else {
+        (
+            "removed the Codex SessionEnd hook from",
+            "would remove the Codex SessionEnd hook from",
+            "Codex SessionEnd hook not registered in",
+        )
+    };
+    if !changed {
+        println!("{unchanged} {}", file.display());
+        return Ok(());
+    }
+    if dry_run {
+        println!("{would} {}", file.display());
+        return Ok(());
+    }
+    if original.is_some() {
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_nanos();
+        let backup = codex_home.join(format!("hooks.json.bak-{stamp}"));
+        fs::copy(&file, &backup)?;
+        println!("backed up {} to {}", file.display(), backup.display());
+    }
+    // Written beside the real file and renamed onto it, so Codex never reads a half-written file
+    // and a symlinked hooks.json keeps its link and its mode.
+    let target = fs::canonicalize(&file).unwrap_or_else(|_| file.clone());
+    let new = target.with_extension("json.new");
+    fs::write(&new, serde_json::to_string_pretty(&config)? + "\n")?;
+    if original.is_some() {
+        fs::set_permissions(&new, fs::metadata(&target)?.permissions())?;
+    }
+    fs::rename(&new, &target)?;
+    println!("{done} {}", file.display());
     Ok(())
 }
 

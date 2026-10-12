@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Symlinks every skill in ./skills into the skill directories of Claude Code and Codex, builds
-# the cj-whetstone metrics binary and prints its SessionEnd and PreToolUse hook lines (settings
-# stay untouched).
+# the cj-whetstone metrics binary, registers its Codex SessionEnd hook in $CODEX_HOME/hooks.json
+# (default ~/.codex, backed up first) and prints its Claude Code hook lines (settings.json stays
+# untouched).
 #
 #   ./install.sh                      global: ~/.claude/skills + ~/.agents/skills
 #   ./install.sh --project <path>     per project: <path>/.claude/skills + <path>/.agents/skills
-#   ./install.sh --uninstall [...]    removes only symlinks that point into this repo
+#   ./install.sh --uninstall [...]    removes only symlinks that point into this repo and, globally, its Codex hook
 #   ./install.sh --dry-run [...]      prints what would happen, changes nothing
 #   ./install.sh --skill <name> [...] only this one skill
 #   ./install.sh --force [...]        move existing folders/foreign symlinks to <dir>.bak-<time>/ and replace them
@@ -72,21 +73,51 @@ for skill_path in "$SKILLS_DIR"/*/; do
 done
 
 # cj-whetstone's metrics binary; the hooks do nothing until it exists.
-if [[ "$MODE" == "install" && ( -z "$ONLY" || "$ONLY" == "cj-whetstone" ) ]]; then
+if [[ -z "$ONLY" || "$ONLY" == "cj-whetstone" ]]; then
   manifest="$SKILLS_DIR/cj-whetstone/skill-metrics/Cargo.toml"
-  if command -v cargo >/dev/null; then
-    # --target-dir: the hook looks there, whatever CARGO_TARGET_DIR says.
-    run cargo build --release --quiet --manifest-path "$manifest" --target-dir "${manifest%/*}/target"
-    [[ $DRY -eq 1 ]] || echo "✓ skill-metrics built"
-  else
-    echo "⚠ cargo not found, skill-metrics not built (https://rustup.rs)"
-  fi
-  hook="$SKILLS_DIR/cj-whetstone/scripts/session-end-hook.sh"
-  bare="$SKILLS_DIR/cj-whetstone/scripts/bare-question-hook.sh"
-  cat <<HOOK
+  bin="${manifest%/*}/target/release/skill-metrics"
+  codex_hook="bash \"$SKILLS_DIR/cj-whetstone/scripts/codex-session-end-hook.sh\""
+  codex_home="${CODEX_HOME:-$HOME/.codex}"
+  dry=""; [[ $DRY -eq 1 ]] && dry="--dry-run"
+  if [[ "$MODE" == "install" ]]; then
+    if command -v cargo >/dev/null; then
+      # --target-dir: the hook looks there, whatever CARGO_TARGET_DIR says.
+      run cargo build --release --quiet --manifest-path "$manifest" --target-dir "${manifest%/*}/target"
+      [[ $DRY -eq 1 ]] || echo "✓ skill-metrics built"
+    else
+      echo "⚠ cargo not found, skill-metrics not built (https://rustup.rs)"
+    fi
+    if [[ "$TARGET_ROOT" != "$HOME" ]]; then
+      echo "Codex hook: only the global install registers it (./install.sh without --project)"
+    elif [[ -x "$bin" ]]; then
+      # shellcheck disable=SC2086 # $dry is empty or one flag
+      "$bin" codex-hooks install "$codex_hook" $dry || echo "⚠ Codex hook not registered"
+    elif [[ $DRY -eq 1 ]]; then
+      echo "[dry-run] register the Codex SessionEnd hook in $codex_home/hooks.json"
+    else
+      echo "⚠ skill-metrics not built, Codex hook not registered"
+    fi
+    if [[ -d "$codex_home" ]]; then
+      echo "Codex runs the hook once you trust it: start codex, it reports hooks that need review; approve it under /hooks."
+      if command -v codex >/dev/null && [[ "$(codex features list 2>/dev/null | awk '$1 == "hooks" { print $NF }')" == "false" ]]; then
+        echo "⚠ Hooks are off in Codex: set hooks = true under [features] in $codex_home/config.toml."
+      fi
+      echo "Without the hook, /cj-whetstone's full scan still collects Codex sessions."
+    fi
+    hook="$SKILLS_DIR/cj-whetstone/scripts/session-end-hook.sh"
+    bare="$SKILLS_DIR/cj-whetstone/scripts/bare-question-hook.sh"
+    cat <<HOOK
 
 Add these hooks to ~/.claude/settings.json under "hooks", if they are not there yet:
   "SessionEnd": [{ "hooks": [{ "type": "command", "command": "bash \"$hook\"" }] }],
   "PreToolUse": [{ "matcher": "AskUserQuestion", "hooks": [{ "type": "command", "command": "bash \"$bare\"" }] }]
 HOOK
+  elif [[ "$TARGET_ROOT" != "$HOME" ]]; then
+    :  # the global Codex hook stays for the global install
+  elif [[ -x "$bin" ]]; then
+    # shellcheck disable=SC2086
+    "$bin" codex-hooks uninstall "$codex_hook" $dry || echo "⚠ Codex hook not removed"
+  elif [[ -f "$codex_home/hooks.json" ]]; then
+    echo "⚠ skill-metrics not built: remove the SessionEnd hook running $codex_hook from $codex_home/hooks.json yourself"
+  fi
 fi

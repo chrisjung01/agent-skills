@@ -2305,3 +2305,163 @@ fn rollout_in(codex: &Path) -> std::path::PathBuf {
     assert_eq!(files.len(), 1);
     files.pop().unwrap()
 }
+
+const HOOK_COMMAND: &str = "bash \"/repo/skills/cj-whetstone/scripts/codex-session-end-hook.sh\"";
+
+/// Runs `codex-hooks <args>` against the Codex home `codex`; returns exit success, stdout and stderr.
+fn codex_hooks(codex: &Path, args: &[&str]) -> (bool, String, String) {
+    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+        .env("CODEX_HOME", codex)
+        .arg("codex-hooks")
+        .args(args)
+        .output()
+        .unwrap();
+    (
+        output.status.success(),
+        String::from_utf8_lossy(&output.stdout).into_owned(),
+        String::from_utf8_lossy(&output.stderr).into_owned(),
+    )
+}
+
+/// The backups `codex-hooks` wrote beside `hooks.json`, oldest first, with their content.
+fn hook_backups(codex: &Path) -> Vec<String> {
+    let mut files: Vec<_> = fs::read_dir(codex)
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.to_string_lossy().contains("hooks.json.bak-"))
+        .collect();
+    files.sort();
+    files
+        .iter()
+        .map(|p| fs::read_to_string(p).unwrap())
+        .collect()
+}
+
+#[test]
+fn installing_the_codex_hook_keeps_foreign_hooks_and_uninstall_removes_only_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let codex = dir.path();
+    let file = codex.join("hooks.json");
+    let foreign = r#"{"hooks": {
+      "SessionStart": [{"hooks": [{"type": "command", "command": "start.sh", "timeout": 10}]}],
+      "SessionEnd": [{"matcher": "x", "hooks": [{"type": "command", "command": "other.sh"}]}]
+    }, "extra": 1}"#;
+    fs::write(&file, foreign).unwrap();
+    let parsed = |text: &str| serde_json::from_str::<serde_json::Value>(text).unwrap();
+
+    let (ok, stdout, _) = codex_hooks(codex, &["install", HOOK_COMMAND, "--dry-run"]);
+    assert!(ok && stdout.contains("would register"), "{stdout}");
+    assert_eq!(fs::read_to_string(&file).unwrap(), foreign);
+    assert!(hook_backups(codex).is_empty());
+
+    let (ok, stdout, stderr) = codex_hooks(codex, &["install", HOOK_COMMAND]);
+    assert!(ok, "{stderr}");
+    assert!(stdout.contains("registered"), "{stdout}");
+    let installed = parsed(&fs::read_to_string(&file).unwrap());
+    let mut expected = parsed(foreign);
+    expected["hooks"]["SessionEnd"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!({"hooks": [{"type": "command", "command": HOOK_COMMAND}]}));
+    assert_eq!(installed, expected);
+    assert_eq!(hook_backups(codex), [foreign]);
+
+    // A second install changes nothing and backs up nothing.
+    let (ok, stdout, _) = codex_hooks(codex, &["install", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("already registered"), "{stdout}");
+    assert_eq!(parsed(&fs::read_to_string(&file).unwrap()), expected);
+    assert_eq!(hook_backups(codex).len(), 1);
+
+    let before = fs::read_to_string(&file).unwrap();
+    let (ok, stdout, _) = codex_hooks(codex, &["uninstall", HOOK_COMMAND, "--dry-run"]);
+    assert!(ok && stdout.contains("would remove"), "{stdout}");
+    assert_eq!(fs::read_to_string(&file).unwrap(), before);
+
+    let (ok, stdout, stderr) = codex_hooks(codex, &["uninstall", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("removed"), "{stdout}{stderr}");
+    assert_eq!(parsed(&fs::read_to_string(&file).unwrap()), parsed(foreign));
+    assert_eq!(hook_backups(codex).len(), 2);
+    assert_eq!(hook_backups(codex)[1], before);
+
+    let (ok, stdout, _) = codex_hooks(codex, &["uninstall", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("not registered"), "{stdout}");
+    assert_eq!(hook_backups(codex).len(), 2);
+
+    // Only codex-hooks knows --dry-run; elsewhere it must not run for real.
+    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+        .args(["report", "--dry-run", "--db"])
+        .arg(codex.join("metrics.sqlite"))
+        .output()
+        .unwrap();
+    assert!(String::from_utf8_lossy(&output.stderr).contains("only with codex-hooks"));
+    assert!(!codex.join("metrics.sqlite").exists());
+}
+
+#[test]
+fn the_codex_hook_goes_into_a_new_hooks_file_and_needs_a_codex_home() {
+    let dir = tempfile::tempdir().unwrap();
+    let missing = dir.path().join("no-codex");
+    let (ok, stdout, _) = codex_hooks(&missing, &["install", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("no Codex"), "{stdout}");
+    assert!(!missing.exists());
+
+    let (ok, _, stderr) = codex_hooks(dir.path(), &["install", HOOK_COMMAND]);
+    assert!(ok, "{stderr}");
+    let written: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(dir.path().join("hooks.json")).unwrap()).unwrap();
+    assert_eq!(
+        written,
+        serde_json::json!({"hooks": {"SessionEnd": [{"hooks": [{"type": "command", "command": HOOK_COMMAND}]}]}})
+    );
+    assert!(hook_backups(dir.path()).is_empty());
+}
+
+#[test]
+fn a_symlinked_codex_hooks_file_stays_a_link_to_the_changed_file() {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = tempfile::tempdir().unwrap();
+    let dotfiles = dir.path().join("dotfiles.json");
+    fs::write(&dotfiles, r#"{"hooks": {}}"#).unwrap();
+    fs::set_permissions(&dotfiles, fs::Permissions::from_mode(0o600)).unwrap();
+    let codex = dir.path().join("codex");
+    fs::create_dir(&codex).unwrap();
+    std::os::unix::fs::symlink(&dotfiles, codex.join("hooks.json")).unwrap();
+
+    let (ok, _, stderr) = codex_hooks(&codex, &["install", HOOK_COMMAND]);
+    assert!(ok, "{stderr}");
+    assert!(fs::symlink_metadata(codex.join("hooks.json"))
+        .unwrap()
+        .file_type()
+        .is_symlink());
+    assert!(fs::read_to_string(&dotfiles)
+        .unwrap()
+        .contains("codex-session-end-hook"));
+    assert_eq!(
+        fs::metadata(&dotfiles).unwrap().permissions().mode() & 0o777,
+        0o600
+    );
+}
+
+#[test]
+fn a_malformed_codex_hooks_file_is_reported_and_left_untouched() {
+    for content in [
+        "{not json",
+        "[]",
+        r#"{"hooks": []}"#,
+        r#"{"hooks": {"SessionEnd": {}}}"#,
+        r#"{"hooks": null}"#,
+        r#"{"hooks": {"SessionEnd": null}}"#,
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("hooks.json");
+        fs::write(&file, content).unwrap();
+        for action in ["install", "uninstall"] {
+            let (ok, _, stderr) = codex_hooks(dir.path(), &[action, HOOK_COMMAND]);
+            assert!(!ok, "{action} {content}");
+            assert!(stderr.contains("left untouched"), "{content}: {stderr}");
+            assert_eq!(fs::read_to_string(&file).unwrap(), content);
+            assert!(hook_backups(dir.path()).is_empty());
+        }
+    }
+}
