@@ -29,7 +29,7 @@ This is a personal repo. The skills follow how I work and change when that chang
 | [`cj-grill-with-docs`](skills/cj-grill-with-docs/SKILL.md) | **Flow 1.** Grills the decisions one question at a time; glossary terms and ADRs are written as they settle; questions only the issue author can answer go into one comment. |
 | [`cj-to-spec`](skills/cj-to-spec/SKILL.md) | **Flow 2.** Turns the grilled conversation into a spec (AC-1… as Given/When/Then, edge cases, test seams, out of scope) and posts it as a `## Spec` comment, or as a new issue. |
 | [`cj-to-tickets`](skills/cj-to-tickets/SKILL.md) | **Flow 3.** Slices a spec into small vertical sub-issues with blocked-by edges. Skipped when the spec fits one ticket. |
-| [`cj-implement`](skills/cj-implement/SKILL.md) | **Flow 4.** Implements the spec's tickets as small draft PRs, one per ticket, stacked while a blocker is unmerged: targeted tests, full checks once per PR, independent review, acceptance table per AC. `one-pr` for one PR per spec. Resumable after `/clear`. |
+| [`cj-implement`](skills/cj-implement/SKILL.md) | **Flow 4.** Implements the spec's tickets as small draft PRs, one per ticket, stacked while a blocker is unmerged: targeted tests, full checks once per PR, independent review, a PR body of five blocks in at most 15 lines with one Verified line per AC. `one-pr` for one PR per spec. Resumable after `/clear`. |
 | [`cj-retro`](skills/cj-retro/SKILL.md) | **Flow 5.** Turns a session's friction into checks, standards or agent-doc pointers in the worked-in repo; skill findings go to `cj-whetstone`. |
 | [`cj-whetstone`](skills/cj-whetstone/SKILL.md) | Improves a skill from the skill calls the whetstone metrics store, after reading their windows. |
 

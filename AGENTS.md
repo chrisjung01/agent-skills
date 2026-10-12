@@ -58,7 +58,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 ## Checks
 
 ```bash
-bash scripts/validate.sh     # format of all skills (also runs in CI): invocation rules, no calls to user-invoked skills, copies of the scannable sentence match AGENTS.md; locally also no word from the gitignored .org-terms file in any tracked file
+bash scripts/validate.sh     # format of all skills (also runs in CI): invocation rules, no calls to user-invoked skills, copies of the scannable sentence match AGENTS.md, PR-BODY.md holds its five blocks in order; locally also no word from the gitignored .org-terms file in any tracked file
 git config core.hooksPath .githooks   # once per checkout: runs validate.sh, and cargo fmt --check when the crate changes, before each commit
 ./install.sh --dry-run       # shows what would be linked
 # trying install.sh under a temporary HOME: also set RUSTUP_HOME and CARGO_HOME to the real ones, or cargo fails
