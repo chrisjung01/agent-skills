@@ -2174,3 +2174,134 @@ fn codex_rows_stored_before_the_source_column_are_labelled_codex() {
         assert_eq!(source, expected, "{start_uuid}");
     }
 }
+
+/// Runs `codex-hook` with `payload` on stdin; returns exit success and stderr.
+fn codex_hook(payload: &str, db: &Path) -> (bool, String) {
+    use std::io::Write;
+    let mut child = binary(db)
+        .args(["--db".as_ref(), db.as_os_str()])
+        .arg("codex-hook")
+        .stdin(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(payload.as_bytes())
+        .unwrap();
+    let output = child.wait_with_output().unwrap();
+    (
+        output.status.success(),
+        String::from_utf8_lossy(&output.stderr).into_owned(),
+    )
+}
+
+/// The payload Codex sends its SessionEnd hook.
+fn session_end(transcript_path: serde_json::Value) -> String {
+    serde_json::json!({
+        "hook_event_name": "SessionEnd",
+        "session_id": CODEX_ID,
+        "transcript_path": transcript_path,
+        "cwd": "/home/x/repo",
+        "reason": "other",
+    })
+    .to_string()
+}
+
+#[test]
+fn the_codex_hook_and_a_full_scan_update_one_call_in_either_order() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    // The session ends while Codex still writes its last record.
+    let lines: Vec<&str> = CODEX.lines().collect();
+    let partial = format!("{}\n{}", lines[..21].join("\n"), &lines[21][..40]);
+    let (_, codex) = codex_session(dir.path(), &partial);
+    let rollout = rollout_in(Path::new(&codex));
+    let payload = session_end(rollout.to_str().unwrap().into());
+
+    let (ok, stderr) = codex_hook(&payload, &db);
+    assert!(ok, "{stderr}");
+    assert_eq!(rows(&db).len(), 1);
+    assert_eq!(rows(&db)[0].3, "2026-10-12T10:02:00.000Z");
+    assert!(cli(&["status", "msg_s1", "beobachtet", "kein Signal"], &db).0);
+
+    // Codex finished the record; a full scan without Claude Code transcripts takes it.
+    fs::write(&rollout, CODEX).unwrap();
+    let home = dir.path().join("home");
+    fs::create_dir(&home).unwrap();
+    let output = binary(&db)
+        .env("HOME", &home)
+        .args(["--db".as_ref(), db.as_os_str()])
+        .args(["--codex-dir", &codex])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let ended = |db: &Path| rows(db).into_iter().map(|r| (r.0, r.3)).collect::<Vec<_>>();
+    let full = vec![
+        ("msg_s1".to_owned(), "2026-10-12T10:03:20.100Z".to_owned()),
+        ("msg_s2".to_owned(), "2026-10-12T10:10:30.100Z".to_owned()),
+    ];
+    assert_eq!(ended(&db), full);
+
+    // The hook after the full scan changes nothing.
+    assert!(codex_hook(&payload, &db).0);
+    assert_eq!(ended(&db), full);
+    let (_, closed) = cli(&["closed"], &db);
+    assert!(closed.starts_with("beobachtet\tmsg_s1\t"), "{closed}");
+}
+
+#[test]
+fn the_codex_hook_reports_bad_input_and_keeps_stored_calls() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    let (projects, codex) = codex_session(dir.path(), CODEX);
+    assert!(cli(&["--projects-dir", &projects, "--codex-dir", &codex], &db).0);
+    assert!(cli(&["status", "msg_s1", "beobachtet", "kein Signal"], &db).0);
+    let stored = (rows(&db), cli(&["closed"], &db).1);
+    let claude_code = dir.path().join("s1.jsonl");
+    fs::write(&claude_code, SESSION).unwrap();
+
+    for (payload, diagnostic) in [
+        ("not json".to_owned(), "not JSON"),
+        ("{}".to_owned(), "no session_id"),
+        (
+            format!("{{\"session_id\":\"{CODEX_ID}\"}}"),
+            "no transcript_path",
+        ),
+        (
+            session_end(dir.path().join("gone.jsonl").to_str().unwrap().into()),
+            "gone.jsonl",
+        ),
+        (
+            session_end(claude_code.to_str().unwrap().into()),
+            "not a Codex session",
+        ),
+    ] {
+        let (ok, stderr) = codex_hook(&payload, &db);
+        assert!(!ok, "{payload}");
+        assert!(stderr.contains(diagnostic), "{payload}: {stderr}");
+        assert_eq!((rows(&db), cli(&["closed"], &db).1), stored, "{payload}");
+    }
+    // A session without a rollout has nothing to collect: a note, no failure.
+    let (ok, stderr) = codex_hook(&session_end(serde_json::Value::Null), &db);
+    assert!(ok && stderr.contains("no transcript"), "{stderr}");
+    assert_eq!((rows(&db), cli(&["closed"], &db).1), stored);
+}
+
+/// The one rollout under `codex`.
+fn rollout_in(codex: &Path) -> std::path::PathBuf {
+    let day = codex.join("2026/10/12");
+    let mut files: Vec<_> = fs::read_dir(day)
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .collect();
+    assert_eq!(files.len(), 1);
+    files.pop().unwrap()
+}

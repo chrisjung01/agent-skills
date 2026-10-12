@@ -11,6 +11,8 @@
 //!   skill-metrics import-notes [<notes dir>] [--db <file>]
 //!   skill-metrics report [--out <file>] [--db <file>]
 //!   skill-metrics hook    (PreToolUse hook: payload on stdin, blocks a bare choice question)
+//!   skill-metrics codex-hook [--db <file>]    (Codex SessionEnd hook: payload on stdin, collects
+//!                                              its transcript; bad input is an error)
 //!
 //! Pipeline: transcript or codex (JSONL into events) → window (events into skill calls) → metrics (what
 //! happened in each window) → version (git) → store (SQLite).
@@ -84,11 +86,16 @@ fn run() -> Result<(), Box<dyn Error>> {
         Some(path) => path,
         None => home()?.join(".claude/whetstone/skill-metrics.sqlite"),
     };
-    let projects = || match projects {
-        Some(path) => Ok(path),
-        None => home().map(|home| home.join(".claude/projects")),
+    // A mistyped folder is an error; a missing default folder means no sessions of that tool.
+    let projects = || -> Result<PathBuf, Box<dyn Error>> {
+        match projects {
+            Some(path) if !path.is_dir() => {
+                Err(format!("no projects folder at {}", path.display()).into())
+            }
+            Some(path) => Ok(path),
+            None => Ok(home()?.join(".claude/projects")),
+        }
     };
-    // A mistyped `--codex-dir` is an error; a missing default folder means no Codex.
     let codex_dir = || -> Result<PathBuf, Box<dyn Error>> {
         match codex_dir {
             Some(path) if !path.is_dir() => {
@@ -110,6 +117,7 @@ fn run() -> Result<(), Box<dyn Error>> {
         ["closed", skill] => closed(&db, Some(skill)),
         ["status", start_uuid, status, finding] => set_status(&db, start_uuid, status, finding),
         ["show", start_uuid] => show(&db, &projects()?, &codex_dir()?, start_uuid),
+        ["codex-hook"] => codex_hook(&db),
         ["import-notes"] => import_notes(&db, &home()?.join(".claude/whetstone/notes")),
         ["import-notes", folder] => import_notes(&db, Path::new(folder)),
         ["report"] => {
@@ -184,10 +192,6 @@ fn show(
     codex_dir: &Path,
     start_uuid: &str,
 ) -> Result<(), Box<dyn Error>> {
-    // A mistyped folder is an error, not a deleted transcript.
-    if !projects.is_dir() {
-        return Err(format!("no projects folder at {}", projects.display()).into());
-    }
     let call = store::shown_call(&existing_db(db)?, start_uuid)?
         .ok_or(format!("no skill call {start_uuid}"))?;
     println!(
@@ -397,18 +401,9 @@ fn extract(
         calls.extend(session_calls);
     }
     for path in &codex_sessions {
-        let Some(text) = read(path) else {
-            continue;
-        };
-        let session_id = codex::session_id(path);
-        let events = codex::parse(&session_id, &text);
-        let mut session_calls = window::skill_calls(&session_id, &events, &[]);
-        metrics::measure(&mut session_calls, &events);
-        versions.fill(&mut session_calls);
-        for call in &mut session_calls {
-            call.source = codex::SOURCE;
+        if let Some(text) = read(path) {
+            calls.extend(codex_calls(path, &text, &mut versions));
         }
-        calls.extend(session_calls);
     }
 
     store::upsert(&mut open_db(db)?, &calls, PARSER_VERSION)?;
@@ -418,6 +413,54 @@ fn extract(
         files.len() + codex_sessions.len(),
         db.display()
     );
+    Ok(())
+}
+
+/// The skill calls of one Codex rollout, keyed by the session id in its file name as in a full
+/// scan.
+fn codex_calls(
+    path: &Path,
+    text: &str,
+    versions: &mut version::Versions,
+) -> Vec<window::SkillCall> {
+    let session_id = codex::session_id(path);
+    let events = codex::parse(&session_id, text);
+    let mut calls = window::skill_calls(&session_id, &events, &[]);
+    metrics::measure(&mut calls, &events);
+    versions.fill(&mut calls);
+    for call in &mut calls {
+        call.source = codex::SOURCE;
+    }
+    calls
+}
+
+/// Collects the rollout a Codex SessionEnd payload names. Input it cannot collect is an error that
+/// leaves the database untouched; the next full scan collects the session.
+fn codex_hook(db: &Path) -> Result<(), Box<dyn Error>> {
+    let mut input = String::new();
+    io::Read::read_to_string(&mut io::stdin(), &mut input)?;
+    let payload: serde_json::Value =
+        serde_json::from_str(&input).map_err(|_| "hook input is not JSON")?;
+    let session = payload["session_id"]
+        .as_str()
+        .ok_or("hook input has no session_id")?;
+    let path = match &payload["transcript_path"] {
+        serde_json::Value::String(path) => Path::new(path),
+        // A session Codex kept no rollout for: nothing to collect, now or in a scan.
+        serde_json::Value::Null if payload.get("transcript_path").is_some() => {
+            eprintln!("skill-metrics: session {session} has no transcript, nothing collected");
+            return Ok(());
+        }
+        _ => return Err(format!("hook input for session {session} has no transcript_path").into()),
+    };
+    let bytes = fs::read(path).map_err(|err| format!("{}: {err}", path.display()))?;
+    let text = String::from_utf8_lossy(&bytes);
+    if !codex::is_rollout(&text) {
+        return Err(format!("{} is not a Codex session", path.display()).into());
+    }
+    let mut versions = version::Versions::in_repo_of(Path::new(env!("CARGO_MANIFEST_DIR")));
+    let calls = codex_calls(path, &text, &mut versions);
+    store::upsert(&mut open_db(db)?, &calls, PARSER_VERSION)?;
     Ok(())
 }
 
@@ -471,11 +514,15 @@ fn subagent_files(session_dir: &Path) -> Vec<PathBuf> {
     files
 }
 
-/// `<projects>/<project>/<session>.jsonl`. Subagent transcripts sit one level deeper
-/// (`<session>/subagents/`) and are not sessions.
+/// `<projects>/<project>/<session>.jsonl`; none when the folder is missing. Subagent transcripts
+/// sit one level deeper (`<session>/subagents/`) and are not sessions.
 fn session_files(projects: &Path) -> io::Result<Vec<PathBuf>> {
     let mut files = Vec::new();
-    for project in fs::read_dir(projects)?.flatten() {
+    let projects = match fs::read_dir(projects) {
+        Err(err) if err.kind() == io::ErrorKind::NotFound => return Ok(files),
+        projects => projects?,
+    };
+    for project in projects.flatten() {
         let project = project.path();
         if !project.is_dir() {
             continue;

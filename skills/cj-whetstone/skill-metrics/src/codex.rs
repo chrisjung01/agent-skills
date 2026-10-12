@@ -38,6 +38,14 @@ pub fn session_id(path: &Path) -> String {
     id.unwrap_or(&stem).to_owned()
 }
 
+/// Whether `jsonl` is a Codex session: its first record is the session's `session_meta`.
+pub fn is_rollout(jsonl: &str) -> bool {
+    jsonl
+        .lines()
+        .find_map(|line| serde_json::from_str::<Value>(line).ok())
+        .is_some_and(|entry| entry["type"] == "session_meta")
+}
+
 /// The transcript of one Codex session.
 pub fn parse(session_id: &str, jsonl: &str) -> Vec<Event> {
     let mut parser = Parser {
