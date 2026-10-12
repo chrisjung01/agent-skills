@@ -1878,3 +1878,160 @@ fn report_check_page() {
     }
     assert_eq!(version_table(all, long).0.len(), 3);
 }
+
+const CODEX: &str = include_str!("fixtures/codex-session.jsonl");
+const CODEX_ID: &str = "01a1c0de-0000-7000-8000-000000000001";
+
+/// Writes `jsonl` as Codex session `CODEX_ID` and returns the projects and Codex folders.
+fn codex_session(dir: &Path, jsonl: &str) -> (String, String) {
+    let (projects, codex) = (dir.join("projects"), dir.join("codex/sessions"));
+    let day = codex.join("2026/10/12");
+    fs::create_dir_all(&day).unwrap();
+    fs::create_dir_all(&projects).unwrap();
+    fs::write(
+        day.join(format!("rollout-2026-10-12T10-00-00-{CODEX_ID}.jsonl")),
+        jsonl,
+    )
+    .unwrap();
+    (
+        projects.to_str().unwrap().to_owned(),
+        codex.to_str().unwrap().to_owned(),
+    )
+}
+
+#[test]
+fn a_selected_codex_session_shows_its_calls_in_open_show_and_report() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    let (projects, codex) = codex_session(dir.path(), CODEX);
+    let dirs = ["--projects-dir", &projects, "--codex-dir", &codex];
+
+    let (ok, _) = cli(&[&dirs[..], &["--session", CODEX_ID]].concat(), &db);
+    assert!(ok);
+    // The prompt and its attached skill text are one call; the mentions before it are none.
+    assert_eq!(
+        rows(&db),
+        [
+            (
+                "msg_s1".into(),
+                "cj-implement".into(),
+                CODEX_ID.into(),
+                "2026-10-12T10:03:20.100Z".into(),
+                1
+            ),
+            (
+                "msg_s2".into(),
+                "cj-review-loop".into(),
+                CODEX_ID.into(),
+                "2026-10-12T10:10:30.100Z".into(),
+                0
+            ),
+        ]
+    );
+
+    let (ok, stdout) = cli(&["open"], &db);
+    assert!(ok);
+    assert_eq!(listed(&stdout), ["msg_s1", "msg_s2"]);
+    // Counters Codex does not write are left out, not 0.
+    assert!(stdout
+        .lines()
+        .next()
+        .unwrap()
+        .ends_with("\tprompts=1 interrupts=1"));
+
+    let (ok, stdout) = cli(&[&dirs[..], &["show", "msg_s1"]].concat(), &db);
+    assert!(ok, "{stdout}");
+    assert!(stdout.contains("prompt [correction]: nein, das ist falsch."));
+    assert!(stdout.contains("agent: Ich lese das Issue."));
+    assert!(stdout.contains("tool exec_command: {\"cmd\":\"git status\"}"));
+    assert!(!stdout.contains("Mit `$cj-implement`") && !stdout.contains("Review läuft."));
+
+    let conn = Connection::open(&db).unwrap();
+    let stored: (Option<i64>, Option<i64>, i64, i64, String, String) = conn
+        .query_row(
+            "SELECT tool_calls, questions, input_tokens, cache_read_tokens, claude_code_version,
+                 start_kind FROM skill_calls WHERE start_uuid = 'msg_s1'",
+            [],
+            |r| {
+                Ok((
+                    r.get(0)?,
+                    r.get(1)?,
+                    r.get(2)?,
+                    r.get(3)?,
+                    r.get(4)?,
+                    r.get(5)?,
+                ))
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        stored,
+        (None, None, 500, 700, "0.162.1".into(), "slash".into())
+    );
+
+    let out = dir.path().join("report.html");
+    let (ok, _) = cli(&["report", "--out", out.to_str().unwrap()], &db);
+    assert!(ok);
+    let rows = overview(&fs::read_to_string(&out).unwrap());
+    let implement = rows.iter().find(|row| row[0] == "cj-implement").unwrap();
+    // Calls, correction, interrupt; denial, tool error, bare question and recommended are not
+    // measured; tokens and active duration are.
+    assert_eq!(
+        implement[1..],
+        [
+            "1",
+            "100 % (21–100 %)",
+            "100 % (21–100 %)",
+            "–",
+            "–",
+            "–",
+            "–",
+            "1260",
+            "2 min"
+        ]
+    );
+}
+
+#[test]
+fn a_codex_session_collected_again_or_resumed_updates_its_calls() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    // The session ended before the interrupt, was collected, then resumed.
+    let lines: Vec<&str> = CODEX.lines().collect();
+    let (projects, codex) = codex_session(dir.path(), &lines[..21].join("\n"));
+    let collect = [
+        "--projects-dir",
+        &projects,
+        "--codex-dir",
+        &codex,
+        "--session",
+        CODEX_ID,
+    ];
+    assert!(cli(&collect, &db).0);
+    assert_eq!(rows(&db).len(), 1);
+    assert_eq!(rows(&db)[0].3, "2026-10-12T10:02:00.000Z");
+    assert!(cli(&["status", "msg_s1", "beobachtet", "kein Signal"], &db).0);
+
+    codex_session(dir.path(), CODEX);
+    assert!(cli(&collect, &db).0);
+    assert!(cli(&collect, &db).0);
+    let stored = rows(&db);
+    assert_eq!(
+        stored
+            .iter()
+            .map(|r| (r.0.as_str(), r.3.as_str(), r.4))
+            .collect::<Vec<_>>(),
+        [
+            ("msg_s1", "2026-10-12T10:03:20.100Z", 1),
+            ("msg_s2", "2026-10-12T10:10:30.100Z", 0)
+        ]
+    );
+    let (ok, stdout) = cli(&["closed"], &db);
+    assert!(ok);
+    assert_eq!(
+        stdout.lines().collect::<Vec<_>>(),
+        [format!(
+            "beobachtet\tmsg_s1\tcj-implement\t{CODEX_ID}\t2026-10-12T10:01:00.000Z\tkein Signal"
+        )]
+    );
+}
