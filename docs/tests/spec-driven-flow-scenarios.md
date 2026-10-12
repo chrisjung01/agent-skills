@@ -20,7 +20,7 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 
 **Setup:** #412 has a spec and three sub-issues: `shop-backend#88` (trigger sends push), `shop-client#413` (show push, tap opens chat, blocked by #88), `shop-client#414` (setting "pushes off", blocked by #413). #88 is closed.
 **Prompt (in shop-client):** "/cj-implement #412"
-**Expected:** no mode given, two tickets in this repo: one choice question first ("One PR per ticket (recommended)" / "One PR for the whole spec"); answered with per ticket: #413 on a branch from `gh issue develop 413` with base `main` (blocker #88 closed), its own draft PR with `Closes #413` and `Part of #412`; then #414 on a branch from `gh issue develop 414` stacked on #413's branch (its blocker is open with a draft PR), draft PR against that branch with "Stacked on"; #88 not touched; #412 not closed by any PR. Each PR: checks, review, acceptance table for its own AC, merge danger.
+**Expected:** no mode given, two tickets in this repo: one choice question first ("One PR per ticket (recommended)" / "One PR for the whole spec"); answered with per ticket: #413 on a branch from `gh issue develop 413` with base `main` (blocker #88 closed), its own draft PR with `Closes #413` and `Part of #412`; then #414 on a branch from `gh issue develop 414` stacked on #413's branch (its blocker is open with a draft PR), draft PR against that branch with "Stacked on"; #88 not touched; #412 not closed by any PR. Each PR: checks, review, a Verified line per own AC; no merge-danger section, the spec holds it.
 
 ## 4. Deviation versus scope change
 

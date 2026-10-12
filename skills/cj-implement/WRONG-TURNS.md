@@ -11,5 +11,7 @@
 | A technical detail differs from the spec | Deviation comment and continue. Never edit the spec for it. |
 | Inline implementation, tests green | Still run the independent review. No reviewer: no push. |
 | A test fails and the expectation looks wrong | Ask. Never change the expectation to match the code. |
+| Body names a test or file the diff lacks | Fix the body or the diff. No PR until they match. |
+| Body needs more than 15 lines to be true | The unit is too big. Propose a split, as with 400 changed lines. |
 | Everything green, PR text ready | Push and open the draft PR without asking. Never merge. |
 | Branch name contains the issue number, so it is linked | Only `gh issue develop` links it. |

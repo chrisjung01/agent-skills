@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Checks every skill: SKILL.md exists, frontmatter has name + description, name == folder name,
 # the description matches the invocation kind, no skill calls a user-invoked one, no organisation term in any tracked file,
-# every copy of the scannable sentence matches the one in AGENTS.md.
+# every copy of the scannable sentence matches the one in AGENTS.md, the PR body template holds its five blocks in order.
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 errors=0
@@ -69,4 +69,9 @@ else
   hits="$(grep -vF -e "$sentence" <<<"$hits")"
   [[ -n "$hits" ]] && { echo "✗ scannable sentence drifted from AGENTS.md:"; cut -d: -f1,2 <<<"$hits"; errors=$((errors+1)); }
 fi
+# PR body template: the five blocks, each a bold list item, present and in this order (#46).
+body=skills/cj-implement/PR-BODY.md
+want="Why,What,How to test,Verified,Risk"
+have="$(grep -oE '^- \*\*(Why|What|How to test|Verified|Risk)\*\*' "$body" 2>/dev/null | sed -E 's/^- \*\*(.*)\*\*$/\1/' | paste -sd, -)"
+[[ "$have" == "$want" ]] || { echo "✗ $body: blocks are '$have', need '$want'"; errors=$((errors+1)); }
 [[ $errors -eq 0 ]]

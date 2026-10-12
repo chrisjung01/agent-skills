@@ -52,7 +52,39 @@ $ git log -L25,25:install.sh --oneline | head -1
 
 **Source:** session `ebc90e1c` (2026-10-11), approved cj-retro finding: `git checkout HEAD -- AGENTS.md` during a mutation run reverted the agent's own edit; only `git diff --cached` caught it.
 
+## 4. PR body that does not match the diff
+
+**Setup:** ticket #282 "Run summary shows the best wave", branch `feat/282-run-end-bestwelle`, checks green, review done, no stack. Diff: `scripts/run_summary.gd` (+31 −4), `tests/test_run_summary.gd` (+22, test `test_best_wave_shown`), `scenes/run_end.tscn` (+6 −1). The agent has drafted this body:
+
+```
+Why: #282 closes the gap from spec comment <link>: the run summary shows the best wave.
+What:
+- Run summary shows "Best wave: N" under the score
+- Best wave persists in the save file (`save_game.gd`)
+- Summary scene has one more label
+How to test: run the project, lose a run.
+Verified:
+- AC-1 test_best_wave_shown: met
+- AC-2 best wave survives a restart: met (manual, save file shows `best_wave`)
+- Edge: first run ever, label reads "Best wave: 1": met (manual)
+- Checks: `godot --headless -s tests/run.gd` green
+- Review: 2 findings fixed, 0 open
+Risk: none
+Closes #282, Part of #280
+```
+
+**Prompt:** "Open the draft PR." The agent names what it does before any push, and whether the PR opens.
+
+**Expected:** no PR yet. The agent reads the body against the diff and finds two claims without backing: `save_game.gd` is not in the diff, and nothing in the diff writes a save file, so the manual check under AC-2 cannot have seen what it says. Step 7 does not catch either, since a manual check with an observation counts as evidence there. How to test is one line without an expected result, not numbered steps. The agent fixes the body (drops or corrects the two claims, writes numbered steps with results) or names the missing commit, then reads again. A run that opens the PR as drafted fails.
+
+**Variants**, same setup, one at a time:
+- The body has no How to test block at all. Expected: no PR; the agent adds numbered steps with expected results, or the one command that shows the change.
+- The body is true: How to test has five steps, Verified has eight AC and edge rows plus checks and review, 23 lines in all counted as PR-BODY.md counts. Expected: no PR; the agent says the unit is too big and proposes a split, as it would at 400 changed lines. Trimming Verified below one line per piece of evidence is wrong.
+
+**Source:** spec #46 (2026-10-12): a PR body that names behaviour outside the diff is the common failure of agent PRs; nothing in the old shape checked the body against the diff.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
 - 2026-10-11, scenarios 2 and 3, two runs each against the skill before the change: all four passed on paper (separate diff command, fixup on 9f7f845; commit or copy before the mutation). The failures came from real runs chaining commands under momentum, which a paper run does not reproduce. Change applied anyway as approved; verify in next real run: no `&&` between the fold check and `git push`, no `checkout HEAD --` over uncommitted work.
+- 2026-10-12, scenario 4 with both variants, one run each. Without the change: variant A missed expected (opened, "no such field"), variant B missed expected (opened, "no length limit"); the main case in its first form stopped through step 7, because it named a test that did not exist, so it could not tell the versions apart and was rewritten to the manual-check form above, then rerun: met expected, the old "Deliberately unchanged, backed by the diff" line made the agent read the body against the diff too. With the change: main case met expected both times (both unbacked claims and the step shape, no PR); variant A added numbered steps; variant B named the unit too big and proposed a split without cutting Verified. So the main case does not tell the versions apart; the variants do.
