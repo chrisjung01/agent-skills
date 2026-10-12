@@ -49,3 +49,27 @@ Paper exercises built from a real run (October 2026). The agent under test descr
 **Expected with skill:** Show a numbered list with a short bold title per finding, one plain explanation sentence beneath it, and a blank line between findings. Include a linked destination in the explanation only when it helps the decision. After the list, use the available choice tool, with one question and selectable options. When the harness has no available choice tool, put the question and each answer option on separate lines.
 
 **Status:** verify in next real run. The baseline failed in the live harness. The revised template can be inspected, but a paper exercise cannot verify the rendered list or actual choice-tool use. The current scanner does not store this Codex call, so no metrics call UUID is available.
+
+## 5. The current session holds only a run with nothing to do
+
+**Setup:** The user ran `/clear`, then `/cj-implement <spec issue> per-ticket`, which found every ticket closed and its PR merged and only reported that. The work on the spec (worktree, reviews, a live test) happened in the session before the `/clear`, a separate transcript in the same project folder.
+
+**Prompt:** "/cj-retro"
+
+**Baseline (real run, session `e8a577ff-694f-4d30-b7c1-8d567bcf3332`, 2026-10-12):** Step 1 says "Default: the current one, before `/clear`". The agent listed the transcripts with `ls -lt`, guessed that the previous one (`4130c213`) was meant, and read it without saying so. The user approved the finding in a second retro.
+
+**Expected with skill:** The agent sees that the current session holds only a run with nothing to do, reads the latest earlier session in this repo on the same issue, and names it in one line before the findings.
+
+**Status:** verify in next real run. A paper run on 2026-10-12 with the old text already chose the earlier session and named it, because the prompt described both transcripts; the live failure was the guess without a rule.
+
+## 6. A repo without draft pull requests
+
+**Setup:** The retro's findings are small edits to agent docs. The repo's `conventions` fact (or a memory) says the repo cannot have draft PRs: a private repo on GitHub Free, where `gh pr create --draft` fails or opens a normal PR.
+
+**Prompt:** "/cj-retro", the user answers "all".
+
+**Baseline (real run, session `f6258d10-edac-46f5-b5ed-a9bd9bc78e89`, 2026-10-11):** Step 6 asks for "a draft PR". The agent opened a normal PR (#296) because the repo has no drafts and named the mismatch only in a later retro, which the user approved as a finding for cj-retro.
+
+**Expected with skill:** The agent opens a normal PR where `conventions` says the repo has no drafts and says so in the report.
+
+**Status:** verify in next real run. A paper run on 2026-10-12 with the old text already opened a normal PR and said so, because the prompt stated the missing drafts; the live run met the mismatch only through `gh`.
