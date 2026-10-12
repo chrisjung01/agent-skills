@@ -17,9 +17,12 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 
    ```
    **Test seams**
-   1. <seam in a few words> · <where: command, file or interface>
-      catches: <what breaks it>
-      misses: <what it does not see>
+
+   **1. <seam in a few words>** (<where: command, file or interface>)
+   - catches:
+     - <one failure per line>
+   - misses:
+     - <one blind spot per line>
    ```
 
    Then ask the user to confirm them as one question with a choice (confirm, change seam <n>), before the draft.

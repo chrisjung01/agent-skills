@@ -52,3 +52,20 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 - 2026-10-11, scenario 5 before the change: two runs (the first with an obviously wrong `grep`, the second with a plausible scan whose definition differs). Both noticed the mismatch and did not post the baseline. Pass already; the real run had the definition only implicit in an earlier tool call. Verify in next real run.
 - 2026-10-11, scenario 6 before the change: one run. Kept "count before and after" and claimed in an edge-case row that a fixed-name file written by a test is caught. Fail.
 - 2026-10-11, scenario 6 after the change: one run. Held the draft back: an overwritten fixed-name file leaves the count unchanged; proposed name-plus-mtime snapshot or an empty user directory and asked for one try on the hard case. Pass.
+
+## 7. Quantities are checked against limits the repo already states
+
+**Setup:** a game repo with 16 plan folders under `docs/plans/`. One of them, `issue-100-30-wellen-kampagne/decisions.md`, says "P8: A wave spawns at most 100 enemies in total", backed by `docs/performance-load-test.md` (100 active enemies, more not measured). Enemy rewards: runner 3, raider 5. The grilled decision list for #284 "Wellen-Generator mit Seed": budget per wave 25 + 11·(n−1), drawn until nothing fits, no last wave, wave 50 must be playable. The user says "Das Grilling ist durch und alle Entscheidungen sind abgenickt, bitte jetzt nur noch die Spec entwerfen, kurz halten."
+**Prompt:** "/cj-to-spec #284" (draft only, do not post).
+**Expected:** the draft names the 100-enemy limit, either kept as a decision or AC, or as a conflict that sends the budget back to grilling. A draft that posts an unbounded budget with "wave 50 playable" and no word on the limit fails.
+**Origin:** session fdb7349a (spec for #284) posted the unbounded budget; the review of the implementation found the conflict with P8 and the spec gained AC-34 afterwards. Retro finding approved in session fad331f6.
+- 2026-10-12, scenario 7 before the change: three runs (one in a 5-file repo, two in the 25-file repo with the time-pressure line). All three found P8, computed when the budget passes 100 enemies and held the draft back. Pass already; the real run had grilled in an earlier context and read only SPEC.md, issue-tracker.md and checks.md before drafting. Verify in next real run.
+
+## 8. Test seams list each catch and miss on its own line
+
+**Setup:** issue #84 "Wellen-Generator mit Seed" is grilled. Seam A (the generator in the test runner) catches seven things, from "same seed, same waves" to "remaining budget smaller than the cheapest group ends the wave", and misses balance and game feel. Seam B (the game scene via GameSceneHelper) catches three things and misses layout at 720×1280. The conversation is in German.
+**Prompt:** step 2 of `/cj-to-spec #84`: show the seams and ask for confirmation.
+**Expected:** each seam heading is bold with its location in parentheses on the same line, and catches and misses are sub-lists with one case per line. A seam whose catches sit on one line separated by commas or semicolons, or several cases on one line, fails.
+**Origin:** session fdb7349a: the user called the seam list hard to read twice and said "so sollte das immer aussehen" for the nested layout; agent-skills#44.
+- 2026-10-12, scenario 8 before the change: one run. Catches as three `fängt:` lines with up to three cases joined by semicolons. Fail.
+- 2026-10-12, scenario 8 after the change: one run. Bold heading with location in parentheses, catches and misses as sub-lists, one case per line (seven catches for seam A). Pass.
