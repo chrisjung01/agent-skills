@@ -38,6 +38,14 @@ pub fn session_id(path: &Path) -> String {
     id.unwrap_or(&stem).to_owned()
 }
 
+/// Whether `jsonl` is a Codex session: its first record is the session's `session_meta`.
+pub fn is_rollout(jsonl: &str) -> bool {
+    jsonl
+        .lines()
+        .find_map(|line| serde_json::from_str::<Value>(line).ok())
+        .is_some_and(|entry| entry["type"] == "session_meta")
+}
+
 /// The transcript of one Codex session.
 pub fn parse(session_id: &str, jsonl: &str) -> Vec<Event> {
     let mut parser = Parser {
@@ -83,7 +91,8 @@ impl Parser<'_> {
         let payload = &entry["payload"];
         let timestamp = entry["timestamp"].as_str().unwrap_or_default().to_owned();
         // Codex before 0.145 writes no message ids; the line's ordinal is stable while the file
-        // only grows.
+        // only grows. ponytail: a fork of such a session gets other keys for its parent's calls
+        // and the full scan stores them twice; no such fork was seen, skip its replay if one is.
         let ordinal = entry["ordinal"].as_u64().unwrap_or(line as u64);
         let uuid = payload["id"]
             .as_str()

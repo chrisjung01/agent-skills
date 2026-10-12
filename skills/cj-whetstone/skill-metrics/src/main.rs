@@ -1,6 +1,6 @@
-//! Reads every Claude Code session transcript and upserts one row per skill call into SQLite, and
-//! holds whetstone's status per skill call. `--session` also finds a Codex session (in
-//! `--codex-dir`, default `$CODEX_HOME/sessions` or `~/.codex/sessions`).
+//! Reads every Claude Code and Codex session transcript and upserts one row per skill call into
+//! SQLite, and holds whetstone's status per skill call. Codex sessions sit in `--codex-dir`,
+//! default `$CODEX_HOME/sessions` or `~/.codex/sessions`.
 //!
 //! Usage:
 //!   skill-metrics [extract] [--session <id>] [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>]
@@ -11,12 +11,18 @@
 //!   skill-metrics import-notes [<notes dir>] [--db <file>]
 //!   skill-metrics report [--out <file>] [--db <file>]
 //!   skill-metrics hook    (PreToolUse hook: payload on stdin, blocks a bare choice question)
+//!   skill-metrics codex-hook [--db <file>]    (Codex SessionEnd hook: payload on stdin, collects
+//!                                              its transcript; bad input is an error)
+//!   skill-metrics codex-hooks install|uninstall <command> [--dry-run]
+//!                                             (adds or removes the SessionEnd hook running
+//!                                              <command> in `$CODEX_HOME/hooks.json`)
 //!
 //! Pipeline: transcript or codex (JSONL into events) → window (events into skill calls) → metrics (what
 //! happened in each window) → version (git) → store (SQLite).
 //! Everything between reading the files and writing the database is pure, except git in version.
 
 mod codex;
+mod codex_hooks;
 mod metrics;
 mod notes;
 mod question;
@@ -58,6 +64,7 @@ fn main() -> ExitCode {
 fn run() -> Result<(), Box<dyn Error>> {
     let (mut projects, mut codex_dir, mut db, mut session, mut out, mut positional) =
         (None, None, None, None, None, Vec::new());
+    let mut dry_run = false;
     let mut args = env::args().skip(1);
     while let Some(arg) = args.next() {
         // After `--` everything is positional, so a finding may start with `--`.
@@ -67,6 +74,10 @@ fn run() -> Result<(), Box<dyn Error>> {
         }
         if !arg.starts_with("--") {
             positional.push(arg);
+            continue;
+        }
+        if arg == "--dry-run" {
+            dry_run = true;
             continue;
         }
         let value = args.next().ok_or(format!("{arg} needs a value"))?;
@@ -80,22 +91,39 @@ fn run() -> Result<(), Box<dyn Error>> {
         }
     }
     let home = || env::var("HOME").map(PathBuf::from);
+    let codex_home = || -> Result<PathBuf, Box<dyn Error>> {
+        match env::var("CODEX_HOME") {
+            Ok(codex_home) => Ok(PathBuf::from(codex_home)),
+            Err(_) => Ok(home()?.join(".codex")),
+        }
+    };
     let db = match db {
         Some(path) => path,
         None => home()?.join(".claude/whetstone/skill-metrics.sqlite"),
     };
-    let projects = || match projects {
-        Some(path) => Ok(path),
-        None => home().map(|home| home.join(".claude/projects")),
+    // A mistyped folder is an error; a missing default folder means no sessions of that tool.
+    let projects = || -> Result<PathBuf, Box<dyn Error>> {
+        match projects {
+            Some(path) if !path.is_dir() => {
+                Err(format!("no projects folder at {}", path.display()).into())
+            }
+            Some(path) => Ok(path),
+            None => Ok(home()?.join(".claude/projects")),
+        }
     };
-    let codex_dir = || match codex_dir {
-        Some(path) => Ok(path),
-        None => match env::var("CODEX_HOME") {
-            Ok(codex_home) => Ok(PathBuf::from(codex_home).join("sessions")),
-            Err(_) => home().map(|home| home.join(".codex/sessions")),
-        },
+    let codex_dir = || -> Result<PathBuf, Box<dyn Error>> {
+        match codex_dir {
+            Some(path) if !path.is_dir() => {
+                Err(format!("no Codex sessions folder at {}", path.display()).into())
+            }
+            Some(path) => Ok(path),
+            None => Ok(codex_home()?.join("sessions")),
+        }
     };
     let positional: Vec<&str> = positional.iter().map(String::as_str).collect();
+    if dry_run && positional.first() != Some(&"codex-hooks") {
+        return Err("--dry-run works only with codex-hooks".into());
+    }
     match positional.as_slice() {
         [] | ["extract"] => extract(&projects()?, &codex_dir()?, &db, session.as_deref()),
         ["open"] => open(&db, None),
@@ -104,6 +132,10 @@ fn run() -> Result<(), Box<dyn Error>> {
         ["closed", skill] => closed(&db, Some(skill)),
         ["status", start_uuid, status, finding] => set_status(&db, start_uuid, status, finding),
         ["show", start_uuid] => show(&db, &projects()?, &codex_dir()?, start_uuid),
+        ["codex-hook"] => codex_hook(&db),
+        ["codex-hooks", action @ ("install" | "uninstall"), command] => {
+            codex_hooks(&codex_home()?, *action == "install", command, dry_run)
+        }
         ["import-notes"] => import_notes(&db, &home()?.join(".claude/whetstone/notes")),
         ["import-notes", folder] => import_notes(&db, Path::new(folder)),
         ["report"] => {
@@ -117,7 +149,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     }
 }
 
-/// One line per open call: status, start uuid, skill, session, start time, counters.
+/// One line per open call: status, start uuid, skill, session, start time, source, counters.
 fn open(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
     for call in store::open_calls(&existing_db(db)?, skill)? {
         let counters: Vec<String> = call
@@ -126,18 +158,20 @@ fn open(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
             .map(|(name, value)| format!("{name}={value}"))
             .collect();
         println!(
-            "offen\t{}\t{}\t{}\t{}\t{}",
+            "offen\t{}\t{}\t{}\t{}\t{}\t{}",
             call.start_uuid,
             call.skill,
             call.session_id,
             call.started_at,
+            call.source,
             counters.join(" ")
         );
     }
     Ok(())
 }
 
-/// One line per call with a status: status, start uuid, skill, session, start time, finding.
+/// One line per call with a status: status, start uuid, skill, session, start time, source,
+/// finding.
 fn closed(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
     for call in store::closed_calls(&existing_db(db)?, skill)? {
         println!("{}", call.join("\t"));
@@ -176,15 +210,11 @@ fn show(
     codex_dir: &Path,
     start_uuid: &str,
 ) -> Result<(), Box<dyn Error>> {
-    // A mistyped folder is an error, not a deleted transcript.
-    if !projects.is_dir() {
-        return Err(format!("no projects folder at {}", projects.display()).into());
-    }
     let call = store::shown_call(&existing_db(db)?, start_uuid)?
         .ok_or(format!("no skill call {start_uuid}"))?;
     println!(
-        "{} {start_uuid} session {} {} to {}",
-        call.skill, call.session_id, call.started_at, call.ended_at
+        "{} {start_uuid} session {} ({}) {} to {}",
+        call.skill, call.session_id, call.source, call.started_at, call.ended_at
     );
     if let Some(status) = &call.status {
         println!(
@@ -353,8 +383,8 @@ fn open_db(db: &Path) -> Result<rusqlite::Connection, Box<dyn Error>> {
     store::open(db)
 }
 
-/// Every Claude Code transcript, or with `session` only that one, a Codex session included; rows
-/// of other sessions stay.
+/// Every Claude Code and Codex transcript, or with `session` only that one; rows of other sessions
+/// stay.
 fn extract(
     projects: &Path,
     codex_dir: &Path,
@@ -362,10 +392,9 @@ fn extract(
     session: Option<&str>,
 ) -> Result<(), Box<dyn Error>> {
     let mut files = session_files(projects)?;
-    let mut codex_sessions = Vec::new();
+    let mut codex_sessions = codex_files(codex_dir);
     if let Some(session) = session {
         files.retain(|path| is_session(path, session));
-        codex_sessions = codex_files(codex_dir);
         codex_sessions.retain(|path| codex::session_id(path) == session);
         if files.is_empty() && codex_sessions.is_empty() {
             return Err(format!("no transcript for session {session}").into());
@@ -390,18 +419,9 @@ fn extract(
         calls.extend(session_calls);
     }
     for path in &codex_sessions {
-        let Some(text) = read(path) else {
-            continue;
-        };
-        let session_id = codex::session_id(path);
-        let events = codex::parse(&session_id, &text);
-        let mut session_calls = window::skill_calls(&session_id, &events, &[]);
-        metrics::measure(&mut session_calls, &events);
-        versions.fill(&mut session_calls);
-        for call in &mut session_calls {
-            call.source = codex::SOURCE;
+        if let Some(text) = read(path) {
+            calls.extend(codex_calls(path, &text, &mut versions));
         }
-        calls.extend(session_calls);
     }
 
     store::upsert(&mut open_db(db)?, &calls, PARSER_VERSION)?;
@@ -411,6 +431,127 @@ fn extract(
         files.len() + codex_sessions.len(),
         db.display()
     );
+    Ok(())
+}
+
+/// The skill calls of one Codex rollout, keyed by the session id in its file name as in a full
+/// scan.
+fn codex_calls(
+    path: &Path,
+    text: &str,
+    versions: &mut version::Versions,
+) -> Vec<window::SkillCall> {
+    let session_id = codex::session_id(path);
+    let events = codex::parse(&session_id, text);
+    let mut calls = window::skill_calls(&session_id, &events, &[]);
+    metrics::measure(&mut calls, &events);
+    versions.fill(&mut calls);
+    for call in &mut calls {
+        call.source = codex::SOURCE;
+    }
+    calls
+}
+
+/// Collects the rollout a Codex SessionEnd payload names. Input it cannot collect is an error that
+/// leaves the database untouched; the next full scan collects the session.
+fn codex_hook(db: &Path) -> Result<(), Box<dyn Error>> {
+    let mut input = String::new();
+    io::Read::read_to_string(&mut io::stdin(), &mut input)?;
+    let payload: serde_json::Value =
+        serde_json::from_str(&input).map_err(|_| "hook input is not JSON")?;
+    let session = payload["session_id"]
+        .as_str()
+        .ok_or("hook input has no session_id")?;
+    let path = match &payload["transcript_path"] {
+        serde_json::Value::String(path) => Path::new(path),
+        // A session Codex kept no rollout for: nothing to collect, now or in a scan.
+        serde_json::Value::Null if payload.get("transcript_path").is_some() => {
+            eprintln!("skill-metrics: session {session} has no transcript, nothing collected");
+            return Ok(());
+        }
+        _ => return Err(format!("hook input for session {session} has no transcript_path").into()),
+    };
+    let bytes = fs::read(path).map_err(|err| format!("{}: {err}", path.display()))?;
+    let text = String::from_utf8_lossy(&bytes);
+    if !codex::is_rollout(&text) {
+        return Err(format!("{} is not a Codex session", path.display()).into());
+    }
+    let mut versions = version::Versions::in_repo_of(Path::new(env!("CARGO_MANIFEST_DIR")));
+    let calls = codex_calls(path, &text, &mut versions);
+    store::upsert(&mut open_db(db)?, &calls, PARSER_VERSION)?;
+    Ok(())
+}
+
+/// Adds or removes the SessionEnd hook running `command` in `<codex home>/hooks.json`. An existing
+/// file is copied to `hooks.json.bak-<nanoseconds>` before it changes; one it cannot read as hooks
+/// is an error and stays as it is.
+fn codex_hooks(
+    codex_home: &Path,
+    install: bool,
+    command: &str,
+    dry_run: bool,
+) -> Result<(), Box<dyn Error>> {
+    if !codex_home.is_dir() {
+        println!("no Codex at {}, hook skipped", codex_home.display());
+        return Ok(());
+    }
+    let file = codex_home.join("hooks.json");
+    let untouched = |why: String| format!("{} {why}, left untouched", file.display());
+    let original = match fs::read_to_string(&file) {
+        Ok(text) => Some(text),
+        Err(err) if err.kind() == io::ErrorKind::NotFound => None,
+        Err(err) => return Err(untouched(err.to_string()).into()),
+    };
+    let mut config = match &original {
+        Some(text) => serde_json::from_str(text)
+            .map_err(|err| untouched(format!("is not valid JSON ({err})")))?,
+        None => serde_json::json!({}),
+    };
+    let changed = if install {
+        codex_hooks::add(&mut config, command)
+    } else {
+        codex_hooks::remove(&mut config, command)
+    }
+    .map_err(untouched)?;
+    let (done, would, unchanged) = if install {
+        (
+            "registered the Codex SessionEnd hook in",
+            "would register the Codex SessionEnd hook in",
+            "Codex SessionEnd hook already registered in",
+        )
+    } else {
+        (
+            "removed the Codex SessionEnd hook from",
+            "would remove the Codex SessionEnd hook from",
+            "Codex SessionEnd hook not registered in",
+        )
+    };
+    if !changed {
+        println!("{unchanged} {}", file.display());
+        return Ok(());
+    }
+    if dry_run {
+        println!("{would} {}", file.display());
+        return Ok(());
+    }
+    if original.is_some() {
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_nanos();
+        let backup = codex_home.join(format!("hooks.json.bak-{stamp}"));
+        fs::copy(&file, &backup)?;
+        println!("backed up {} to {}", file.display(), backup.display());
+    }
+    // Written beside the real file and renamed onto it, so Codex never reads a half-written file
+    // and a symlinked hooks.json keeps its link and its mode.
+    let target = fs::canonicalize(&file).unwrap_or_else(|_| file.clone());
+    let new = target.with_extension("json.new");
+    fs::write(&new, serde_json::to_string_pretty(&config)? + "\n")?;
+    if original.is_some() {
+        fs::set_permissions(&new, fs::metadata(&target)?.permissions())?;
+    }
+    fs::rename(&new, &target)?;
+    println!("{done} {}", file.display());
     Ok(())
 }
 
@@ -464,11 +605,15 @@ fn subagent_files(session_dir: &Path) -> Vec<PathBuf> {
     files
 }
 
-/// `<projects>/<project>/<session>.jsonl`. Subagent transcripts sit one level deeper
-/// (`<session>/subagents/`) and are not sessions.
+/// `<projects>/<project>/<session>.jsonl`; none when the folder is missing. Subagent transcripts
+/// sit one level deeper (`<session>/subagents/`) and are not sessions.
 fn session_files(projects: &Path) -> io::Result<Vec<PathBuf>> {
     let mut files = Vec::new();
-    for project in fs::read_dir(projects)?.flatten() {
+    let projects = match fs::read_dir(projects) {
+        Err(err) if err.kind() == io::ErrorKind::NotFound => return Ok(files),
+        projects => projects?,
+    };
+    for project in projects.flatten() {
         let project = project.path();
         if !project.is_dir() {
             continue;

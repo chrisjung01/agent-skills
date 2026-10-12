@@ -9,8 +9,16 @@ const SESSION: &str = include_str!("fixtures/session.jsonl");
 const NESTING: &str = include_str!("fixtures/nesting.jsonl");
 const SUBAGENT: &str = include_str!("fixtures/nesting-subagent.jsonl");
 
+/// The binary with a `CODEX_HOME` beside `db` that does not exist, so a full scan never reads
+/// the real Codex sessions.
+fn binary(db: &Path) -> Command {
+    let mut command = Command::new(env!("CARGO_BIN_EXE_skill-metrics"));
+    command.env("CODEX_HOME", db.with_extension("no-codex-home"));
+    command
+}
+
 fn run(projects: &Path, db: &Path) {
-    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+    let output = binary(db)
         .arg("--projects-dir")
         .arg(projects)
         .arg("--db")
@@ -26,12 +34,7 @@ fn run(projects: &Path, db: &Path) {
 
 /// Runs the binary with `--db <db>` and `args`; returns exit success and stdout.
 fn cli(args: &[&str], db: &Path) -> (bool, String) {
-    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
-        .arg("--db")
-        .arg(db)
-        .args(args)
-        .output()
-        .unwrap();
+    let output = binary(db).arg("--db").arg(db).args(args).output().unwrap();
     (
         output.status.success(),
         String::from_utf8_lossy(&output.stdout).into_owned(),
@@ -40,12 +43,7 @@ fn cli(args: &[&str], db: &Path) -> (bool, String) {
 
 /// Runs the binary like `cli`, expects it to fail and returns stderr.
 fn cli_error(args: &[&str], db: &Path) -> String {
-    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
-        .arg("--db")
-        .arg(db)
-        .args(args)
-        .output()
-        .unwrap();
+    let output = binary(db).arg("--db").arg(db).args(args).output().unwrap();
     assert!(!output.status.success());
     String::from_utf8_lossy(&output.stderr).into_owned()
 }
@@ -119,7 +117,7 @@ fn reruns_add_no_rows_and_keep_rows_of_deleted_transcripts() {
             r.get(0)
         })
         .unwrap();
-    assert_eq!((version, parser), (10, 10));
+    assert_eq!((version, parser), (11, 10));
 }
 
 #[test]
@@ -646,7 +644,7 @@ fn a_database_newer_than_the_build_is_refused() {
         .unwrap()
         .pragma_update(None, "user_version", 99)
         .unwrap();
-    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+    let output = binary(&db)
         .args(["--projects-dir".as_ref(), projects.as_os_str()])
         .args(["--db".as_ref(), db.as_os_str()])
         .output()
@@ -843,7 +841,7 @@ fn open_lists_calls_without_status_and_status_sets_one_that_reruns_keep() {
     let u02 = all.lines().next().unwrap();
     assert_eq!(
         u02,
-        "offen\tu02\tcj-review-loop\ts1\t2026-10-01T10:01:00.000Z\t\
+        "offen\tu02\tcj-review-loop\ts1\t2026-10-01T10:01:00.000Z\tclaude-code\t\
          prompts=2 interrupts=1 denials=0 tool_errors=0 questions=0 own_word_answers=0"
     );
     // unslop's own call and the call it was nested in.
@@ -909,7 +907,7 @@ fn open_lists_calls_without_status_and_status_sets_one_that_reruns_keep() {
     assert_eq!(listed(&closed), ["u12", "n01"]);
     assert_eq!(
         closed.lines().next().unwrap(),
-        "verworfen\tu12\tcj-ci-triage\ts1\t2026-10-01T10:10:00.000Z\t--db was wrong"
+        "verworfen\tu12\tcj-ci-triage\ts1\t2026-10-01T10:10:00.000Z\tclaude-code\t--db was wrong"
     );
     assert_eq!(listed(&cli(&["closed", "unslop"], &db).1), ["n01"]);
 }
@@ -1178,7 +1176,7 @@ fn show_prints_user_texts_and_the_window_while_the_transcript_exists() {
     let (ok, out) = show();
     assert!(ok);
     let user_texts = "\
-cj-implement t01 session s5 2026-10-05T10:01:00.000Z to 2026-10-05T10:18:00.000Z
+cj-implement t01 session s5 (claude-code) 2026-10-05T10:01:00.000Z to 2026-10-05T10:18:00.000Z
 status: beobachtet, asked for the token
 user texts:
   prompt: Use token [redacted] and [redacted] here, key [redacted].
@@ -2031,7 +2029,439 @@ fn a_codex_session_collected_again_or_resumed_updates_its_calls() {
     assert_eq!(
         stdout.lines().collect::<Vec<_>>(),
         [format!(
-            "beobachtet\tmsg_s1\tcj-implement\t{CODEX_ID}\t2026-10-12T10:01:00.000Z\tkein Signal"
+            "beobachtet\tmsg_s1\tcj-implement\t{CODEX_ID}\t2026-10-12T10:01:00.000Z\tcodex\tkein Signal"
         )]
     );
+}
+
+#[test]
+fn a_full_scan_collects_both_sources_and_keeps_claude_code_calls() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    let (projects, codex) = codex_session(dir.path(), CODEX);
+    let repo = Path::new(&projects).join("-home-x-repo");
+    fs::create_dir_all(&repo).unwrap();
+    fs::write(repo.join("s1.jsonl"), SESSION).unwrap();
+    let report = |name: &str| {
+        let out = dir.path().join(name);
+        assert!(cli(&["report", "--out", out.to_str().unwrap()], &db).0);
+        overview(&fs::read_to_string(out).unwrap())
+    };
+
+    // A store that holds only Claude Code calls, one of them with a status.
+    let no_codex = dir.path().join("no-codex");
+    fs::create_dir(&no_codex).unwrap();
+    let claude_only = ["--projects-dir", &projects, "--codex-dir"];
+    assert!(
+        cli(
+            &[&claude_only[..], &[no_codex.to_str().unwrap()]].concat(),
+            &db
+        )
+        .0
+    );
+    let claude_rows = rows(&db);
+    assert!(cli(&["status", "u02", "beobachtet", "kein Signal"], &db).0);
+    let before = report("before.html");
+
+    let both = ["--projects-dir", &projects, "--codex-dir", &codex];
+    assert!(cli(&both, &db).0);
+    assert!(cli(&both, &db).0);
+    let stored = rows(&db);
+    assert_eq!(stored.len(), claude_rows.len() + 2);
+    assert!(claude_rows.iter().all(|row| stored.contains(row)));
+    let conn = Connection::open(&db).unwrap();
+    let sources: Vec<(String, String)> = conn
+        .prepare("SELECT start_uuid, source FROM skill_calls ORDER BY start_uuid")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+        .unwrap()
+        .map(Result::unwrap)
+        .collect();
+    for (start_uuid, source) in &sources {
+        let expected = if start_uuid.starts_with("msg_") {
+            "codex"
+        } else {
+            "claude-code"
+        };
+        assert_eq!(source, expected, "{start_uuid}");
+    }
+
+    // The inspection commands name the source.
+    let (ok, stdout) = cli(&["closed"], &db);
+    assert!(ok);
+    assert_eq!(
+        stdout.lines().collect::<Vec<_>>(),
+        ["beobachtet\tu02\tcj-review-loop\ts1\t2026-10-01T10:01:00.000Z\tclaude-code\tkein Signal"]
+    );
+    let (ok, stdout) = cli(&["open"], &db);
+    assert!(ok);
+    let source_of = |start_uuid: &str| {
+        let line = stdout
+            .lines()
+            .find(|line| listed(line) == [start_uuid])
+            .unwrap();
+        line.split('\t').nth(5).unwrap().to_owned()
+    };
+    assert_eq!(
+        (source_of("msg_s2"), source_of("u12")),
+        ("codex".into(), "claude-code".into())
+    );
+    let (ok, stdout) = cli(&[&both[..], &["show", "msg_s2"]].concat(), &db);
+    assert!(ok);
+    assert!(stdout.starts_with(&format!(
+        "cj-review-loop msg_s2 session {CODEX_ID} (codex) "
+    )));
+
+    // cj-review-loop ran in both sources: the Codex call adds to calls, not to the rates Codex
+    // does not measure.
+    let skill = |overview: &[Vec<String>]| {
+        overview
+            .iter()
+            .find(|row| row[0] == "cj-review-loop")
+            .unwrap()
+            .clone()
+    };
+    let (before, after) = (skill(&before), skill(&report("after.html")));
+    assert_eq!(
+        after[1].parse::<i64>().unwrap(),
+        before[1].parse::<i64>().unwrap() + 1
+    );
+    // Denial, tool error, bare question and recommended answers.
+    assert_eq!(after[4..8], before[4..8]);
+
+    // A mistyped Codex folder is an error, not a scan without Codex.
+    let typo = dir.path().join("typo");
+    assert!(!cli(&[&claude_only[..], &[typo.to_str().unwrap()]].concat(), &db).0);
+}
+
+#[test]
+fn codex_rows_stored_before_the_source_column_are_labelled_codex() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    let (projects, codex) = codex_session(dir.path(), CODEX);
+    let repo = Path::new(&projects).join("-home-x-repo");
+    fs::create_dir_all(&repo).unwrap();
+    fs::write(repo.join("s1.jsonl"), SESSION).unwrap();
+    let both = ["--projects-dir", &projects, "--codex-dir", &codex];
+    assert!(cli(&both, &db).0);
+    // The database as `--session` left it before the source column; the rollout is gone since.
+    Connection::open(&db)
+        .unwrap()
+        .execute_batch(
+            "ALTER TABLE skill_calls DROP COLUMN source; PRAGMA user_version = 10;
+             UPDATE skill_calls SET parser_version = 10;",
+        )
+        .unwrap();
+    fs::remove_dir_all(&codex).unwrap();
+    fs::create_dir(&codex).unwrap();
+
+    assert!(cli(&both, &db).0);
+    let sources: Vec<(String, String)> = Connection::open(&db)
+        .unwrap()
+        .prepare("SELECT start_uuid, source FROM skill_calls ORDER BY start_uuid")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+        .unwrap()
+        .map(Result::unwrap)
+        .collect();
+    assert_eq!(sources.len(), 5);
+    for (start_uuid, source) in &sources {
+        let expected = if start_uuid.starts_with("msg_") {
+            "codex"
+        } else {
+            "claude-code"
+        };
+        assert_eq!(source, expected, "{start_uuid}");
+    }
+}
+
+/// Runs `codex-hook` with `payload` on stdin; returns exit success and stderr.
+fn codex_hook(payload: &str, db: &Path) -> (bool, String) {
+    use std::io::Write;
+    let mut child = binary(db)
+        .args(["--db".as_ref(), db.as_os_str()])
+        .arg("codex-hook")
+        .stdin(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(payload.as_bytes())
+        .unwrap();
+    let output = child.wait_with_output().unwrap();
+    (
+        output.status.success(),
+        String::from_utf8_lossy(&output.stderr).into_owned(),
+    )
+}
+
+/// The payload Codex sends its SessionEnd hook.
+fn session_end(transcript_path: serde_json::Value) -> String {
+    serde_json::json!({
+        "hook_event_name": "SessionEnd",
+        "session_id": CODEX_ID,
+        "transcript_path": transcript_path,
+        "cwd": "/home/x/repo",
+        "reason": "other",
+    })
+    .to_string()
+}
+
+#[test]
+fn the_codex_hook_and_a_full_scan_update_one_call_in_either_order() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    // The session ends while Codex still writes its last record.
+    let lines: Vec<&str> = CODEX.lines().collect();
+    let partial = format!("{}\n{}", lines[..21].join("\n"), &lines[21][..40]);
+    let (_, codex) = codex_session(dir.path(), &partial);
+    let rollout = rollout_in(Path::new(&codex));
+    let payload = session_end(rollout.to_str().unwrap().into());
+
+    let (ok, stderr) = codex_hook(&payload, &db);
+    assert!(ok, "{stderr}");
+    assert_eq!(rows(&db).len(), 1);
+    assert_eq!(rows(&db)[0].3, "2026-10-12T10:02:00.000Z");
+    assert!(cli(&["status", "msg_s1", "beobachtet", "kein Signal"], &db).0);
+
+    // Codex finished the record; a full scan without Claude Code transcripts takes it.
+    fs::write(&rollout, CODEX).unwrap();
+    let home = dir.path().join("home");
+    fs::create_dir(&home).unwrap();
+    let output = binary(&db)
+        .env("HOME", &home)
+        .args(["--db".as_ref(), db.as_os_str()])
+        .args(["--codex-dir", &codex])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let ended = |db: &Path| rows(db).into_iter().map(|r| (r.0, r.3)).collect::<Vec<_>>();
+    let full = vec![
+        ("msg_s1".to_owned(), "2026-10-12T10:03:20.100Z".to_owned()),
+        ("msg_s2".to_owned(), "2026-10-12T10:10:30.100Z".to_owned()),
+    ];
+    assert_eq!(ended(&db), full);
+
+    // The hook after the full scan changes nothing.
+    assert!(codex_hook(&payload, &db).0);
+    assert_eq!(ended(&db), full);
+    let (_, closed) = cli(&["closed"], &db);
+    assert!(closed.starts_with("beobachtet\tmsg_s1\t"), "{closed}");
+}
+
+#[test]
+fn the_codex_hook_reports_bad_input_and_keeps_stored_calls() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("metrics.sqlite");
+    let (projects, codex) = codex_session(dir.path(), CODEX);
+    assert!(cli(&["--projects-dir", &projects, "--codex-dir", &codex], &db).0);
+    assert!(cli(&["status", "msg_s1", "beobachtet", "kein Signal"], &db).0);
+    let stored = (rows(&db), cli(&["closed"], &db).1);
+    let claude_code = dir.path().join("s1.jsonl");
+    fs::write(&claude_code, SESSION).unwrap();
+
+    for (payload, diagnostic) in [
+        ("not json".to_owned(), "not JSON"),
+        ("{}".to_owned(), "no session_id"),
+        (
+            format!("{{\"session_id\":\"{CODEX_ID}\"}}"),
+            "no transcript_path",
+        ),
+        (
+            session_end(dir.path().join("gone.jsonl").to_str().unwrap().into()),
+            "gone.jsonl",
+        ),
+        (
+            session_end(claude_code.to_str().unwrap().into()),
+            "not a Codex session",
+        ),
+    ] {
+        let (ok, stderr) = codex_hook(&payload, &db);
+        assert!(!ok, "{payload}");
+        assert!(stderr.contains(diagnostic), "{payload}: {stderr}");
+        assert_eq!((rows(&db), cli(&["closed"], &db).1), stored, "{payload}");
+    }
+    // A session without a rollout has nothing to collect: a note, no failure.
+    let (ok, stderr) = codex_hook(&session_end(serde_json::Value::Null), &db);
+    assert!(ok && stderr.contains("no transcript"), "{stderr}");
+    assert_eq!((rows(&db), cli(&["closed"], &db).1), stored);
+}
+
+/// The one rollout under `codex`.
+fn rollout_in(codex: &Path) -> std::path::PathBuf {
+    let day = codex.join("2026/10/12");
+    let mut files: Vec<_> = fs::read_dir(day)
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .collect();
+    assert_eq!(files.len(), 1);
+    files.pop().unwrap()
+}
+
+const HOOK_COMMAND: &str = "bash \"/repo/skills/cj-whetstone/scripts/codex-session-end-hook.sh\"";
+
+/// Runs `codex-hooks <args>` against the Codex home `codex`; returns exit success, stdout and stderr.
+fn codex_hooks(codex: &Path, args: &[&str]) -> (bool, String, String) {
+    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+        .env("CODEX_HOME", codex)
+        .arg("codex-hooks")
+        .args(args)
+        .output()
+        .unwrap();
+    (
+        output.status.success(),
+        String::from_utf8_lossy(&output.stdout).into_owned(),
+        String::from_utf8_lossy(&output.stderr).into_owned(),
+    )
+}
+
+/// The backups `codex-hooks` wrote beside `hooks.json`, oldest first, with their content.
+fn hook_backups(codex: &Path) -> Vec<String> {
+    let mut files: Vec<_> = fs::read_dir(codex)
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.to_string_lossy().contains("hooks.json.bak-"))
+        .collect();
+    files.sort();
+    files
+        .iter()
+        .map(|p| fs::read_to_string(p).unwrap())
+        .collect()
+}
+
+#[test]
+fn installing_the_codex_hook_keeps_foreign_hooks_and_uninstall_removes_only_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let codex = dir.path();
+    let file = codex.join("hooks.json");
+    let foreign = r#"{"hooks": {
+      "SessionStart": [{"hooks": [{"type": "command", "command": "start.sh", "timeout": 10}]}],
+      "SessionEnd": [{"matcher": "x", "hooks": [{"type": "command", "command": "other.sh"}]}]
+    }, "extra": 1}"#;
+    fs::write(&file, foreign).unwrap();
+    let parsed = |text: &str| serde_json::from_str::<serde_json::Value>(text).unwrap();
+
+    let (ok, stdout, _) = codex_hooks(codex, &["install", HOOK_COMMAND, "--dry-run"]);
+    assert!(ok && stdout.contains("would register"), "{stdout}");
+    assert_eq!(fs::read_to_string(&file).unwrap(), foreign);
+    assert!(hook_backups(codex).is_empty());
+
+    let (ok, stdout, stderr) = codex_hooks(codex, &["install", HOOK_COMMAND]);
+    assert!(ok, "{stderr}");
+    assert!(stdout.contains("registered"), "{stdout}");
+    let installed = parsed(&fs::read_to_string(&file).unwrap());
+    let mut expected = parsed(foreign);
+    expected["hooks"]["SessionEnd"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!({"hooks": [{"type": "command", "command": HOOK_COMMAND}]}));
+    assert_eq!(installed, expected);
+    assert_eq!(hook_backups(codex), [foreign]);
+
+    // A second install changes nothing and backs up nothing.
+    let (ok, stdout, _) = codex_hooks(codex, &["install", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("already registered"), "{stdout}");
+    assert_eq!(parsed(&fs::read_to_string(&file).unwrap()), expected);
+    assert_eq!(hook_backups(codex).len(), 1);
+
+    let before = fs::read_to_string(&file).unwrap();
+    let (ok, stdout, _) = codex_hooks(codex, &["uninstall", HOOK_COMMAND, "--dry-run"]);
+    assert!(ok && stdout.contains("would remove"), "{stdout}");
+    assert_eq!(fs::read_to_string(&file).unwrap(), before);
+
+    let (ok, stdout, stderr) = codex_hooks(codex, &["uninstall", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("removed"), "{stdout}{stderr}");
+    assert_eq!(parsed(&fs::read_to_string(&file).unwrap()), parsed(foreign));
+    assert_eq!(hook_backups(codex).len(), 2);
+    assert_eq!(hook_backups(codex)[1], before);
+
+    let (ok, stdout, _) = codex_hooks(codex, &["uninstall", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("not registered"), "{stdout}");
+    assert_eq!(hook_backups(codex).len(), 2);
+
+    // Only codex-hooks knows --dry-run; elsewhere it must not run for real.
+    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+        .args(["report", "--dry-run", "--db"])
+        .arg(codex.join("metrics.sqlite"))
+        .output()
+        .unwrap();
+    assert!(String::from_utf8_lossy(&output.stderr).contains("only with codex-hooks"));
+    assert!(!codex.join("metrics.sqlite").exists());
+}
+
+#[test]
+fn the_codex_hook_goes_into_a_new_hooks_file_and_needs_a_codex_home() {
+    let dir = tempfile::tempdir().unwrap();
+    let missing = dir.path().join("no-codex");
+    let (ok, stdout, _) = codex_hooks(&missing, &["install", HOOK_COMMAND]);
+    assert!(ok && stdout.contains("no Codex"), "{stdout}");
+    assert!(!missing.exists());
+
+    let (ok, _, stderr) = codex_hooks(dir.path(), &["install", HOOK_COMMAND]);
+    assert!(ok, "{stderr}");
+    let written: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(dir.path().join("hooks.json")).unwrap()).unwrap();
+    assert_eq!(
+        written,
+        serde_json::json!({"hooks": {"SessionEnd": [{"hooks": [{"type": "command", "command": HOOK_COMMAND}]}]}})
+    );
+    assert!(hook_backups(dir.path()).is_empty());
+}
+
+#[test]
+fn a_symlinked_codex_hooks_file_stays_a_link_to_the_changed_file() {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = tempfile::tempdir().unwrap();
+    let dotfiles = dir.path().join("dotfiles.json");
+    fs::write(&dotfiles, r#"{"hooks": {}}"#).unwrap();
+    fs::set_permissions(&dotfiles, fs::Permissions::from_mode(0o600)).unwrap();
+    let codex = dir.path().join("codex");
+    fs::create_dir(&codex).unwrap();
+    std::os::unix::fs::symlink(&dotfiles, codex.join("hooks.json")).unwrap();
+
+    let (ok, _, stderr) = codex_hooks(&codex, &["install", HOOK_COMMAND]);
+    assert!(ok, "{stderr}");
+    assert!(fs::symlink_metadata(codex.join("hooks.json"))
+        .unwrap()
+        .file_type()
+        .is_symlink());
+    assert!(fs::read_to_string(&dotfiles)
+        .unwrap()
+        .contains("codex-session-end-hook"));
+    assert_eq!(
+        fs::metadata(&dotfiles).unwrap().permissions().mode() & 0o777,
+        0o600
+    );
+}
+
+#[test]
+fn a_malformed_codex_hooks_file_is_reported_and_left_untouched() {
+    for content in [
+        "{not json",
+        "[]",
+        r#"{"hooks": []}"#,
+        r#"{"hooks": {"SessionEnd": {}}}"#,
+        r#"{"hooks": null}"#,
+        r#"{"hooks": {"SessionEnd": null}}"#,
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("hooks.json");
+        fs::write(&file, content).unwrap();
+        for action in ["install", "uninstall"] {
+            let (ok, _, stderr) = codex_hooks(dir.path(), &[action, HOOK_COMMAND]);
+            assert!(!ok, "{action} {content}");
+            assert!(stderr.contains("left untouched"), "{content}: {stderr}");
+            assert_eq!(fs::read_to_string(&file).unwrap(), content);
+            assert!(hook_backups(dir.path()).is_empty());
+        }
+    }
 }

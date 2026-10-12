@@ -87,6 +87,10 @@ const MIGRATIONS: &[&str] = &[
     // wrote and that are never re-extracted.
     "ALTER TABLE skill_calls ADD COLUMN choice_questions INTEGER;
     ALTER TABLE skill_calls ADD COLUMN bare_questions INTEGER;",
+    // Before this migration only `--session` collected Codex rows: parser version 10 with no tool
+    // calls measured, which a Claude Code row of that version always has.
+    "ALTER TABLE skill_calls ADD COLUMN source TEXT NOT NULL DEFAULT 'claude-code';
+    UPDATE skill_calls SET source = 'codex' WHERE parser_version = 10 AND tool_calls IS NULL;",
 ];
 
 /// Whetstone's statuses; a call without one is `offen`.
@@ -163,9 +167,10 @@ pub fn upsert(
                  cache_write_tokens, active_ms, claude_code_version, entrypoint, cwd, git_branch,
                  tool_calls, tool_errors, interrupts, questions, recommended_answers,
                  own_word_answers, subagents, commits, pushes, prs_created, skill_version, status,
-                 finding, start_kind, choice_questions, bare_questions)
+                 finding, start_kind, choice_questions, bare_questions, source)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16,
-                 ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30, ?31, ?32)",
+                 ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30, ?31, ?32,
+                 ?33)",
             params![
                 call.start_uuid,
                 call.skill,
@@ -200,6 +205,7 @@ pub fn upsert(
                 call.start_kind,
                 tool(|m| m.choice_questions),
                 tool(|m| m.bare_questions),
+                call.source,
             ],
         )?;
         for (kind, count) in &call.metrics.denials {
@@ -257,6 +263,7 @@ pub struct OpenCall {
     pub skill: String,
     pub session_id: String,
     pub started_at: String,
+    pub source: String,
     /// `name=value` per counter; NULL counters (rows of an older parser) are left out.
     pub counters: Vec<(&'static str, i64)>,
 }
@@ -273,7 +280,7 @@ pub fn open_calls(conn: &Connection, skill: Option<&str>) -> rusqlite::Result<Ve
         "own_word_answers",
     ];
     let mut stmt = conn.prepare(
-        "SELECT start_uuid, skill, session_id, started_at, user_prompts, interrupts,
+        "SELECT start_uuid, skill, session_id, started_at, source, user_prompts, interrupts,
              -- An older parser wrote no denials: NULL, not 0.
              CASE WHEN tool_calls IS NOT NULL THEN
                  (SELECT coalesce(sum(count), 0) FROM denials d WHERE d.start_uuid = c.start_uuid)
@@ -288,7 +295,7 @@ pub fn open_calls(conn: &Connection, skill: Option<&str>) -> rusqlite::Result<Ve
     let calls = stmt.query_map([skill], |row| {
         let mut counters = Vec::new();
         for (index, name) in COUNTERS.into_iter().enumerate() {
-            if let Some(value) = row.get::<_, Option<i64>>(4 + index)? {
+            if let Some(value) = row.get::<_, Option<i64>>(5 + index)? {
                 counters.push((name, value));
             }
         }
@@ -297,6 +304,7 @@ pub fn open_calls(conn: &Connection, skill: Option<&str>) -> rusqlite::Result<Ve
             skill: row.get(1)?,
             session_id: row.get(2)?,
             started_at: row.get(3)?,
+            source: row.get(4)?,
             counters,
         })
     })?;
@@ -304,10 +312,10 @@ pub fn open_calls(conn: &Connection, skill: Option<&str>) -> rusqlite::Result<Ve
 }
 
 /// Calls with a status other than `offen`, by start time, as (status, start uuid, skill,
-/// session, start time, finding). `skill` filters as in `open_calls`.
-pub fn closed_calls(conn: &Connection, skill: Option<&str>) -> rusqlite::Result<Vec<[String; 6]>> {
+/// session, start time, source, finding). `skill` filters as in `open_calls`.
+pub fn closed_calls(conn: &Connection, skill: Option<&str>) -> rusqlite::Result<Vec<[String; 7]>> {
     let mut stmt = conn.prepare(
-        "SELECT status, start_uuid, skill, session_id, started_at, coalesce(finding, '')
+        "SELECT status, start_uuid, skill, session_id, started_at, source, coalesce(finding, '')
          FROM skill_calls
          WHERE status IS NOT NULL AND status != 'offen'
            AND (?1 IS NULL OR skill = ?1
@@ -322,6 +330,7 @@ pub fn closed_calls(conn: &Connection, skill: Option<&str>) -> rusqlite::Result<
             row.get(3)?,
             row.get(4)?,
             row.get(5)?,
+            row.get(6)?,
         ])
     })?;
     calls.collect()
@@ -333,6 +342,7 @@ pub struct ShownCall {
     pub session_id: String,
     pub started_at: String,
     pub ended_at: String,
+    pub source: String,
     pub status: Option<String>,
     pub finding: Option<String>,
     /// In window order.
@@ -350,8 +360,8 @@ pub struct StoredUserText {
 pub fn shown_call(conn: &Connection, start_uuid: &str) -> rusqlite::Result<Option<ShownCall>> {
     let Some(mut call) = conn
         .query_row(
-            "SELECT skill, session_id, started_at, ended_at, status, finding FROM skill_calls
-             WHERE start_uuid = ?1",
+            "SELECT skill, session_id, started_at, ended_at, source, status, finding
+             FROM skill_calls WHERE start_uuid = ?1",
             [start_uuid],
             |row| {
                 Ok(ShownCall {
@@ -359,8 +369,9 @@ pub fn shown_call(conn: &Connection, start_uuid: &str) -> rusqlite::Result<Optio
                     session_id: row.get(1)?,
                     started_at: row.get(2)?,
                     ended_at: row.get(3)?,
-                    status: row.get(4)?,
-                    finding: row.get(5)?,
+                    source: row.get(4)?,
+                    status: row.get(5)?,
+                    finding: row.get(6)?,
                     user_texts: Vec::new(),
                 })
             },
