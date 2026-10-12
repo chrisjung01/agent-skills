@@ -61,6 +61,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 bash scripts/validate.sh     # format of all skills (also runs in CI): invocation rules, no calls to user-invoked skills, copies of the scannable sentence match AGENTS.md; locally also no word from the gitignored .org-terms file in any tracked file
 git config core.hooksPath .githooks   # once per checkout: runs validate.sh, and cargo fmt --check when the crate changes, before each commit
 ./install.sh --dry-run       # shows what would be linked
+# trying install.sh under a temporary HOME: also set RUSTUP_HOME and CARGO_HOME to the real ones, or cargo fails
 # in skills/cj-whetstone/skill-metrics/ when the crate changes (also in CI):
 cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test --locked
 cargo test -- --ignored      # manual, not in CI, after a report layout change: writes target/tmp/report-check.html from sample data; look at it as the test's doc comment says
