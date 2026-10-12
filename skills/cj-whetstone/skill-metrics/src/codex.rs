@@ -83,7 +83,8 @@ impl Parser<'_> {
         let payload = &entry["payload"];
         let timestamp = entry["timestamp"].as_str().unwrap_or_default().to_owned();
         // Codex before 0.145 writes no message ids; the line's ordinal is stable while the file
-        // only grows.
+        // only grows. ponytail: a fork of such a session gets other keys for its parent's calls
+        // and the full scan stores them twice; no such fork was seen, skip its replay if one is.
         let ordinal = entry["ordinal"].as_u64().unwrap_or(line as u64);
         let uuid = payload["id"]
             .as_str()

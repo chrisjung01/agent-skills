@@ -1,6 +1,6 @@
-//! Reads every Claude Code session transcript and upserts one row per skill call into SQLite, and
-//! holds whetstone's status per skill call. `--session` also finds a Codex session (in
-//! `--codex-dir`, default `$CODEX_HOME/sessions` or `~/.codex/sessions`).
+//! Reads every Claude Code and Codex session transcript and upserts one row per skill call into
+//! SQLite, and holds whetstone's status per skill call. Codex sessions sit in `--codex-dir`,
+//! default `$CODEX_HOME/sessions` or `~/.codex/sessions`.
 //!
 //! Usage:
 //!   skill-metrics [extract] [--session <id>] [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>]
@@ -88,12 +88,18 @@ fn run() -> Result<(), Box<dyn Error>> {
         Some(path) => Ok(path),
         None => home().map(|home| home.join(".claude/projects")),
     };
-    let codex_dir = || match codex_dir {
-        Some(path) => Ok(path),
-        None => match env::var("CODEX_HOME") {
-            Ok(codex_home) => Ok(PathBuf::from(codex_home).join("sessions")),
-            Err(_) => home().map(|home| home.join(".codex/sessions")),
-        },
+    // A mistyped `--codex-dir` is an error; a missing default folder means no Codex.
+    let codex_dir = || -> Result<PathBuf, Box<dyn Error>> {
+        match codex_dir {
+            Some(path) if !path.is_dir() => {
+                Err(format!("no Codex sessions folder at {}", path.display()).into())
+            }
+            Some(path) => Ok(path),
+            None => match env::var("CODEX_HOME") {
+                Ok(codex_home) => Ok(PathBuf::from(codex_home).join("sessions")),
+                Err(_) => Ok(home()?.join(".codex/sessions")),
+            },
+        }
     };
     let positional: Vec<&str> = positional.iter().map(String::as_str).collect();
     match positional.as_slice() {
@@ -117,7 +123,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     }
 }
 
-/// One line per open call: status, start uuid, skill, session, start time, counters.
+/// One line per open call: status, start uuid, skill, session, start time, source, counters.
 fn open(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
     for call in store::open_calls(&existing_db(db)?, skill)? {
         let counters: Vec<String> = call
@@ -126,18 +132,20 @@ fn open(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
             .map(|(name, value)| format!("{name}={value}"))
             .collect();
         println!(
-            "offen\t{}\t{}\t{}\t{}\t{}",
+            "offen\t{}\t{}\t{}\t{}\t{}\t{}",
             call.start_uuid,
             call.skill,
             call.session_id,
             call.started_at,
+            call.source,
             counters.join(" ")
         );
     }
     Ok(())
 }
 
-/// One line per call with a status: status, start uuid, skill, session, start time, finding.
+/// One line per call with a status: status, start uuid, skill, session, start time, source,
+/// finding.
 fn closed(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
     for call in store::closed_calls(&existing_db(db)?, skill)? {
         println!("{}", call.join("\t"));
@@ -183,8 +191,8 @@ fn show(
     let call = store::shown_call(&existing_db(db)?, start_uuid)?
         .ok_or(format!("no skill call {start_uuid}"))?;
     println!(
-        "{} {start_uuid} session {} {} to {}",
-        call.skill, call.session_id, call.started_at, call.ended_at
+        "{} {start_uuid} session {} ({}) {} to {}",
+        call.skill, call.session_id, call.source, call.started_at, call.ended_at
     );
     if let Some(status) = &call.status {
         println!(
@@ -353,8 +361,8 @@ fn open_db(db: &Path) -> Result<rusqlite::Connection, Box<dyn Error>> {
     store::open(db)
 }
 
-/// Every Claude Code transcript, or with `session` only that one, a Codex session included; rows
-/// of other sessions stay.
+/// Every Claude Code and Codex transcript, or with `session` only that one; rows of other sessions
+/// stay.
 fn extract(
     projects: &Path,
     codex_dir: &Path,
@@ -362,10 +370,9 @@ fn extract(
     session: Option<&str>,
 ) -> Result<(), Box<dyn Error>> {
     let mut files = session_files(projects)?;
-    let mut codex_sessions = Vec::new();
+    let mut codex_sessions = codex_files(codex_dir);
     if let Some(session) = session {
         files.retain(|path| is_session(path, session));
-        codex_sessions = codex_files(codex_dir);
         codex_sessions.retain(|path| codex::session_id(path) == session);
         if files.is_empty() && codex_sessions.is_empty() {
             return Err(format!("no transcript for session {session}").into());

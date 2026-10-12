@@ -11,7 +11,12 @@ _Code_: `SkillCall`
 
 **Start kind**:
 How a skill call started: `slash` when the user typed the skill's slash command (or picked it with `$<skill>` in Codex), `model` when the model called the `Skill` tool outside any window whose loaded skill texts name the skill.
-_Avoid_: Trigger, Source
+_Avoid_: Trigger
+
+**Source**:
+The tool whose transcript a skill call came from: `claude-code` or `codex`.
+_Avoid_: Origin, Agent
+_Code_: `SkillCall::source`
 
 **Window**:
 The part of a session that belongs to a skill call: from its start until the next skill call, `/clear`, or the end of the session.
