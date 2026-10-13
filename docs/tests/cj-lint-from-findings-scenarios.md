@@ -44,3 +44,8 @@ Expected: the proof stops, the reply names the error, the finding is offered as 
   - D: the 12 other imports go unmentioned. "Change only what the findings name" keeps the loop off them, and nothing reports them.
   - F: `cj-retro` files a plain issue "enable `no-console`" without proving the rule fires.
   - G: the rep notes that "Red: repair first" pushes toward installing dependencies.
+- GREEN (2026-10-13, one rep per scenario, with the skill and the call lines): 7 of 7 reps met Expected.
+  - A and E: rung 2 `no-restricted-imports`, probe from `git show HEAD:`, restore checked. B: "nothing to mechanize", no question. C: rung 4, issue draft, no plugin code.
+  - The reps found six gaps, all fixed in the skill: a one-name rule counted as mechanical (B), a diff against `HEAD` carried earlier edits and `git status` missed a bad restore (E), the linter ran only after the config edit (G), the probe counted as a repo hit (A), two options on rung 4 clashed with the three-option rule (C), and `warn` blocks nothing when CI ignores warnings (F).
+  - Rerun after the fixes: D recommends fixing the 12 hits at `error` because CI ignores warnings. G stops at the first lint run, touches no file and offers issue or drop.
+- Verify in next real run: the next whetstone run checks cj-lint-from-findings calls for a probe left behind, a config not restored, or a rule proposed without its proof line.
