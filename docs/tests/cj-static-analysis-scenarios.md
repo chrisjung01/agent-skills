@@ -102,6 +102,68 @@ Results:
 
 AC-2 (documented rule without a linter) and the edge row "symbol orphaned before the diff" have no case of their own: in the grep repo runs both versions reported the `print` as a medium STANDARDS finding and gave no line for `legacy_round`, so those runs tell the versions apart for neither.
 
+## 11. A calling skill asks before a fix (AC-6, ticket #65)
+
+Fixture: index repo, the current index named in the prompt as the user's `code-index` fact. `cj-review-loop` step 2 assesses one finding: `apply_tax` crashes when `rate` is None. Runs on 2026-10-13, one per version.
+
+Expected: the callers answer comes from the code index and names `shopindex` with its indexed commit.
+
+Results:
+- before: missed expected. `grep` over the head found both callers; the index was not asked and no source was named.
+- after: met expected. `apply_tax: shop/checkout.py:2, :8, shop/invoice.py:1, :5 | code index shopindex @ df0d2eb`, the index answer plus the diff.
+
+## 12. A calling skill reads the affected code (AC-6, ticket #65)
+
+Fixture and runs as in case 11. `cj-implement` step 1 reads the code for ticket #21, which changes how `apply_tax` rounds.
+
+Expected: as in case 11.
+
+Results:
+- before: missed expected. `git grep` only; the agent noted the old text never asks for the code index.
+- after: met expected. The same answer line as case 11, the index found current against the merge base.
+
+## 13. Fix a review thread (AC-6, ticket #65)
+
+Fixture and runs as in case 11. `cj-address-pr-feedback` phase 2 fixes one thread classified as fix: `apply_tax` crashes when `rate` is None.
+
+Expected: as in case 11.
+
+Results:
+- before: missed expected. `grep` and `git grep` only; the agent noted phase 2 says grep and never names the index.
+- after: met expected. The index answer plus the diff, source `code index shopindex @ df0d2eb`, cross-checked with `git grep`.
+
+## 14. Read the code before grilling (AC-6, ticket #65)
+
+Fixture and runs as in case 11. `cj-grill-with-docs` step 1 reads the code for issue #21.
+
+Expected: as in case 11.
+
+Results:
+- before: missed expected. `grep` gave the callers; the agent ran the index on its own, called it stale and named no source.
+- after: met expected. The same answer line as case 11, the index found current against the merge base.
+
+## 15. Trace the callers of stack frames (AC-6, edge row index behind, ticket #65)
+
+Fixture: index repo. A pasted error-tracker issue: `TypeError` in `apply_tax` called from `invoice_total`, release `f7a203b`, the head. `cj-bug-triage` runs the code bullets of its error-tracker phase 2.
+
+Expected: callers at the release commit with a named source; an index on an older commit counts as unchecked and `grep` fills in.
+
+Results:
+- before: missed expected. The text asks for no callers; the agent searched with `git grep` on its own and never asked the index.
+- after: met expected. Base and head are the release; source `code index shopindex @ df0d2eb, not the base f7a203b, unchecked`; `invoice_total` has "no callers (grep, unchecked)" and an open question about an outside caller.
+
+## 16. Callers of a changed signature in a teammate's pull request (AC-6, ticket #65)
+
+Fixture: a copy of the index repo per run, the last commit as a teammate's pull request. `cj-review-teammate-pr` phase 2 only.
+
+Expected: the callers of `apply_tax`, whose signature the diff changes, with a named source; a worktree the review creates is removed.
+
+Results:
+- before: missed expected. `grep` on the head as "source of truth"; the agent asked the index on its own and set it aside as the base's view instead of adding the diff. No source line. Worktree removed.
+- after: met expected. Source `code index shopindex @ df0d2eb` plus the diff; `Lint: none, no lint command found`; one worktree for local checks, created and removed.
+
+A `cj-review-teammate-pr` run on the lint repo gave no finding for the blocked `print` in both versions: the old text already reached the LINT section through `cj-reviewing`, so that run tells the versions apart for nothing. A rerun on the final text, where phase 3 uses `cj-reviewing` for the severity scale only, took the `Lint:` lines from phase 2 and again gave no finding for the `print`. No case covers the worktree of a copy-only pull request.
+
 ## Not run: AC-7
 
 The scenario 5 fixture of `docs/tests/cj-reviewing-scenarios.md` is a real pull request outside this repo. AC-7 stays open until the acceptance of #62.
