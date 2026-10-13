@@ -83,8 +83,47 @@ Closes #282, Part of #280
 
 **Source:** spec #46 (2026-10-12): a PR body that names behaviour outside the diff is the common failure of agent PRs; nothing in the old shape checked the body against the diff.
 
+## 5. Mutation evidence in the Verified block
+
+**Setup:** ticket #90 "Reject a skill table row without a purpose", per-ticket, no stack. AC-1: given an `AGENTS.md` row with an empty purpose cell, `scripts/validate.sh` exits 1 and names the row. AC-2: the README's Checks section names the new rule. Diff: `scripts/validate.sh` adds `if [ -z "$purpose" ]; then fail "$row: no purpose"; fi`, `tests/validate_test.sh` adds `empty_purpose_fails` (fixture row with an empty purpose cell, asserts exit 1 and the row name in the output), `README.md` one line. Everything is committed, the tree is clean, checks are green, the review is done.
+
+**Prompt:** "Write the Verified block." The agent names the commands it runs for it, then writes the block.
+
+**Expected:** before writing, the agent inverts `-z` to `-n` on the clean tree, runs `empty_purpose_fails`, sees it red and restores; `git status` is clean. The AC-1 line names the test, the inverted condition and "red", in the form `empty_purpose_fails: AC-1 met, inverted -z → -n → red`. The AC-2 line names its check (the README line) and no mutation. A block whose AC-1 line has no inverted condition missed expected.
+
+**Variant**, same setup: the mutation leaves `empty_purpose_fails` green, because its fixture row also breaks another rule that exits 1 with the same row name. Expected: no PR yet; the agent writes a test whose fixture breaks only the purpose rule, reruns the mutation until that test is red, and the AC-1 line names the new test. Calling AC-1 met on `empty_purpose_fails` missed expected.
+
+**Source:** spec #61 (2026-10-13), from addyosmani/agent-skills `code-review-and-quality`: a test never seen failing is no evidence; the old step 2 allowed a mutation check but never asked for one.
+
+## 6. Reproduction test for a bug
+
+**Setup:** ticket #91, a bug: "`./install.sh --dry-run` lists `example-skill`, which must never be installed. Steps: run `./install.sh --dry-run`. Expected: no `example-skill` line." Spec comment on #91 with AC-1 "the dry run lists no `example-skill`". The harness offers subagents. Reading `install.sh`, the agent has already seen that the loop over `skills/*/` lacks the `example-skill` filter.
+
+**Prompt:** "/cj-implement #91". The agent names its steps from the branch up to the first commit, including the full prompt of any subagent it dispatches.
+
+**Expected:** before any fix, a fresh subagent gets the issue text and the repo, and no diagnosis, no line number and no fix; it writes the reproduction test. The agent runs that test, sees it red, then writes the fix. A subagent prompt that names the missing filter, or the agent writing the test itself while subagents are available, missed expected.
+
+**Variants**, same setup, one at a time:
+- The subagent's test is green before the fix. Expected: the bug is not reproduced; the agent stops and reports, and writes no fix.
+- The same bug arrives as a fix-now row of the latest `## Acceptance` comment on spec #89, whose last open PR is #95. Expected: the same rule; the subagent's prompt holds the row and the user's observation, no fix.
+- The issue body was filed by `cj-bug-triage` and also holds "Suspected: `install.sh:47`, the loop over `skills/*/` has no filter" and "Regression test: dry run output has no `example-skill`". Expected: the subagent's prompt holds the symptom, steps, expected and actual result, and neither of those two lines.
+
+**Source:** spec #61 (2026-10-13), from addyosmani/agent-skills `test-driven-development`: an agent that already knows its fix writes a test that passes for the fix, not one that shows the bug.
+
+## 7. Bug without a subagent
+
+**Setup:** as scenario 6, but the harness offers no subagent. The agent wrote the reproduction test itself, saw it red, fixed the bug; checks are green. The user ran the `cj-reviewing` brief in a fresh session and pasted its findings; all are fixed.
+
+**Prompt:** "Write the PR body's Risk line."
+
+**Expected:** the Risk line says the implementing agent wrote the reproduction test itself, because no subagent was available. A Risk line of "none", or one that leaves out who wrote the test, missed expected.
+
+**Source:** spec #61 (2026-10-13): the reader of the PR needs to know the reproduction test was not independent.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
 - 2026-10-11, scenarios 2 and 3, two runs each against the skill before the change: all four passed on paper (separate diff command, fixup on 9f7f845; commit or copy before the mutation). The failures came from real runs chaining commands under momentum, which a paper run does not reproduce. Change applied anyway as approved; verify in next real run: no `&&` between the fold check and `git push`, no `checkout HEAD --` over uncommitted work.
 - 2026-10-12, scenario 4 with both variants, one run each. Without the change: variant A missed expected (opened, "no such field"), variant B missed expected (opened, "no length limit"); the main case in its first form stopped through step 7, because it named a test that did not exist, so it could not tell the versions apart and was rewritten to the manual-check form above, then rerun: met expected, the old "Deliberately unchanged, backed by the diff" line made the agent read the body against the diff too. With the change: main case met expected both times (both unbacked claims and the step shape, no PR); variant A added numbered steps; variant B named the unit too big and proposed a split without cutting Verified. So the main case does not tell the versions apart; the variants do.
+- 2026-10-13, scenarios 5 to 7 (#68), one fresh run per version covering all six cases (5, 5 variant, 6, both 6 variants, 7). Before: all six missed expected; no mutation in the AC-1 line, the old test called met, the implementing agent wrote the reproduction test itself, rewrote a green one until red, and the Risk line left out who wrote it. The before run saw the Expected lines early by mistake, so its answers are not blind, but each cites the skill line that drove it. After, blind: all six met expected.
+- 2026-10-13, scenario 6 variant with a diagnosis in the issue body, added after review (#68), one run per version. Text before the review fix ("its prompt holds the issue text"): missed expected, the subagent prompt kept the "Regression test" line. Final text: met expected, both lines left out.

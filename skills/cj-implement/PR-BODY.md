@@ -8,8 +8,8 @@ Five blocks in this order. Each starts with its bold name on its first line (`**
 - **Why**: one or two sentences, with the links to the ticket and the spec comment. Merge danger lives in the spec, deviations are comments on its issue; both are reachable through these links, so neither is repeated here.
 - **What**: three to five bullets of changed behaviour in the user's terms. A UI change in a project that can take a screenshot: one before/after pair here.
 - **How to test**: one to five numbered steps, each one action with its expected result, that a person can run without reading the diff. Nothing to try by hand: the one command that shows the change instead.
-- **Verified**: one line per piece of evidence (test name, command with result, or manual check with its observation): the AC and edge-case rows it covers, met or not met; rows with the same evidence share a line. Then one line for the checks and one for the review outcome.
-- **Risk**: what is untested or could break, or "none".
+- **Verified**: one line per piece of evidence (test name, command with result, or manual check with its observation): the AC and edge-case rows it covers, met or not met, and for a test with a mutation check the inverted condition and its result (`test_x: AC-1 met, inverted <condition> → red`); rows with the same evidence share a line. Then one line for the checks and one for the review outcome.
+- **Risk**: what is untested or could break, or "none". A reproduction test the implementing agent wrote itself, because no subagent was available, is named here.
 - **Tickets** (`one-pr` only): a checklist, one line per ticket of this repo, checked when its commits are on the branch. It is the resume state for the next run.
 - **Links** (last): per-ticket: `Closes #<ticket>` and `Part of #<spec issue>`. `one-pr`: `Closes #<n>` for each done ticket of this repo, and `Part of #<spec issue>`. The spec's issue is closed by hand once every ticket is merged. Other repos: full reference (`owner/repo#n`).
 
