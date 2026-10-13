@@ -52,7 +52,7 @@ Run the `unslop` skill over the ledger and the final output; replies go through 
 ## Phase 2: fix
 
 - One commit per thread; threads with one root cause share one commit, said in the message body.
-- Fix the root cause: grep other callers before guarding one place, or the reviewer finds the sibling.
+- Fix the root cause: find the other callers before guarding one place, or the reviewer finds the sibling. Call the Skill tool with "cj-static-analysis" for them.
 - After every fix run the analyze command and the targeted tests (`commands`, minus the ones it lists to avoid). Red means the fix is not done.
 - A spec in the repo whose decision changed is updated in the same commit.
 

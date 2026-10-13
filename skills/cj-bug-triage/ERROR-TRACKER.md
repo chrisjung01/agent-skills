@@ -23,7 +23,7 @@ Only non-production environments (`error-tracker`): not a production bug; say so
 
 Code:
 
-- Map the stack frames to real files and read around them.
+- Map the stack frames to real files and read around them. Call the Skill tool with "cj-static-analysis" for the callers of the frames' symbols at the commit of the release the issue was first seen in (`releases`), else the checked-out one, to see every path into the failing frame. Remove a worktree it made once the trace is named.
 - Does the error travel through the app's own error-reporting path as a deliberately reported, handled state rather than a crash?
 - An expected API, auth or connectivity failure with a handled UI path and a visible error state is not a bug.
 - Fingerprinting: does the app or tracker group by a normalised message or custom fingerprint, merging unrelated causes into one issue?

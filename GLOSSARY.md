@@ -73,3 +73,11 @@ _Avoid_: Acceptance (the user's check of the whole spec)
 **Loosened check**:
 A change in a diff that makes an existing check verify less: a test skipped, or deleted while the code it tests stays, an assertion removed, a suppression comment added (`@ts-ignore`, `eslint-disable`), a threshold lowered, an error swallowed by an empty `catch`. A tightened check needs no comment; a loosened one is a finding unless the spec, a deviation comment or the commit message gives its reason.
 _Avoid_: Bar-lowering (metaphor), Suppression (one kind only), Weakened test (checks are not only tests)
+
+**Static analysis**:
+Answers about code taken from a tool instead of from reading it: who calls or imports a symbol, and which findings the project's linter already blocks in CI. Each answer names its source: a code index, the project's analyzer or `grep`. Which sources count as checked is defined in `cj-static-analysis`.
+_Avoid_: Linting (one source only), Code search (`grep` only)
+
+**Orphaned symbol**:
+A symbol a diff adds outside test code, or whose last caller outside tests it removes, that still exists afterwards and that nothing outside tests calls or imports afterwards. A symbol that existed before the diff without such a caller is not one. Reported as a low finding from a checked source, as a question from an unchecked one, unless the review already reports it as an unwired entry point.
+_Avoid_: Dead code (also covers code unused before the diff), Unused export (one kind only)

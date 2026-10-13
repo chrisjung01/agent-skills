@@ -45,17 +45,19 @@ Done when every criterion and every changed area has a status.
 
 ## Phase 2: read the code against the agreements
 
+Call the Skill tool with "cj-static-analysis" for the lint lines and the callers source at the PR's head. A violation it lists as blocking is no finding, because CI already stops it; with no linter, every agreement is judged by reading. Keep the worktree it made until the findings are written, then remove it.
+
 Check every agreement in `standards` against the diff, starting with the ones that need judgement rather than a linter (layer boundaries, dependency wiring, logic in the wrong layer, async guards, time zones, edits to generated files). For each, name the pattern that would break it, then search for it.
 
-Then what no lint catches: correctness, edge cases (empty list, no connection, wrong role), error and loading states kept through refactors, new string keys in every locale file, and downstream apps or variants: grep them for everything the diff renames or removes (`architecture`). One PR of a series ("PR 2 of 3"): read the siblings' descriptions so you do not flag what the next one delivers.
+Then what no lint catches: correctness, edge cases (empty list, no connection, wrong role), error and loading states kept through refactors, new string keys in every locale file, and downstream apps or variants (`architecture`): the callers of everything the diff renames or removes, from cj-static-analysis inside this repo and from `grep` in each one outside it. One PR of a series ("PR 2 of 3"): read the siblings' descriptions so you do not flag what the next one delivers.
 
-Local checks run when the diff changes code beyond copy or assets. Tell the user you are creating a detached worktree and give its absolute path (their working tree and branches stay untouched), run the analyze command and the targeted tests (`commands`, minus the ones it lists to avoid), then remove the worktree. Green CI does not replace this when the PR changes test infrastructure.
+Local checks run when the diff changes code beyond copy or assets. Use the worktree cj-static-analysis made; without one, tell the user you are creating a detached worktree and give its absolute path (their working tree and branches stay untouched). Run the analyze command and the targeted tests (`commands`, minus the ones it lists to avoid), then remove a worktree you created. Green CI does not replace this when the PR changes test infrastructure.
 
 Done when every agreement was checked and local checks ran or were skipped with the reason.
 
 ## Phase 3: findings and verdict
 
-Call the Skill tool with "cj-reviewing" for the severity scale. Sort findings into SPEC (phase 1), STANDARDS and CORRECTNESS (phase 2). An unticked relevant checklist item without a reason is medium. Low findings go into one batched comment, or none.
+Call the Skill tool with "cj-reviewing" for the severity scale only; the phase 2 lint and source lines stand in for its gather step. Sort findings into SPEC (phase 1), STANDARDS and CORRECTNESS (phase 2). An unticked relevant checklist item without a reason is medium. Low findings go into one batched comment, or none.
 
 Per finding: location, what goes wrong with the input that triggers it, suggestion. Check the trigger before writing it: follow the callers to where the effect shows, and read the repo's config before claiming anything about its setup. What you could not check is a question, not a finding. Location is `file:line`, the file that should contain something missing, or "PR body, checklist". A finding without a location is a hunch and stays out.
 

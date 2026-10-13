@@ -37,7 +37,7 @@ Done when the user has decided per finding.
    - legitimate: fix it, `attempts += 1`
    - wrong or not applicable: `rejected`, with a concrete reason from code or tests; when in doubt, fix
    - low: ledger only
-   Fix the root cause: grep the other callers before adding a guard in one place. Change only what the findings name.
+   Fix the root cause: find the other callers before adding a guard in one place. Call the Skill tool with "cj-static-analysis" for them. Change only what the findings name.
 3. **Check.** Run every check from setup. Red: repair first; a fix that breaks a check counts as another attempt.
 4. **Stop?**
    - done: no new and no `still_open` high or medium

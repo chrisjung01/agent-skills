@@ -28,6 +28,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 | `cj-filing-issues` | Find duplicates and dependencies, then create issues with good bodies and wire parent and blocked-by edges |
 | `cj-posting` | The one gate for anything others see or that changes shared state: draft, clean, show, ask, then act |
 | `cj-lint-from-findings` | Turn a mechanical review finding into a lint rule, pattern rule or grep check, proven to fire, placed where the user picks |
+| `cj-static-analysis` | Who calls a symbol, which symbols a diff orphans, which findings the linter already blocks; code index, then analyzer, then `grep`, each answer naming its source |
 | `cj-project-context` | Find project and organisation facts at runtime (commands, labels, channels, goals) instead of hard-coding them |
 | `example-skill` | Template for new skills, never installed |
 
