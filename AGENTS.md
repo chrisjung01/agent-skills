@@ -24,6 +24,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 | `cj-whetstone` | Improve a skill from the skill calls the whetstone metrics store, after reading their windows |
 | `cj-grilling` | Interview the user one question at a time until every decision is made; sharpen domain terms, write glossary and ADRs |
 | `cj-html-report` | Render a result as a visual page (cards, diagrams) next to the chat summary |
+| `cj-design-options` | Help the user make an architecture decision: forces from the code, two or three checked candidates, a recommendation with its flip condition; the user decides |
 | `cj-filing-issues` | Find duplicates and dependencies, then create issues with good bodies and wire parent and blocked-by edges |
 | `cj-posting` | The one gate for anything others see or that changes shared state: draft, clean, show, ask, then act |
 | `cj-lint-from-findings` | Turn a mechanical review finding into a lint rule, pattern rule or grep check, proven to fire, placed where the user picks |

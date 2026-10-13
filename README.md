@@ -45,6 +45,7 @@ This is a personal repo. The skills follow how I work and change when that chang
 | [`cj-review-loop`](skills/cj-review-loop/SKILL.md) | Your own branch needs a review: one pass, or rounds of review and fix until no high or medium findings remain. |
 | [`cj-review-teammate-pr`](skills/cj-review-teammate-pr/SKILL.md) | You review a colleague's PR against its issue and the team agreements. Drafts the comments, never approves for you. |
 | [`cj-address-pr-feedback`](skills/cj-address-pr-feedback/SKILL.md) | Your own PR has open review threads. Verifies each claim, shows a ledger before touching code, replies on every thread. |
+| [`cj-design-options`](skills/cj-design-options/SKILL.md) | An architecture decision is due: where code or data belongs, how parts talk, a technology with lock-in, a new abstraction. Finds the forces in your code, checks two or three candidates, explains them with change scenarios and recommends one; you decide. |
 | [`cj-filing-issues`](skills/cj-filing-issues/SKILL.md) | An issue is about to be created, or you want to know whether it already exists. Finds duplicates and dependencies, writes the body by kind, wires sub-issues and blocked-by. |
 
 **Building blocks** (called by the skills above; hidden from the `/` menu):
@@ -71,7 +72,7 @@ No skill contains facts about a specific organisation or repo. They ask `cj-proj
 
 Each skill that takes something from a source names the files and what it took in its own `CREDITS.md`.
 
-- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-teach` is copied unchanged apart from its name.
+- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-teach` is copied unchanged apart from its name. `cj-design-options` takes the deletion test, the one-adapter rule, the dependency categories and parallel candidate designs from `codebase-design`.
 - [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills): single checks and review rules.
 - [superpowers](https://github.com/obra/superpowers): testing a skill change with scenarios that fail before the edit and pass after it (`docs/tests/`), and the `writing-skills` method `cj-whetstone` uses for its edits.
 - [unslop](https://github.com/backnotprop/pstack/tree/main/skills/unslop) from pstack: the writing rules every text for humans goes through. Install it separately.
