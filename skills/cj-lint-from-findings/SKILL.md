@@ -13,7 +13,7 @@ Call the Skill tool with "cj-project-context" for: commands, standards, conventi
 ## Steps
 
 1. **Filter.** Keep a finding only when a check can spot it in the source text without knowing intent: a banned API or import, an import shape, a file in the wrong place, a fixed code pattern. Smells and judgement calls drop out; they belong in the standards file. So does a rule that would catch only this one instance (one banned name), not the class of mistake. Nothing left: say "nothing to mechanize" in one line and stop, without a question.
-2. **Inventory.** From `commands` and `standards`: the linters, their config files, the lint command, whether it fails on warnings, and the hook or CI step that runs it. Run the lint command once on one file: it does not run (missing dependencies, unknown command), so name the error, offer every finding as an issue, and never install dependencies to make it run. No linter: every finding starts at rung 3.
+2. **Inventory.** From `commands` and `standards`: the linters, their config files, the lint command, whether it fails on warnings, and the hook or CI step that runs it. Run the lint command once on one file: it does not run (missing dependencies, unknown command, a config that does not load), so name the error, offer every finding as an issue, and never install dependencies to make it run. No linter: every finding starts at rung 3.
 3. **Draft** on the first rung that holds:
    1. a rule the installed linter already has, enabled or configured
    2. a generic pattern rule of that linter (restricted imports, restricted syntax, banned API) with the finding's pattern
