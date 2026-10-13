@@ -52,3 +52,5 @@ Done when one stop condition holds and its report is shown.
 ## Hand-off
 
 Everything the user reads goes through the `unslop` skill. The changes stay uncommitted in the working tree unless the calling skill says otherwise; commit and push are the user's call. Call the Skill tool with "cj-posting" before any push.
+
+After the final report, pass the `fixed` findings with their id, location, title and problem to the lint skill, fix marked `uncommitted`: call the Skill tool with "cj-lint-from-findings". Skip it after an escalation report and in once mode.

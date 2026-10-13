@@ -54,6 +54,7 @@ This is a personal repo. The skills follow how I work and change when that chang
 | [`cj-grilling`](skills/cj-grilling/SKILL.md) | One question at a time, as a choice with the recommended option first; keeps the domain language precise and writes the glossary and ADRs. |
 | [`cj-reviewing`](skills/cj-reviewing/SKILL.md) | The reviewer brief (CORRECTNESS, STANDARDS, SPEC) and the one severity scale. |
 | [`cj-posting`](skills/cj-posting/SKILL.md) | The one gate for anything others see: draft, clean with `unslop`, show, ask, then act. |
+| [`cj-lint-from-findings`](skills/cj-lint-from-findings/SKILL.md) | A review found something a linter could catch: drafts the rule, proves it fires on the faulty code and stays quiet on the fix, then asks where it goes. |
 | [`cj-project-context`](skills/cj-project-context/SKILL.md) | Finds project and organisation facts at runtime instead of hard-coding them. |
 | [`cj-html-report`](skills/cj-html-report/SKILL.md) | Renders a result as a visual page next to the chat summary. |
 

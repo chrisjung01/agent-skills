@@ -16,7 +16,7 @@ Call the Skill tool with "cj-project-context" for: commands, standards.
 2. **Find candidates** in these categories, each only when the session shows it:
    - **Navigation**: the agent searched long for a file or fact. → a pointer in the agent docs.
    - **Automated checks**: a mistake a check could have caught, or a check that exists but is not wired into a pre-commit hook or CI. Read the repo's check commands and CI first; a repo without any guardrail is itself a finding.
-   - **Standards**: the reviewer missed something. A **mechanical** rule (banned API, import shape, file location, fixed pattern) becomes a lint rule, hook or CI job, never prose. A **judgement call** goes to the standards file the reviewer reads.
+   - **Standards**: the reviewer missed something. A **mechanical** rule (banned API, import shape, file location, fixed pattern) becomes a check, never prose; its change is "lint rule via cj-lint-from-findings". A **judgement call** goes to the standards file the reviewer reads.
    - **Steering files**: instructions in `AGENTS.md` or `CLAUDE.md` that changed nothing, or belong in standards or a check. Agent docs hold pointers, not rules.
    - **Tool economy**: expensive or repeated tool calls a script or a narrower command would replace.
    - **Information access**: a fact the agent needed and could not reach (logs, a read-only service, a missing facts entry).
@@ -41,6 +41,6 @@ Call the Skill tool with "cj-project-context" for: commands, standards.
 
    If the harness provides an available choice tool, use it for the question after showing the findings. If no choice tool is available, put the question and each answer option on separate lines.
 
-6. **Do what got a yes.** Small edits to agent docs or standards: on a branch with a draft PR, or a normal PR where `conventions` says the repo has no drafts; say which. A new check or a larger change: call the Skill tool with "cj-filing-issues" for an issue in that repo. Skill findings: name `/cj-whetstone <skill>` and quote the finding with its evidence (the moment in the session, the skill line) in the report, so whetstone finds it in this window; never edit a skill from here. Call the Skill tool with "cj-posting" before any outbound action; the yes from step 5 covers exactly the actions it named, and this skill carries it into `cj-filing-issues`.
+6. **Do what got a yes.** Small edits to agent docs or standards: on a branch with a draft PR, or a normal PR where `conventions` says the repo has no drafts; say which. A new check or a larger change: call the Skill tool with "cj-filing-issues" for an issue in that repo. A mechanical Standards finding: call the Skill tool with "cj-lint-from-findings" with the finding and the moment in the session; its question replaces the issue. Skill findings: name `/cj-whetstone <skill>` and quote the finding with its evidence (the moment in the session, the skill line) in the report, so whetstone finds it in this window; never edit a skill from here. Call the Skill tool with "cj-posting" before any outbound action; the yes from step 5 covers exactly the actions it named, and this skill carries it into `cj-filing-issues`.
 
 Done when every finding is done, filed, routed or declined by the user, and the report lists each with its link.
