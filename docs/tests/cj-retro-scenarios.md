@@ -115,3 +115,12 @@ A `cj-implement` session in an app repo (not the skills repo) produced four find
 
 **Expected with skill:** Two questions, one per turn: F1's first, then F4's on its own. F4's question offers only "hand to whetstone" (recommended) and "not at all", never direct PR or issue. No question covers both findings at once. On "hand to whetstone" the report quotes F4 with its evidence and names `/cj-whetstone cj-implement`.
 
+## Results for scenarios 7 to 10 (2026-10-13)
+
+- Baseline, scenario 7: missed expected; one question "which of these three", options all, pick per finding, none.
+- Baseline, scenario 8: missed expected; one PR from the singular "a draft PR", but commits "per repo convention"; one commit per finding missed.
+- Baseline, scenario 9: missed expected; issues filed, "with spec" left open, no `Next:` block and no grilling line.
+- Baseline, scenario 10: missed expected; the first question asked "which of these two" for both findings, with all, pick per finding and none.
+- With skill, first run: scenarios 7 to 10 met expected, but later turns lacked their finding's entry, and scenario 8 invented a `Next:` line.
+- With skill, final text: scenarios 7 to 10 met expected; scenario 8 ends without a `Next:` block, and later turns open with their finding's entry.
+- Left open: the choice tool hides the list written before it in some terminals (#21).
