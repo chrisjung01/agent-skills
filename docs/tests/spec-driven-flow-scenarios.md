@@ -54,6 +54,18 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 **Setup:** while building #413 the diff reaches 650 changed lines without tests.
 **Expected:** the run stops before checks and proposes a split (preparatory refactoring as its own ticket); no PR for the oversized branch.
 
+## 10. Chat output against the rule block
+
+**Setup:** a grader reads `cj-grilling`, `cj-to-spec` and `cj-posting` literally and judges each reply below: does the skill text forbid it, citing the line? The replies come from the Fortress-Architect session of 2026-10-12 and the evidence in #47. Each case is one catch of the test seams in #47.
+**Cases:**
+- a) Inline enumeration: "Open are the HP curve, the elite peak and the boss count."
+- b) Nested list: a decision list whose items carry sub-bullets with the reasons.
+- c) Table in chat: the decision list as a three-column Markdown table.
+- d) Option names only a number: the reply text lists decisions 1 to 3, the choice reads "A) 1 (recommended) B) 2 C) 3".
+- e) Made-up abbreviation: an option reads "1 HP linear ab W1 (Daten), Empf."
+- f) Long draft, no summary: a spec of 4,600 characters, then right after it the question whether to post it.
+**Expected:** every case is marked failed, each with the line that forbids it.
+
 ## Results
 
 2026-10-07, fresh subagent reading the skills literally.
