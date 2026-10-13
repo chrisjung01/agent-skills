@@ -3,7 +3,7 @@
 | Situation | Required reaction |
 | --- | --- |
 | No spec, issue looks clear, time pressure | Only a trivial change uses the issue as its spec. Everything else goes back to `/cj-to-spec`. |
-| No mode given, several tickets | Ask once with the two options. Never pick `one-pr` yourself. |
+| No mode given, several tickets | Ask once with the two options. Never pick `one-pr` yourself. Fix-now rows from acceptance: no question, the last PR's mode. |
 | A ticket grows past about 400 lines | Stop and propose a split. A big PR is the problem this skill avoids. |
 | Two blockers still open | The ticket waits. Never stack on a local merge of two branches. |
 | Stacked base was squash-merged | `rebase --onto` the default branch, `--force-with-lease` on this ticket's branch only. |
