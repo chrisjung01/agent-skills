@@ -24,7 +24,7 @@ Exact commands are in [COMMANDS.md](COMMANDS.md); read it before the first `gh` 
 
 ## Phase 0: find the PR and every thread
 
-1. The PR: number or URL from the user, else the PR of the current branch. None (typical on the main branch)? List the user's recent PRs, drafts included, and ask which one as a choice. Not the user's PR? Stop and point to cj-review-teammate-pr.
+1. The PR: number or URL from the user, else the PR of the current branch. None (typical on the main branch)? List the user's recent PRs, drafts included, and ask which one as a choice: the three most recent, then "another PR". Not the user's PR? Stop and point to cj-review-teammate-pr.
 2. Work in a worktree of the PR branch, never in the user's checkout: the one `git worktree list` shows for it, else a new one at the path from `conventions`. Tell the user once: `Worktree: <absolute path> (branch <branch>)`. Pull, fetch the base.
 3. Fetch threads (with resolved and outdated state) and review bodies.
 4. Ledger, one row per entry: `id, author, file:line, claim in one sentence, class (empty), status`.

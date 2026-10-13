@@ -26,7 +26,7 @@ Done when base, requirements, checks (or their absence) and the reviewer brief a
 
 1. Dispatch the reviewer.
 2. Show all findings unchanged, by section, with your one-line take per high and medium: agree, disagree with reason, or unsure.
-3. Ask one question as a choice: fix all high and medium, decide per finding (then one finding per question: fix or ignore), or switch to loop mode. Change and commit nothing before the answers.
+3. Ask one question as a choice: fix all high and medium, decide per finding (then one finding per question: fix, ignore, or something else), or switch to loop mode. Change and commit nothing before the answers.
 
 Done when the user has decided per finding.
 
