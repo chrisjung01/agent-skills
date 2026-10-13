@@ -32,6 +32,7 @@ This is a personal repo. The skills follow how I work and change when that chang
 | [`cj-implement`](skills/cj-implement/SKILL.md) | **Flow 4.** Implements the spec's tickets as small draft PRs, one per ticket, stacked while a blocker is unmerged: targeted tests, full checks once per PR, independent review, a PR body of five blocks in at most 15 lines with one Verified line per AC. `one-pr` for one PR per spec. Resumable after `/clear`. |
 | [`cj-retro`](skills/cj-retro/SKILL.md) | **Flow 5.** Turns a session's friction into checks, standards or agent-doc pointers in the worked-in repo; skill findings go to `cj-whetstone`. |
 | [`cj-whetstone`](skills/cj-whetstone/SKILL.md) | Improves a skill from the skill calls the whetstone metrics store, after reading their windows. |
+| [`cj-teach`](skills/cj-teach/SKILL.md) | Teaches a topic over several sessions: mission, sources, short HTML lessons with quizzes, reference sheets and learning records in the current directory. Copied from mattpocock/skills. |
 
 **Day to day** (the model picks them up from your words, or you type `/name`):
 
@@ -65,7 +66,7 @@ No skill contains facts about a specific organisation or repo. They ask `cj-proj
 
 ## Sources
 
-- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-to-spec`, `cj-to-tickets`, `cj-retro`, `cj-grilling`, `cj-reviewing` and `cj-html-report` are adapted from its skills; each of those folders has a `CREDITS.md`.
+- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-to-spec`, `cj-to-tickets`, `cj-retro`, `cj-grilling`, `cj-reviewing` and `cj-html-report` are adapted from its skills; each of those folders has a `CREDITS.md`. `cj-teach` is copied unchanged apart from its name, with a `CREDITS.md` as well.
 - [superpowers](https://github.com/obra/superpowers): testing a skill change with scenarios that fail before the edit and pass after it (`docs/tests/`), and the `writing-skills` method `cj-whetstone` uses for its edits.
 - [unslop](https://github.com/backnotprop/pstack/tree/main/skills/unslop) from pstack: the writing rules every text for humans goes through. Install it separately.
 - [Agent Skills specification](https://agentskills.io/specification): the folder format, one `SKILL.md` per skill with `name` and `description` in its frontmatter.

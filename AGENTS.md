@@ -13,6 +13,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 | `cj-to-tickets` | Flow 3: slice the spec into small vertical sub-issues with blocked-by edges |
 | `cj-implement` | Flow 4: one small reviewed draft PR per ticket, stacked while a blocker is open; `one-pr` mode for one PR per spec |
 | `cj-retro` | Flow 5: propose changes to the worked-in repo's environment after a session |
+| `cj-teach` | Teach a topic over several sessions in a workspace of lessons, references and learning records |
 | `cj-bug-triage` | Verdict and issue for an error-tracker issue or a human bug report |
 | `cj-review-loop` | Review your own branch: one pass, or fix in rounds until no high or medium findings remain |
 | `cj-reviewing` | The reviewer brief (CORRECTNESS, STANDARDS, SPEC) and the one severity scale every review uses |
