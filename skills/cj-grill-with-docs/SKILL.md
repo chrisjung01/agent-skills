@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Grill with docs
 
-Step 1 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-retro`. It ends in a shared understanding, not in code or a spec.
+Step 1 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. It ends in a shared understanding, not in code or a spec.
 
 1. **Input.** An issue reference: read the body, every comment, linked issues and the affected code. An idea without an issue: start from the user's words.
 2. **Challenged?** A `## Challenge` comment in the thread or a challenge result earlier in this session: its verdict and smaller lever are settled decisions; anything but "build" or "build differently" stops here. None: the challenge is optional. For a new feature or real effort, say in one line that `/cj-challenge <issue>` is recommended, then go on and put "Not challenged" in the decision list of step 5. A trivial fix or a refactor without behaviour change skips the line.

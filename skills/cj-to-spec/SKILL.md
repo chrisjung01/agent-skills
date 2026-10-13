@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # To spec
 
-Step 2 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-retro`. The spec is the one source the tickets, the implementation, the review and the PR point to. It says **what** and **why**, never **how** in file terms.
+Step 2 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. The spec is the one source the tickets, the implementation, the review and the PR point to. It says **what** and **why**, never **how** in file terms.
 
 Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracker, conventions.
 

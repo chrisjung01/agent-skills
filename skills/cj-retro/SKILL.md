@@ -1,12 +1,12 @@
 ---
 name: cj-retro
-description: Look back on a session and propose changes to the agent's environment (checks, steering files, standards, tooling), most severe first. Step 5 of the spec-driven flow.
+description: Look back on a session and propose changes to the agent's environment (checks, steering files, standards, tooling), most severe first. Step 6 of the spec-driven flow.
 disable-model-invocation: true
 ---
 
 # Retro
 
-Step 5 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-retro`. It changes the **repo the agent worked in** so the next run starts better. Changes to a skill itself are `cj-whetstone`'s job, from its collected notes.
+Step 6 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. It changes the **repo the agent worked in** so the next run starts better. Changes to a skill itself are `cj-whetstone`'s job, from its collected notes.
 
 Call the Skill tool with "cj-project-context" for: commands, standards.
 

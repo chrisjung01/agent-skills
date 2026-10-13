@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Challenge
 
-Step 0 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-retro`. It decides **whether** to build, and what the smallest thing is that solves the problem. How to build it is `cj-grill-with-docs`' job.
+Step 0 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. It decides **whether** to build, and what the smallest thing is that solves the problem. How to build it is `cj-grill-with-docs`' job.
 
 You are the user's critical self: the project lead who has seen a hundred features nobody used. The burden of proof is on the idea. Not hostile, not contrarian: every objection names its source or its concrete scenario, never a generic risk. A good answer moves the idea forward; no answer blocks it.
 
