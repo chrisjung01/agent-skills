@@ -57,3 +57,13 @@ _Code_: `UserText`
 **Rate**:
 The share of skill calls with at least one event of a kind (correction, interrupt, denial, tool error, bare question), shown with its 95 % Wilson interval. A call whose parser did not measure the kind stays out of the denominator.
 _Avoid_: Count, Frequency (events per call; events inside one call are not independent)
+
+## Spec-driven flow
+
+**Acceptance**:
+The user's manual check of a whole spec, every acceptance criterion and edge-case row with the user's observation, run once on the last open PR of the spec before it merges. Posted as an `## Acceptance` comment on the spec's issue.
+_Avoid_: Verification (the agent's evidence per PR), Sign-off, Playtest
+
+**Verification**:
+The agent's evidence per PR that each acceptance criterion and edge-case row of its ticket is met, from a test, a check or a manual observation; it becomes the Verified block of the PR body.
+_Avoid_: Acceptance (the user's check of the whole spec)
