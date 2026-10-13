@@ -12,7 +12,7 @@ Call the Skill tool with "cj-project-context" for: repos, commands, conventions,
 
 ## 1. Read and gate
 
-- Input: the spec's issue. Read it, its latest `## Spec` comment and every comment after it, its sub-issues (the tickets) and their state, and the latest `## Acceptance` comment if there is one.
+- Input: the spec's issue. Read it, its latest `## Spec` comment and every comment after it, its sub-issues (the tickets) and their state, the latest `## Acceptance` and `## Challenge` comments if there are any, and every `Deviation:` comment.
 - **The tickets** are the spec's sub-issues, or the spec's issue itself when it has none. A closed ticket is done.
 - **The open PRs of the spec** are the open PRs that close one of its tickets. Look them up in the spec's repo and every repo that holds a ticket: `gh pr list --repo <repo> --state open --json number,url,headRefName,headRefOid,closingIssuesReferences`.
 - Gate, first match wins:
@@ -37,7 +37,15 @@ Call the Skill tool with "cj-project-context" for: repos, commands, conventions,
 - **A row not met** gets a second question, a choice with two options: "Fix now" (built in the last PR through `cj-implement`) or "Follow-up" (a new issue, the last PR merges without it). With every PR merged, only "Follow-up" exists: say so and ask nothing.
 - Keep the results in the harness's task list, one entry per row, so a long run loses none.
 
-## 4. Post
+## 4. Records
+
+Only in a run with no fix-now row left: a fix through `cj-implement` can add deviations, and every run would otherwise record them again. A kill issue or deviation an earlier `## Acceptance` comment already records is carried over with its link, never filed or written twice.
+
+- **Kill issue.** The latest `## Challenge` comment on the spec's issue and its `**Kill criterion:**` line: signal, threshold, date. A date relative to launch counts from today; the body says so. Call the Skill tool with "cj-filing-issues" and run Find for it first; an open kill check for this spec it finds is reused, nothing filed. Else draft one issue for File with these presets: the spec's repo, kind task, title `Kill check: <spec title>`, a body with signal, threshold, due date and links to the spec's issue and the challenge comment, no parent, no blockers, and the board's date field set to the due date (`issue-tracker`; no such field: skip it). No challenge comment, or no kill criterion in it: draft nothing.
+- **Deviations.** Call the Skill tool with "cj-grilling" for the ADR test and the ADR and glossary formats; write nothing before the yes in step 5.3. Sort every `Deviation:` comment on the spec's issue, first match wins: hard to reverse, surprising without context and a real trade-off goes to an ADR; a new domain term goes to the glossary; everything else is only listed. Draft the ADR and glossary text in the repo's existing format; an ADR or term already on the target branch for that deviation is not written again. No glossary yet: the new file and the agent-doc pointer `cj-grilling` adds are part of the text shown.
+- **Writing them**, after the yes in step 5.3. The last PR open: in the worktree, `git status` clean (else ask before anything), `git checkout --detach <remote>/<last PR branch>`, which leaves the local merge of the default branch behind, write the files, commit as `conventions` says, `git push <remote> HEAD:<last PR branch>`. Every PR merged: the branch `<prefix>/<issue>-acceptance-records` (prefix from `conventions`, else `agent/`); it already exists from an earlier run: build on it and its open PR, and check there what is already written; else a new one from `<remote>/<default branch>`; commit, push, and a draft PR titled `Record decisions from acceptance of #<issue>`, its body naming the deviations and `Part of #<issue>`. A rejected push: stop and report, never force.
+
+## 5. Post
 
 1. **Follow-up drafts.** Call the Skill tool with "cj-filing-issues" and run Find for each follow-up; a duplicate it finds becomes that row's follow-up, and nothing is filed for it. Draft the rest for File with these presets: the spec's repo, kind bug, the spec's issue as related (a link in the body), no parent, no blockers. The follow-up is not a sub-issue of the spec.
 2. **The `## Acceptance` comment** on the spec's issue, in the language from `conventions`:
@@ -52,20 +60,29 @@ Call the Skill tool with "cj-project-context" for: repos, commands, conventions,
    | AC-1 | met | <the user's words> | |
    | AC-3 | not met | <the user's words> | fix now |
    | Edge: <input or state> | not met | <the user's words> | follow-up #<n> |
+
+   **Kill issue:** #<n>, due <date>
+   **Deviations:**
+   - <decision>: ADR `<path>`
+   - <decision>: glossary, <term>
+   - <decision>: listed
    ```
 
-   A row asked again and now met has an empty choice. A carried row keeps its result, observation and choice, followed by "(carried from <link to the comment where it was last asked>)", which replaces an earlier such marker. Every row of the spec appears, none twice.
-3. Show the follow-up drafts and the comment (follow-up numbers as placeholders) in one reply and ask through `cj-posting`: one question for filing the follow-ups (none left to file: no question), one for posting the comment. After the yes, run File in `cj-filing-issues`; this skill carries that yes, so File asks nothing. Fill in the numbers, then post. A follow-up the user declines: ask that row's choice again while the last PR is open; with every PR merged, the row stays not met with "no follow-up" as its choice. The comment never carries a placeholder. A rerun posts a new comment and never edits the earlier one.
+   A row asked again and now met has an empty choice. A carried row keeps its result, observation and choice, followed by "(carried from <link to the comment where it was last asked>)", which replaces an earlier such marker. Every row of the spec appears, none twice. The kill line otherwise reads "no challenge comment, nothing filed", "no kill criterion, nothing filed" or "declined, nothing filed"; the deviations line reads "none" without `Deviation:` comments. A run with fix-now rows left has neither line.
+3. Show the follow-up drafts, the kill issue draft, the ADR and glossary text with its commit message and, when every PR is merged, the records PR's title and body, and the comment (issue numbers as placeholders), all in one reply. Then ask through `cj-posting`, one question at a time; nothing to file or write skips its question:
+   1. Filing the follow-ups and the kill issue. A follow-up the user declines: ask that row's choice again while the last PR is open; with every PR merged, the row stays not met with "no follow-up" as its choice. A row that turns fix now: drop the kill issue draft, the records and both lines from the comment, and show the changed comment. Then run File for what got a yes; this skill carries that yes, so File asks nothing.
+   2. Writing and pushing the ADR and glossary text, with the records PR when every PR is merged. Write them as step 4 says; declined text leaves its deviation listed only.
+   3. Posting the comment. Fill in the numbers, then post. The comment never carries a placeholder. A rerun posts a new comment and never edits the earlier one.
 
-## 5. Report and next step
+## 6. Report and next step
 
-Report the comment's link, one line per row not met with its choice, and the follow-ups with links. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before a question, the reply text holds the full list with details, numbered; with nothing to list, one line of context is enough. A question has 3 options, a fourth only as a real alternative, the recommended one first; with only one real option, the proposal and something else. Each option names its item and says in full words what it means and its one consequence, so the user decides without scrolling up.
+Report the comment's link, one line per row not met with its choice, the follow-ups and the kill issue with links, and where the ADR and glossary text went. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before a question, the reply text holds the full list with details, numbered; with nothing to list, one line of context is enough. A question has 3 options, a fourth only as a real alternative, the recommended one first; with only one real option, the proposal and something else. Each option names its item and says in full words what it means and its one consequence, so the user decides without scrolling up.
 
 The next step:
 
 - Fix-now rows left: `/clear`, then `/cj-implement <issue>` to build them on the last PR, then `/cj-accept <issue>` again.
-- No fix-now row left: merge the last PR (when one is still open), close the spec's issue, then `/cj-retro`. Merging and closing are the user's; this skill does neither.
+- No fix-now row left: merge the last PR (when one is still open) and the records PR (when one was opened), close the spec's issue, then `/cj-retro`. Merging and closing are the user's; this skill does neither.
 
 Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command or action per line, each followed by ` · ` and its reason in a few words. A step that names a PR, issue or comment carries its full link, even when the link appears earlier in the reply. No table. Name the worktree with `git worktree remove <path>` as the last line once no fix-now row is left.
 
-Done when every row has a result, every failed row has its choice, the comment is posted or its decline reported, and the reply ends with the next step.
+Done when every row has a result, every failed row has its choice, the kill issue, the records and the comment are done after a yes or their decline reported, and the reply ends with the next step.

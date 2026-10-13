@@ -45,6 +45,36 @@ Shared setup: repo `acme/shop-client`, default branch `main`. Spec #412 "Push no
 **Prompt:** "/cj-accept #412"
 **Expected:** nothing filed for the muted row; its choice is "follow-up #440". Had Find found nothing and the user declined filing, the row's choice is asked again; the comment never holds `#<n>`.
 
+## 8. Kill criterion once every row is met
+
+**Setup:** as scenario 4, the rerun ends with every row met. #412 has a `## Challenge` comment whose kill criterion reads "Under 5 % of chat users open a push within 7 days; 2026-12-15". `issue-tracker` names a project board with a date field "Due".
+**Prompt:** "/cj-accept #412"
+**Expected:** one issue filed through `cj-filing-issues` after a yes, with the signal, the 5 % threshold and the due date 2026-12-15 in the body, #412 linked in its body, no parent, the board's "Due" field set to 2026-12-15; the Acceptance comment names it. Scenario 3's run, which has a fix-now row left, files no kill issue.
+
+## 9. No challenge comment, no deviations
+
+**Setup:** as scenario 8, but #412 has no `## Challenge` comment and no `Deviation:` comment.
+**Prompt:** "/cj-accept #412"
+**Expected:** no kill issue filed; the Acceptance comment says there is no challenge comment and nothing was filed, and its deviation line reads "none"; nothing is written to any branch.
+
+## 10. Deviations sorted
+
+**Setup:** as scenario 8. #412 holds three comments: "Deviation: push payloads go through the backend queue instead of direct FCM calls | the app has no server key | moving back means a new backend endpoint and a migration", "Deviation: the setting is called Quiet chat, not muted chat | the OS already uses Mute | rename later is one string", "Deviation: tap handler in `NotificationRouter`, not `ChatScreen` | one place for every push type | a move".
+**Prompt:** "/cj-accept #412"
+**Expected:** the queue becomes an ADR, Quiet chat a glossary term, the handler move is only listed. ADR and glossary text are shown before anything is written; after a yes they are committed on the last PR's branch and pushed to `#421`, without the local merge of `main`. The Acceptance comment lists all three with where each went.
+
+## 11. Deviation after every PR is merged
+
+**Setup:** as scenario 5, every row met. #412 holds the queue deviation from scenario 10 only.
+**Prompt:** "/cj-accept #412"
+**Expected:** the ADR text is shown first; after a yes it goes on a new branch from `origin/main` and into its own small draft PR that names #412; nothing is pushed to `main` or to a merged branch.
+
+## 12. Declined follow-up turns into fix now
+
+**Setup:** as scenario 8, but the rerun's muted row is asked again, still not met, and the user picks follow-up. On the filing question the user files the kill issue and declines the follow-up, then picks fix now for the muted row.
+**Prompt:** "/cj-accept #412"
+**Expected:** the muted row's choice is asked again before anything is filed; once it is fix now, no kill issue is filed, no ADR or glossary text is written, the changed comment without kill and deviation lines is shown before the posting question; next step `/cj-implement #412`.
+
 ## Results
 
 2026-10-13, fresh subagents reading the texts literally.
@@ -55,3 +85,4 @@ Shared setup: repo `acme/shop-client`, default branch `main`. Spec #412 "Push no
 - After the fix: scenarios 4 and 5 met expected.
 - Review rounds 1 and 2 (fresh reviewer): gate on ticket state and open PRs, follow-up Find before File with one carried yes, carried rows keep their observation, declined follow-ups, merge conflict named as next step. Scenario 7 added for the follow-up cases.
 - After the review fixes, all scenarios on the final text: 1 to 7 met expected.
+- 2026-10-13, kill issue and deviations (#55). Before: scenarios 8 to 11 missed expected; the text never read the challenge or `Deviation:` comments. After, first version: 1 to 11 met expected. Also found: a declined follow-up turned fix now after the records were written, the records PR had no yes, the kill body asked for a fact the criterion lacks. Review round 1: the kill issue could be filed before that row turned fix now, an interrupted run filed the kill issue twice, the records PR was not shown. Scenario 12 added; all fixed. After the fixes: 1 to 12 met expected, graded before two wording fixes in step 4 (Find loads `cj-filing-issues`, a new glossary is shown). Review round 2: a rerun after every PR merged would draft the records branch again; it is now reused.

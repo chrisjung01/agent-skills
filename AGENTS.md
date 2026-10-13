@@ -12,7 +12,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 | `cj-to-spec` | Flow 2: post the spec as a `## Spec` comment on the issue (or a new issue) |
 | `cj-to-tickets` | Flow 3: slice the spec into small vertical sub-issues with blocked-by edges |
 | `cj-implement` | Flow 4: one small reviewed draft PR per ticket, stacked while a blocker is open; `one-pr` mode for one PR per spec |
-| `cj-accept` | Flow 5: the user checks every AC and edge case of a spec by hand on its last open PR; posts an `## Acceptance` comment |
+| `cj-accept` | Flow 5: the user checks every AC and edge case of a spec by hand on its last open PR; posts an `## Acceptance` comment, files the kill-criterion issue, records deviations as ADR or glossary |
 | `cj-retro` | Flow 6: propose changes to the worked-in repo's environment after a session |
 | `cj-teach` | Teach a topic over several sessions in a workspace of lessons, references and learning records |
 | `cj-bug-triage` | Verdict and issue for an error-tracker issue or a human bug report |
