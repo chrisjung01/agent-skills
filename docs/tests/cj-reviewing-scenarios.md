@@ -49,3 +49,37 @@ Defect in 2 of 3 runs: the wiring bug reported twice, once in CORRECTNESS and on
 ## 7. Brief after the duplicate fix (GREEN, two mid-sized runs)
 
 Both runs: wiring high in CORRECTNESS, criteria lines `partial (F1)`, no SPEC finding of their own. The mid-sized runs still read standards thinly (one opened none, one skimmed headings and rated the ports break low), which confirms the Opus tier.
+
+## 8. Loosened check without a reason, N+1 query, tightened checks (#67)
+
+Fixture: a small Python shop repo with `AGENTS.md` and one commit "orders: totals per customer, drop legacy export". It adds `order_totals(db, customer_ids)`, which runs one `db.query` per id. It puts a bare `@pytest.mark.skip` on `test_refund_rejects_negative` while `refund()` keeps its guard. It deletes `legacy_export` together with its test, adds an assertion to another test and raises `fail_under` from 80 to 85. Issue #40: AC-1 `order_totals` returns totals per customer, AC-2 `legacy_export` is removed with its test, non-goal "changes to refunds". No reason for the skip anywhere. Runs on 2026-10-13, Opus tier, effort high.
+
+Expected: the skip is a high CORRECTNESS finding that names the Loosened check; the loop query is under CORRECTNESS; the deleted test, the added assertion and the raised threshold give no finding.
+
+Results:
+- old brief, one run: missed expected. The skip is medium, with no Loosened check named. The loop query is low under CORRECTNESS. The raised threshold is a medium SPEC finding and the added assertion a low one.
+- new brief, first wording, one run: met expected. Skip high with a LOOSENED line `no reason | F1`, loop query medium, no finding for the tightened checks or the deleted test.
+- new brief, final wording, one run: met expected, same shape.
+
+## 9. Loosened check with its reason in a deviation comment (#67)
+
+Fixture: scenario 8 plus the comment `Deviation: skip test_refund_rejects_negative for now | the refund rule moves to the payments service in #41, which rewrites this test | ...` on the issue. The old brief has no slot for it, so the comment rides in the Spec field, as `cj-implement` passed it before; the new brief gets it under Deviations.
+
+Expected: no finding for the skip, and one LOOSENED line naming the check and its reason.
+
+Results:
+- old brief, one run: missed expected. The skip is a low CORRECTNESS finding asking for a reason marker; nothing names the check and its reason as one line.
+- new brief, first wording, one run: the skip met expected, LOOSENED line with the reason and no finding. The raised threshold was still a low SPEC finding. Fixed in the brief: a tightened check is no finding "in any section".
+- new brief, final wording, one run: met expected. The report names the raised threshold and the added assertion as tightened, with no finding.
+
+## 10. List endpoint without pagination (#67)
+
+Fixture: a second repo with a route table in `shop/app.py`. The commit adds `GET /orders`, whose handler runs `SELECT id, total FROM orders ORDER BY id` with no limit and returns every row. Issue #60: AC-1 the route returns the orders as a list of `{id, total}`, sorted by id. Runs on 2026-10-13, Opus tier, effort high.
+
+Expected: the fetch without a limit is reported under CORRECTNESS.
+
+Results:
+- old brief, one run: missed expected. Its only finding is a low one about a test fake that ignores the SQL.
+- new brief, one run: met expected, a medium CORRECTNESS finding "List endpoint fetches every order with no pagination", with a cursor as suggestion.
+
+The loop query of scenario 8 does not tell the versions apart by section: the old brief also reports it under CORRECTNESS, only as low where the new one says medium. A variant with the query hidden in a helper outside the diff gave the same picture, low and medium, so it was dropped.

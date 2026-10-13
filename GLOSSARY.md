@@ -67,3 +67,9 @@ _Avoid_: Verification (the agent's evidence per PR), Sign-off, Playtest
 **Verification**:
 The agent's evidence per PR that each acceptance criterion and edge-case row of its ticket is met, from a test, a check or a manual observation; it becomes the Verified block of the PR body.
 _Avoid_: Acceptance (the user's check of the whole spec)
+
+## Review
+
+**Loosened check**:
+A change in a diff that makes an existing check verify less: a test skipped, or deleted while the code it tests stays, an assertion removed, a suppression comment added (`@ts-ignore`, `eslint-disable`), a threshold lowered, an error swallowed by an empty `catch`. A tightened check needs no comment; a loosened one is a finding unless the spec, a deviation comment or the commit message gives its reason.
+_Avoid_: Bar-lowering (metaphor), Suppression (one kind only), Weakened test (checks are not only tests)
