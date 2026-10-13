@@ -61,7 +61,7 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 - a) Inline enumeration: "Open are the HP curve, the elite peak and the boss count."
 - b) Nested list: a decision list whose items carry sub-bullets with the reasons.
 - c) Table in chat: the decision list as a three-column Markdown table.
-- d) Option names only a number: the reply text lists decisions 1 to 3, the choice reads "A) 1 (recommended) B) 2 C) 3".
+- d) Option names only a number: the reply text lists test seams 1 to 3, the confirmation question reads "A) confirm B) change seam 2".
 - e) Made-up abbreviation: an option reads "1 HP linear ab W1 (Daten), Empf."
 - f) Long draft, no summary: a spec of 4,600 characters, then right after it the question whether to post it.
 **Expected:** every case is marked failed, each with the line that forbids it.
