@@ -14,6 +14,7 @@ One brief for every review. A fresh reviewer gets the diff, the spec and the sta
 |---|---|
 | base and diff command | the caller (`git diff <base>...HEAD`, or the PR diff) |
 | spec with acceptance criteria verbatim | issue, spec file, plan part, PR description; none found: "none" |
+| deviation comments | the `Deviation:` comments on the spec's issue, verbatim; none: "none" |
 | standards | Call the Skill tool with "cj-project-context" for: standards. Pass the files and sections, not a summary, plus every guideline folder the repo's instructions point to, even when they name it only for some tasks |
 | checks already run | commands and results, if the caller has them |
 | ledger | previous findings and rejected ones with reasons, on a re-review |
@@ -24,7 +25,7 @@ Dispatch one subagent with the brief below, on the Opus tier with effort high wh
 
 The one scale every skill uses:
 
-- **high**: bug, crash, data loss, security hole, an acceptance criterion missing or built wrong, a standards break others will copy. Blocks the merge.
+- **high**: bug, crash, data loss, security hole, an acceptance criterion missing or built wrong, a standards break others will copy, a Loosened check without a stated reason. Blocks the merge.
 - **medium**: likely failure on an edge case, missing error handling, missing test for non-trivial logic, a criterion only partly met, a documented rule broken, behaviour that touches a stated non-goal, other scope creep with real cost.
 - **low**: naming, style, taste, a baseline smell without a concrete consequence.
 
@@ -35,16 +36,19 @@ You review a change. Read and report only; change no file.
 
 Repo: <path>
 Diff: <command>
-Commits: <git log --oneline <base>..HEAD>
+Commits: <git log <base>..HEAD>, full messages
 Spec: <path, URL or pasted criteria, or "none">
+Deviations: <`Deviation:` comments on the spec's issue, or "none">
 Standards: <files and sections to read, plus guideline folders to pick from by the layers the diff touches, or "none documented">
 Checks already run: <command -> result, or "none">
 
 Judge three sections, each on its own. Every defect is reported once, in the first section that owns it: a criterion missing or built wrong is SPEC; a bug the spec does not cover is CORRECTNESS; a broken rule or smell is STANDARDS. The SPEC criteria lines still list every criterion. A criterion that fails only because of a CORRECTNESS finding gets its line marked partial with that finding's id, and no SPEC finding of its own.
 
-CORRECTNESS: bugs, edge cases, error handling, security, data loss, races, contract breaks, missing tests for non-trivial logic.
+CORRECTNESS: bugs, edge cases, error handling, security, data loss, races, contract breaks, missing tests for non-trivial logic, performance (a query or request inside a loop over a list, unbounded fetching, a list endpoint without pagination), Loosened checks.
 
-STANDARDS: (a) every place the diff breaks a documented rule, citing file and rule; (b) baseline smells as judgement calls, dropped where a documented rule allows the pattern: mysterious name, duplicated code, feature envy, data clump, primitive obsession, repeated switch, shotgun surgery, speculative generality, middle man. Skip what a linter or the build already enforces.
+A Loosened check makes an existing check verify less: a test skipped or deleted while the code it tests stays, an assertion removed, a suppression comment added (`@ts-ignore`, `eslint-disable`), a threshold lowered, an error swallowed by an empty `catch`. A tightened check (a threshold raised, an assertion added) is no finding in any section. A Loosened check whose reason the spec, Deviations or a commit message gives is no finding either, only a LOOSENED line.
+
+STANDARDS: (a) every place the diff breaks a documented rule, citing file and rule; (b) baseline smells as judgement calls, dropped where a documented rule allows the pattern: mysterious name, duplicated code, feature envy, data clump, primitive obsession, repeated switch, shotgun surgery, speculative generality, middle man, complexity moved instead of reduced, silent fallback over an unclear invariant, conditional added to an unrelated flow. Skip what a linter or the build already enforces.
 
 READ: every standards file you opened. A listed file you did not open: "not read: <file>, <why>".
 
@@ -52,10 +56,12 @@ WIRING: one line per entry point the diff adds or changes (resolver, route, hand
 
 CHECKS: one line per test goal the standards require for the touched files: <goal> | ran | not run. A goal counts as ran only when "Checks already run" names it. Not run: a medium CORRECTNESS finding.
 
+LOOSENED: one line per Loosened check in the diff: <file:line> | <what it checks less> | <reason and where it stands> | <finding id when no reason is given>.
+
 SPEC: first one line per acceptance criterion: <n> | met | partial | missing | wrong | not verifiable | <code or test that shows it>. Then findings for every criterion not met, and for behaviour the spec did not ask for, quoting the non-goal it touches if one exists. No spec: "SPEC: no spec".
 
 Severity:
-- high: bug, crash, data loss, security hole, an acceptance criterion missing or built wrong, a standards break others will copy
+- high: bug, crash, data loss, security hole, an acceptance criterion missing or built wrong, a standards break others will copy, a Loosened check without a stated reason
 - medium: likely failure on an edge case, missing error handling, missing test for non-trivial logic, a criterion only partly met, a documented rule broken, behaviour that touches a stated non-goal, other scope creep with real cost
 - low: naming, style, taste, a baseline smell without a concrete consequence
 
@@ -76,6 +82,9 @@ WIRING:
 
 CHECKS:
 <goal lines>
+
+LOOSENED:
+<loosened lines>
 
 CORRECTNESS:
 - id: F<n>
@@ -98,4 +107,4 @@ Report only what you can point at in the code or the spec.
 
 ## After the review
 
-Show the WIRING and CHECKS lines, then the three sections as they came, in that order, without reranking across them. End with one line: findings per section and the worst one in each. What happens next (fix, ask, post) is the caller's job.
+Show the WIRING, CHECKS and LOOSENED lines, then the three sections as they came, in that order, without reranking across them. End with one line: findings per section and the worst one in each. What happens next (fix, ask, post) is the caller's job.
