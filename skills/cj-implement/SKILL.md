@@ -28,7 +28,7 @@ Keep a TODO list with the harness's task tool: one entry per PR unit, each with 
 ## 1. Read and gate
 
 - Input: the spec's issue, or one of its tickets (then only that ticket).
-- Read the issue, its latest `## Spec` comment and every comment after it (deviations, answers, the latest `## Acceptance` comment), the sub-issues with their blocked-by edges and state, the applicable `AGENTS.md`, the glossary and the ADRs the spec names, and the affected code.
+- Read the issue, its latest `## Spec` comment and every comment after it (deviations, answers, the latest `## Acceptance` comment), the sub-issues with their blocked-by edges and state, the applicable `AGENTS.md`, the glossary and the ADRs the spec names, and the affected code. Call the Skill tool with "cj-static-analysis" for the callers of the symbols the change touches; each unit asks again in its worktree before Build.
 - **No spec comment.** A trivial change (typo, copy, a one-line fix whose expected behaviour the issue states) may use the issue as its spec: say so in one line and go on with its criteria as AC-1… Anything else: stop and name `/cj-grill-with-docs <issue>` and `/cj-to-spec <issue>`.
 - The spec has an open question, or a criterion you cannot verify: stop and ask. Code or docs answer facts; only product decisions go to the user.
 - No sub-issues (the spec fits one ticket): the spec's issue is the one ticket; both modes give one PR. Leave its title unchanged, including any existing `[Epic] ` prefix. The PR only `Closes #<issue>`, without `Part of`.

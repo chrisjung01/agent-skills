@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Step 1 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. It ends in a shared understanding, not in code or a spec.
 
-1. **Input.** An issue reference: read the body, every comment, linked issues and the affected code. An idea without an issue: start from the user's words.
+1. **Input.** An issue reference: read the body, every comment, linked issues and the affected code. Call the Skill tool with "cj-static-analysis" for the callers of the symbols the change touches. An idea without an issue: start from the user's words.
 2. **Challenged?** A `## Challenge` comment in the thread or a challenge result earlier in this session: its verdict and smaller lever are settled decisions; anything but "build" or "build differently" stops here. None: the challenge is optional. For a new feature or real effort, say in one line that `/cj-challenge <issue>` is recommended, then go on and put "Not challenged" in the decision list of step 5. A trivial fix or a refactor without behaviour change skips the line.
 3. **Grill.** Call the Skill tool with "cj-grilling". Facts come from code, docs and tools; only decisions go to the user.
 4. **Questions only the issue author can answer** (product intent, a business rule nobody in the session owns): collect them into one comment on the issue, numbered, each with a proposed answer. Call the Skill tool with "cj-posting" before posting it. Stop there. When the answers arrive (even days later), the user starts `/cj-grill-with-docs <issue>` again: it reads the answers from the thread as settled decisions and grills only what is still open.
