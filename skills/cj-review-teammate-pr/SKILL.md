@@ -57,7 +57,7 @@ Done when every agreement was checked and local checks ran or were skipped with 
 
 ## Phase 3: findings and verdict
 
-Call the Skill tool with "cj-reviewing" for the severity scale. Sort findings into SPEC (phase 1), STANDARDS and CORRECTNESS (phase 2). An unticked relevant checklist item without a reason is medium. Low findings go into one batched comment, or none.
+Call the Skill tool with "cj-reviewing" for the severity scale only; the phase 2 lint and source lines stand in for its gather step. Sort findings into SPEC (phase 1), STANDARDS and CORRECTNESS (phase 2). An unticked relevant checklist item without a reason is medium. Low findings go into one batched comment, or none.
 
 Per finding: location, what goes wrong with the input that triggers it, suggestion. Check the trigger before writing it: follow the callers to where the effect shows, and read the repo's config before claiming anything about its setup. What you could not check is a question, not a finding. Location is `file:line`, the file that should contain something missing, or "PR body, checklist". A finding without a location is a hunch and stays out.
 
