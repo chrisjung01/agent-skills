@@ -13,14 +13,16 @@ Interview the user until every decision the plan hangs on is made. Picture the p
 The **frontier** is every open decision whose prerequisites are already settled. Why the plan exists, what problem it solves, comes first unless it is already stated. From the frontier, ask the one decision that unblocks the most others. Ask exactly one question per turn, as a choice:
 
 ```
-**<title>**: <the question, one or two sentences of context; every PR, issue or doc an option rests on as a full URL with one line on what it did>
+**<title>**: one or two sentences of context
+1. <item>: <its details, written out; a PR, issue or doc it rests on as a full URL with one line on what it did>
 
-A) <option> (recommended): <one-line consequence>
-B) <option>: <one-line consequence>
-C) <option>: <one-line consequence>
+<the question>
+A) <item in full words> (recommended): <what it means>; <its one consequence>
+B) <item in full words>: <what it means>; <its one consequence>
+C) <item in full words>: <what it means>; <its one consequence>
 ```
 
-Two to four options, the recommended one first. Use the harness's choice tool where it offers one; the user can always answer in their own words. A question without real alternatives (a name, a number) gets your proposal as A and "something else" as B.
+The numbered list stands in the reply text before the question; the options repeat what the user needs, so nobody scrolls up while deciding. A question with nothing to list gets one line of context. Use the harness's choice tool where it offers one; the user can always answer in their own words. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before a question, the reply text holds the full list with details, numbered; with nothing to list, one line of context is enough. A question has 3 options, a fourth only as a real alternative, the recommended one first; with only one real option, the proposal and something else. Each option names its item and says in full words what it means and its one consequence, so the user decides without scrolling up.
 
 Then wait. Each answer settles part of the tree and may open new decisions; pick the next question from the updated frontier. Never put a second question in the same turn, not even as a follow-up line.
 
@@ -30,7 +32,7 @@ Anything the code, the docs or a tool can answer, look up yourself; dispatch a s
 
 ## Done when
 
-The frontier is empty and the user confirms the shared understanding. Give a summary of the decisions before anything acts on them. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines.
+The frontier is empty and the user confirms the shared understanding. Give a summary of the decisions before anything acts on them. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before a question, the reply text holds the full list with details, numbered; with nothing to list, one line of context is enough. A question has 3 options, a fourth only as a real alternative, the recommended one first; with only one real option, the proposal and something else. Each option names its item and says in full words what it means and its one consequence, so the user decides without scrolling up.
 
 ## Domain language
 

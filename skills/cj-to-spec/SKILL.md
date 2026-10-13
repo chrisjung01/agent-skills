@@ -13,19 +13,18 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 ## Steps
 
 1. **Synthesize, do not interview.** Work from the conversation and the code. Use the glossary's terms and respect the ADRs in the area. If this session did not grill (no decision list in the conversation), call the Skill tool with "cj-grilling" first; a spec built on guesses is the failure this flow exists to prevent.
-2. **Test seams.** Propose where the behaviour is tested: the highest public interface that observes it, existing seams before new ones, as few as possible. Per seam: what it catches, what it misses. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. Show the seams in the reply text, never as a prose paragraph and never only inside the question, numbered so the user can name one, in this shape (labels in the reply's language):
+2. **Test seams.** Propose where the behaviour is tested: the highest public interface that observes it, existing seams before new ones, as few as possible. Per seam: what it catches, what it misses. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before a question, the reply text holds the full list with details, numbered; with nothing to list, one line of context is enough. A question has 3 options, a fourth only as a real alternative, the recommended one first; with only one real option, the proposal and something else. Each option names its item and says in full words what it means and its one consequence, so the user decides without scrolling up. Show the seams in the reply text, never as a prose paragraph and never only inside the question, numbered so the user can name one, in this shape (labels in the reply's language):
 
    ```
    **Test seams**
 
    **1. <seam in a few words>** (<where: command, file or interface>)
-   - catches:
-     - <one failure per line>
-   - misses:
-     - <one blind spot per line>
+   - catches: <one failure>
+   - catches: <the next failure, one per line>
+   - misses: <one blind spot, one per line>
    ```
 
-   Then ask the user to confirm them as one question with a choice (confirm, change seam <n>), before the draft.
+   Then ask the user to confirm them as one question with a choice: confirm all seams, change one seam (named in full words), or drop one seam (named in full words), each with its consequence, before the draft.
 3. **Size.** One spec is one goal that ships on its own. Two goals that could ship separately: propose two specs, one per issue, and continue with the one the user picks first.
 4. **Draft** the spec in the shape of [SPEC.md](SPEC.md) and run its checks.
 5. **Show and post.** Show the full text. Call the Skill tool with "cj-posting":

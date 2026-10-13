@@ -54,6 +54,18 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 **Setup:** while building #413 the diff reaches 650 changed lines without tests.
 **Expected:** the run stops before checks and proposes a split (preparatory refactoring as its own ticket); no PR for the oversized branch.
 
+## 10. Chat output against the rule block
+
+**Setup:** a grader reads `cj-grilling`, `cj-to-spec` and `cj-posting` literally and judges each reply below: does the skill text forbid it, citing the line? The replies come from the Fortress-Architect session of 2026-10-12 and the evidence in #47. Each case is one catch of the test seams in #47.
+**Cases:**
+- a) Inline enumeration: "Open are the HP curve, the elite peak and the boss count."
+- b) Nested list: a decision list whose items carry sub-bullets with the reasons.
+- c) Table in chat: the decision list as a three-column Markdown table.
+- d) Option names only a number: the reply text lists test seams 1 to 3, the confirmation question reads "A) confirm B) change seam 2".
+- e) Made-up abbreviation: an option reads "1 HP linear ab W1 (Daten), Empf."
+- f) Long draft, no summary: a spec of 4,600 characters, then right after it the question whether to post it.
+**Expected:** every case is marked failed, each with the line that forbids it.
+
 ## Results
 
 2026-10-07, fresh subagent reading the skills literally.
@@ -62,3 +74,4 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 - Fixed: step 1 finds earlier runs, step 3 skips tickets checked in the PR, fixups only on unpushed commits, plain push only, a new base only as a merge; `parent body untouched` and `body shape` presets in `cj-filing-issues`; `Closes #<spec>` only from the PR that finishes the last open ticket; full ticket bodies before the go; `--branch-repo` for a second repo.
 - Run 2: scenarios 3, 4, 5 (first run and resume) pass. Its three remaining points (checkout of an existing branch, fixups on pushed commits, `--branch-repo`) were fixed afterwards.
 - 2026-10-07, per-ticket PRs: `cj-implement` now opens one draft PR per ticket (stacked while one blocker is open) and keeps one PR per spec as mode `one-pr`; the spec's issue is closed by hand, which replaces the `Closes #<spec>` rule above. Run 3: scenarios 3, 4, 5 (first run, resume), 9 pass; 5 (restack after squash merge) and 8 (`one-pr` readiness) failed and were fixed: restack by the `Stacked on #P` line and #P's head commit, and a blocker inside the same `one-pr` unit counts as done once on the branch.
+- 2026-10-13, scenario 10 (#47), fresh grader reading `cj-grilling`, `cj-to-spec`, `cj-posting` literally. Before the rule block: missed expected in a, b, c, e, f. Case d first named a grilling choice, which the old template's consequence slot half caught; rewritten as the seam question `cj-to-spec` prescribed, it missed expected before and met it after. With the block: met expected in all six; f rests on "longer than one screen", a judgement call. The run found that `cj-to-spec`'s seam shape was a nested list; the user chose a flat shape, one `catches:` or `misses:` line per case.

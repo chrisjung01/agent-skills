@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Checks every skill: SKILL.md exists, frontmatter has name + description, name == folder name,
 # the description matches the invocation kind, no skill calls a user-invoked one, no organisation term in any tracked file,
-# every copy of the scannable sentence matches the one in AGENTS.md, the PR body template holds its five blocks in order.
+# every copy of the scannable rule block matches the one in AGENTS.md and every skill that writes chat text carries it, the PR body template holds its five blocks in order.
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 errors=0
@@ -68,6 +68,13 @@ else
   (( rc > 1 )) && { echo "✗ scannable sentence scan failed (git grep exit $rc)"; errors=$((errors+1)); }
   hits="$(grep -vF -e "$sentence" <<<"$hits")"
   [[ -n "$hits" ]] && { echo "✗ scannable sentence drifted from AGENTS.md:"; cut -d: -f1,2 <<<"$hits"; errors=$((errors+1)); }
+  # A skill that asks a choice question, writes a Next: block or a chat summary carries the block (#47).
+  # cj-teach is an upstream copy kept unchanged (README), so it is exempt.
+  files="$(git grep --cached -liE 'as a choice|choice tool|Next:|in chat|reply text|chat summary|ask the user|question the user' -- 'skills/*/SKILL.md' ':!skills/cj-teach/SKILL.md')"; rc=$?
+  (( rc > 1 )) && { echo "✗ rule block coverage scan failed (git grep exit $rc)"; errors=$((errors+1)); }
+  for f in $files; do
+    git show ":$f" | grep -qF -e "$sentence" || { echo "✗ $f: writes chat text without the scannable rule block"; errors=$((errors+1)); }
+  done
 fi
 # PR body template: the five blocks, each a bold list item, present and in this order (#46).
 body=skills/cj-implement/PR-BODY.md

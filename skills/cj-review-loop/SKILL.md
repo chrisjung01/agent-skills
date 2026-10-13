@@ -26,7 +26,7 @@ Done when base, requirements, checks (or their absence) and the reviewer brief a
 
 1. Dispatch the reviewer.
 2. Show all findings unchanged, by section, with your one-line take per high and medium: agree, disagree with reason, or unsure.
-3. Ask one question as a choice: fix all high and medium, decide per finding (then one finding per question: fix or ignore), or switch to loop mode. Change and commit nothing before the answers.
+3. Ask one question as a choice: fix all high and medium, decide per finding (then one finding per question: fix, ignore, or something else), or switch to loop mode. Change and commit nothing before the answers.
 
 Done when the user has decided per finding.
 
@@ -45,7 +45,7 @@ Done when the user has decided per finding.
    - round limit: after 5 rounds, stop with everything still open
    Otherwise the next round.
 
-Report with the templates in [REPORT.md](REPORT.md): the escalation report on escalate, the final report otherwise. Write it scannable: one item per line, its core in a few words first; reason, source or path on an indented line below it, or left out when the user does not need it to decide; group under headings that name the topic in the reader's terms, not generic labels like Scope or Process; no item longer than two lines. Tables keep their shape.
+Report with the templates in [REPORT.md](REPORT.md): the escalation report on escalate, the final report otherwise. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before a question, the reply text holds the full list with details, numbered; with nothing to list, one line of context is enough. A question has 3 options, a fourth only as a real alternative, the recommended one first; with only one real option, the proposal and something else. Each option names its item and says in full words what it means and its one consequence, so the user decides without scrolling up. Tables keep their shape.
 
 Done when one stop condition holds and its report is shown.
 
