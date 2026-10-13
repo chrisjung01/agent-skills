@@ -38,6 +38,7 @@ A value from another project, an earlier session or general knowledge is not a s
 | `error-tracker` | organisation, projects, which environments count as production | facts file; else the error tracker's own org and project list |
 | `analytics` | the product analytics tool, how events are named in code, the filter for internal and test users; the business-data tool | `AGENTS.md`, the tracking code, facts file |
 | `product-docs` | where product decisions, goals (OKRs) and team agreements are documented, and the current goal period | facts file; else docs search |
+| `code-index` | a code index service the agent can query for callers and references, and how to read the commit it indexed | connected tools (a code search or navigation server), facts file |
 | `glossary` | domain terms, user roles and personas | `GLOSSARY.md`, `docs/agents/domain.md`, `AGENTS.md` |
 
 A skill may need a fact that is not in this table. Treat it the same way and name it plainly.

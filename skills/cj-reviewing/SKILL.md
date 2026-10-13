@@ -17,6 +17,7 @@ One brief for every review. A fresh reviewer gets the diff, the spec and the sta
 | deviation comments | the `Deviation:` comments on the spec's issue, verbatim; none: "none" |
 | standards | Call the Skill tool with "cj-project-context" for: standards. Pass the files and sections, not a summary, plus every guideline folder the repo's instructions point to, even when they name it only for some tasks |
 | checks already run | commands and results, if the caller has them |
+| lint and callers source | Call the Skill tool with "cj-static-analysis": it runs the lint command over the changed files and names the best source for callers. Pass its `Lint:` lines and its source line as they came, and its worktree as the repo when it made one. A lint run with an exit code also goes under checks already run |
 | ledger | previous findings and rejected ones with reasons, on a re-review |
 
 Dispatch one subagent with the brief below, on the Opus tier with effort high where the harness takes a model and an effort. A smaller model misses findings that only show outside the diff.
@@ -41,6 +42,8 @@ Spec: <path, URL or pasted criteria, or "none">
 Deviations: <`Deviation:` comments on the spec's issue, or "none">
 Standards: <files and sections to read, plus guideline folders to pick from by the layers the diff touches, or "none documented">
 Checks already run: <command -> result, or "none">
+Lint: <the `Lint:` lines from cj-static-analysis>
+Callers source: <the source line from cj-static-analysis, as it came>
 
 Judge three sections, each on its own. Every defect is reported once, in the first section that owns it: a criterion missing or built wrong is SPEC; a bug the spec does not cover is CORRECTNESS; a broken rule or smell is STANDARDS. The SPEC criteria lines still list every criterion. A criterion that fails only because of a CORRECTNESS finding gets its line marked partial with that finding's id, and no SPEC finding of its own.
 
@@ -48,15 +51,17 @@ CORRECTNESS: bugs, edge cases, error handling, security, data loss, races, contr
 
 A Loosened check makes an existing check verify less: a test skipped or deleted while the code it tests stays, an assertion removed, a suppression comment added (`@ts-ignore`, `eslint-disable`), a threshold lowered, an error swallowed by an empty `catch`. A tightened check (a threshold raised, an assertion added) is no finding in any section. A Loosened check whose reason the spec, Deviations or a commit message gives is no finding either, only a LOOSENED line.
 
-STANDARDS: (a) every place the diff breaks a documented rule, citing file and rule; (b) baseline smells as judgement calls, dropped where a documented rule allows the pattern: mysterious name, duplicated code, feature envy, data clump, primitive obsession, repeated switch, shotgun surgery, speculative generality, middle man, complexity moved instead of reduced, silent fallback over an unclear invariant, conditional added to an unrelated flow. Skip what a linter or the build already enforces.
+STANDARDS: (a) every place the diff breaks a documented rule, citing file and rule; (b) baseline smells as judgement calls, dropped where a documented rule allows the pattern: mysterious name, duplicated code, feature envy, data clump, primitive obsession, repeated switch, shotgun surgery, speculative generality, middle man, complexity moved instead of reduced, silent fallback over an unclear invariant, conditional added to an unrelated flow. Drop a finding that a Lint line already names as blocking (same file, line and rule); a violation the linter flags without blocking stays. Lint "none": judge every documented rule by reading, including those a linter could check. Skip what the build already enforces.
 
 READ: every standards file you opened. A listed file you did not open: "not read: <file>, <why>".
 
-WIRING: one line per entry point the diff adds or changes (resolver, route, handler, job, command, screen, public export): <entry point> | <file:line where the running app composes or registers it> | wired | missing. Find that place outside the diff, starting from the app's composition root. A test that calls the entry point's own module directly does not show wiring. Missing: a high CORRECTNESS finding.
+WIRING: one line per entry point the diff adds or changes, meaning what the composition root is meant to register (resolver, route, handler, job, command, screen): <entry point> | <file:line where the running app composes or registers it> | wired | missing. Find that place outside the diff, starting from the app's composition root. A test that calls the entry point's own module directly does not show wiring. Missing: a high CORRECTNESS finding. Any other symbol nothing uses goes to ORPHANED, and in a repo without a composition root, so does every symbol nothing uses. With a Callers source marked unchecked, missing is a finding only when you read the composition root and found no registration there; otherwise the symbol goes to ORPHANED.
 
 CHECKS: one line per test goal the standards require for the touched files: <goal> | ran | not run. A goal counts as ran only when "Checks already run" names it. Not run: a medium CORRECTNESS finding.
 
 LOOSENED: one line per Loosened check in the diff: <file:line> | <what it checks less> | <reason and where it stands> | <finding id when no reason is given>.
+
+ORPHANED: find the callers of every symbol the diff adds or changes, and of every symbol a removed line called or imported, using the Callers source. A code index has not seen the diff: take its callers, add those the diff adds, drop those it removes, and for an unchecked index fill in with `grep` at the head. An orphaned symbol is one the diff adds outside test code, or whose last caller outside tests it removes, that still exists at the head and that nothing outside tests calls or imports afterwards; one that existed at the base commit without such a caller is none. One line per orphaned symbol, none for any other symbol, "none" when there is no orphan: <symbol> | <file:line> | <source> | <finding id> or question: <what to confirm>. An entry point a WIRING line already reports missing cites that finding, under any source. Otherwise a source without "unchecked" makes it a low STANDARDS finding titled "Orphaned symbol" that names the source, and an unchecked source makes it a question, never a finding; under it, a symbol reached only through a string name, dependency injection or codegen also gets a question line. Every claim about callers in the report (none, only tests, all updated) names its source, and an unchecked one says "unchecked".
 
 SPEC: first one line per acceptance criterion: <n> | met | partial | missing | wrong | not verifiable | <code or test that shows it>. Then findings for every criterion not met, and for behaviour the spec did not ask for, quoting the non-goal it touches if one exists. No spec: "SPEC: no spec".
 
@@ -74,6 +79,9 @@ Answer in exactly this shape:
 PREVIOUS:
 - <id>: resolved | still_open, <one sentence why>
 
+LINT:
+<the Lint lines as passed>
+
 READ:
 - <file>
 
@@ -85,6 +93,9 @@ CHECKS:
 
 LOOSENED:
 <loosened lines>
+
+ORPHANED:
+<orphaned lines>
 
 CORRECTNESS:
 - id: F<n>
@@ -107,4 +118,4 @@ Report only what you can point at in the code or the spec.
 
 ## After the review
 
-Show the WIRING, CHECKS and LOOSENED lines, then the three sections as they came, in that order, without reranking across them. End with one line: findings per section and the worst one in each. What happens next (fix, ask, post) is the caller's job.
+Show the LINT, WIRING, CHECKS, LOOSENED and ORPHANED lines, then the three sections as they came, in that order, without reranking across them. End with one line: findings per section and the worst one in each. What happens next (fix, ask, post) is the caller's job. Remove a worktree cj-static-analysis made for the review.
