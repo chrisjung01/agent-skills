@@ -76,6 +76,11 @@ else
     git show ":$f" | grep -qF -e "$sentence" || { echo "✗ $f: writes chat text without the scannable rule block"; errors=$((errors+1)); }
   done
 fi
+# Sources: every upstream repo a CREDITS.md links is listed in the README's Sources. The lines there name only the
+# repo, so parallel branches that credit the same repo do not touch the same README line.
+for repo in $(git grep --cached -hoE 'https://github\.com/[^/)]+/[^/)]+' -- 'skills/*/CREDITS.md' | sort -u); do
+  git show :README.md | sed -n '/^## Sources/,/^## /p' | grep -qF "($repo)" || { echo "✗ README.md Sources: $repo is credited in a CREDITS.md but not listed"; errors=$((errors+1)); }
+done
 # PR body template: the five blocks, each a bold list item, present and in this order (#46).
 body=skills/cj-implement/PR-BODY.md
 want="Why,What,How to test,Verified,Risk"
