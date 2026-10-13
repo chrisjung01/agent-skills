@@ -69,6 +69,7 @@ No skill contains facts about a specific organisation or repo. They ask `cj-proj
 ## Sources
 
 - [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-to-spec`, `cj-to-tickets`, `cj-retro`, `cj-grilling`, `cj-reviewing` and `cj-html-report` are adapted from its skills; each of those folders has a `CREDITS.md`. `cj-teach` is copied unchanged apart from its name, with a `CREDITS.md` as well.
+- [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills): `cj-reviewing` takes Loosened checks, performance and three baseline smells from its `constraint-driven-development` and `code-review-and-quality`; its `CREDITS.md` names them.
 - [superpowers](https://github.com/obra/superpowers): testing a skill change with scenarios that fail before the edit and pass after it (`docs/tests/`), and the `writing-skills` method `cj-whetstone` uses for its edits.
 - [unslop](https://github.com/backnotprop/pstack/tree/main/skills/unslop) from pstack: the writing rules every text for humans goes through. Install it separately.
 - [Agent Skills specification](https://agentskills.io/specification): the folder format, one `SKILL.md` per skill with `name` and `description` in its frontmatter.
