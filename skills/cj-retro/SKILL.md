@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Step 6 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. It changes the **repo the agent worked in** so the next run starts better. Changes to a skill itself are `cj-whetstone`'s job, from its collected notes.
 
-Call the Skill tool with "cj-project-context" for: commands, standards.
+Call the Skill tool with "cj-project-context" for: commands, standards, conventions.
 
 ## Steps
 
@@ -37,10 +37,16 @@ Call the Skill tool with "cj-project-context" for: commands, standards.
    Keep a blank line between findings. Include a linked destination in the explanation only when it helps the user decide.
 
    More than three findings: also call the Skill tool with "cj-html-report" for one card per finding; the page adds to the list in chat.
-5. **Ask.** The turn that asks holds, in this order: the numbered list from step 4 as reply text, then the choice. Ask which to do, one question at a time, each as a choice: all, pick per finding (one finding per question), none. Each option names its findings in full words, with what it means and its one consequence, never by number alone.
+5. **Ask** one question per finding, one per turn, in rank order. The first turn that asks holds, in this order: the numbered list from step 4 as reply text, then the question for finding 1. Each later turn opens with its finding's entry from that list. Each question names its finding in full words and offers:
+   - **direct PR**: the change goes into the retro's one shared PR, as its own commit.
+   - **issue with spec**: an issue in that repo; the flow picks it up at grilling, so its open decisions get made before anyone builds.
+   - **not at all**: nothing happens; the report lists the finding as declined.
 
-   If the harness provides an available choice tool, use it for the question after showing the findings. If no choice tool is available, put the question and each answer option on separate lines.
+   The option you estimate fits comes first, marked recommended, and its description says why: a small edit with nothing left to decide fits a direct PR, a new check or a change that hides a decision fits an issue. A skill finding routed to `cj-whetstone` offers "hand to whetstone" (recommended) and "not at all"; a mechanical Standards finding offers "hand to cj-lint-from-findings" (recommended) and "not at all". A skill finding for a skill outside the skills repo gets no question; it is reported only.
 
-6. **Do what got a yes.** Small edits to agent docs or standards: on a branch with a draft PR, or a normal PR where `conventions` says the repo has no drafts; say which. A new check or a larger change: call the Skill tool with "cj-filing-issues" for an issue in that repo. A mechanical Standards finding: call the Skill tool with "cj-lint-from-findings" with the finding's id, its `file:line` from the session as location, title and problem, fix `none`, and the moment in the session; its question replaces the issue. A finding the lint skill drops falls back to an issue. Skill findings: name `/cj-whetstone <skill>` and quote the finding with its evidence (the moment in the session, the skill line) in the report, so whetstone finds it in this window; never edit a skill from here. Call the Skill tool with "cj-posting" before any outbound action; the yes from step 5 covers exactly the actions it named, and this skill carries it into `cj-filing-issues`.
+   If the harness provides an available choice tool, use it for each question after showing the findings. If no choice tool is available, put the question and each answer option on separate lines.
+
+6. **Do what got a yes.** Every finding answered direct PR: one branch from the default branch, in a new worktree at the path from `conventions` so the session's checkout stays as it is, with one draft PR, one commit per finding holding only that finding's files, or a normal PR where `conventions` says the repo has no drafts; say which. None answered direct PR: no branch, no PR. Issue with spec: call the Skill tool with "cj-filing-issues" for one issue per finding in that repo. Handed to cj-lint-from-findings: call the Skill tool with "cj-lint-from-findings" with the finding's id, its `file:line` from the session as location, title and problem, fix `none`, and the moment in the session; its question picks the check's route. A finding the lint skill drops falls back to an issue with spec. Handed to whetstone: name `/cj-whetstone <skill>` and quote the finding with its evidence (the moment in the session, the skill line) in the report, so whetstone finds it in this window; never edit a skill from here. Call the Skill tool with "cj-posting" before any outbound action; the answers from step 5 cover exactly the actions they named, and this skill carries them into `cj-filing-issues`.
+7. **Report** each finding with its route and link, declined ones included. End with the next step under a bold "Next:" (in the reply's language) as a numbered list, one command per line, each followed by ` · ` and its reason in a few words: `/cj-grill-with-docs <issue link>` for each issue filed in step 6, `/cj-whetstone <skill>` for each finding handed to whetstone. With neither, the report ends without a `Next:` block.
 
 Done when every finding is done, filed, routed or declined by the user, and the report lists each with its link.
