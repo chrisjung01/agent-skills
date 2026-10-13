@@ -10,7 +10,7 @@ Step 4 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → 
 
 ## Mode
 
-The argument after the issue picks the mode. No mode given and the spec has more than one ticket in this repo: ask once, before any branch, as a choice with two options where the harness offers one: "One PR per ticket (recommended)" and "One PR for the whole spec". One ticket: no question, both modes give one PR. State the mode in the first line of the reply.
+The argument after the issue picks the mode. No mode given and the spec has more than one ticket in this repo: ask once, before any branch, as a choice with three options where the harness offers one: "One PR per ticket (recommended)", "One PR for the whole spec" and "Stop before any branch", each with its consequence. One ticket: no question, both modes give one PR. State the mode in the first line of the reply.
 
 | | `per-ticket` (default) | `one-pr` (argument `one-pr`, "ein PR", "one PR") |
 |---|---|---|

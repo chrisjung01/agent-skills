@@ -34,7 +34,7 @@ Paper exercises built from a real run (October 2026). The agent under test descr
 
 **Baseline (real runs, sessions 4aadeed6, ab6be69d, dac7e3aa, a3d7de72, 70f8d77c):** After a last grep the agent called the choice tool at once; the findings stood only in the option descriptions ("1 AGENTS.md-Regel … 2 validate.sh-Check"), or only on the HTML page. In 70f8d77c, a run after the rule was added, the user rejected the question.
 
-**Expected with skill:** The turn that asks shows the numbered findings list as reply text first, then calls the choice tool; options name findings by number and a few words.
+**Expected with skill:** The turn that asks shows the numbered findings list as reply text first, then calls the choice tool; options name findings in full words with their one consequence.
 
 **Status:** verify in next real run. A paper exercise does not reproduce it: an agent describing its plan lists the findings, the failure shows only when the harness's choice tool is at hand.
 

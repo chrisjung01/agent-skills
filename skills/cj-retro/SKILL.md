@@ -37,7 +37,7 @@ Call the Skill tool with "cj-project-context" for: commands, standards.
    Keep a blank line between findings. Include a linked destination in the explanation only when it helps the user decide.
 
    More than three findings: also call the Skill tool with "cj-html-report" for one card per finding; the page adds to the list in chat.
-5. **Ask.** The turn that asks holds, in this order: the numbered list from step 4 as reply text, then the choice. Ask which to do, one question at a time, each as a choice: all, pick per finding (one finding per question), none. Option texts name findings by their number and a few words, never by number alone.
+5. **Ask.** The turn that asks holds, in this order: the numbered list from step 4 as reply text, then the choice. Ask which to do, one question at a time, each as a choice: all, pick per finding (one finding per question), none. Each option names its findings in full words, with what it means and its one consequence, never by number alone.
 
    If the harness provides an available choice tool, use it for the question after showing the findings. If no choice tool is available, put the question and each answer option on separate lines.
 

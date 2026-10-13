@@ -25,7 +25,7 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
      - <one blind spot per line>
    ```
 
-   Then ask the user to confirm them as one question with a choice (confirm, change seam <n>), before the draft.
+   Then ask the user to confirm them as one question with a choice: confirm all seams, change one seam (named in full words), or drop one seam (named in full words), each with its consequence, before the draft.
 3. **Size.** One spec is one goal that ships on its own. Two goals that could ship separately: propose two specs, one per issue, and continue with the one the user picks first.
 4. **Draft** the spec in the shape of [SPEC.md](SPEC.md) and run its checks.
 5. **Show and post.** Show the full text. Call the Skill tool with "cj-posting":
