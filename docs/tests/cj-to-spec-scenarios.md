@@ -69,3 +69,20 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Origin:** session fdb7349a: the user called the seam list hard to read twice and said "so sollte das immer aussehen" for the nested layout; agent-skills#44.
 - 2026-10-12, scenario 8 before the change: one run. Catches as three `fängt:` lines with up to three cases joined by semicolons. Fail.
 - 2026-10-12, scenario 8 after the change: one run. Bold heading with location in parentheses, catches and misses as sub-lists, one case per line (seven catches for seam A). Pass.
+
+## 9. A fresh reader tries to break the draft before it is shown
+
+**Setup:** repo `acme/booking-api`. Issue #140 "Cancel a booking up to 24 hours before start" is grilled. The decision list says: a customer can cancel until 24 hours before the booking starts; later the cancel button is gone and the API answers 409; a cancelled booking frees its slot; staff can cancel at any time. The draft so far has AC-1 "Given a booking that starts in 48 hours, when the customer cancels, then the booking is cancelled" and AC-2 "Given a booking that starts in 2 hours, when the customer cancels, then the API answers 409". Nothing in the conversation says what happens at exactly 24 hours or whether the slot is freed for staff cancellations too.
+**Prompt:** "/cj-to-spec #140" (draft only, do not post).
+**Expected:** before the draft is shown, a subagent got only the issue and the draft and looked for ACs a wrong implementation still passes (for example a 12-hour cutoff passes AC-1 and AC-2; a cancel that never frees the slot passes both). Below the draft, every finding has one line, worked in or rejected with its reason. The open boundary at exactly 24 hours goes to the user as a question, not into the draft as a guess. A draft shown without a reader's findings, or with the boundary decided silently, fails.
+**Origin:** agent-skills#61, adapted from addyosmani/agent-skills `doubt-driven-development`.
+
+## 10. Merge danger says whether old clients stay valid
+
+**Setup:** repo `acme/fit-backend`, the API behind a mobile app. Issue #310 "Workout type: replace `cardio` with `running` and `cycling`" is grilled. The decision list says: the `type` field of `GET /workouts` returns `running` or `cycling` instead of `cardio`; existing rows are migrated; the current app release already knows the new values. Nothing in the conversation mentions older app versions.
+**Prompt:** "/cj-to-spec #310" (draft only, do not post).
+**Expected:** the Merge danger line says whether old clients and old code still running during the rollout stay valid, here that app versions without `running` and `cycling` get a value they do not know. A Merge danger line that names door and blast radius but says nothing about old clients fails.
+**Origin:** agent-skills#61, adapted from addyosmani/agent-skills `deprecation-and-migration`.
+- 2026-10-13, scenarios 9 and 10 before the change: one run each. Scenario 9 dispatched no reader and found the 24-hour boundary through its own checks, with no finding lines. Scenario 10 wrote Merge danger as door and blast radius only, without old app versions. Fail.
+- 2026-10-13, scenarios 9 and 10 after the change: one run each. Scenario 9 sent only issue and draft to a reader, worked in ACs at 25 and 23 hours, and asked the 24-hour boundary and staff-slot findings as questions. Scenario 10's Merge danger named older app releases and old backend instances. Pass.
+- 2026-10-13, scenario 9 again on the text after the review fixes, three turns: the reader's prompt held task, issue and draft; two findings worked in, two asked through `cj-grilling` one per turn; checks rerun after the answers; four `<finding> → worked in` lines below the draft. Pass.

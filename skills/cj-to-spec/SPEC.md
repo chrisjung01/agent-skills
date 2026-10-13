@@ -25,7 +25,7 @@ The comment starts with the line `## Spec` so later steps find it. Headings in t
 
 **Recorded in repo.** Glossary terms and ADRs written during the grilling, by name, for `cj-implement` to commit. "none" when empty.
 
-**Merge danger.** One-way or two-way door, and the blast radius in one line.
+**Merge danger.** One-way or two-way door, the blast radius in one line, and whether old clients and old code still running during the rollout stay valid.
 ```
 
 ## Checks before showing
