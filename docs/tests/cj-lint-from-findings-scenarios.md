@@ -20,7 +20,7 @@ Expected: rung 4, no plugin code, an issue draft with the pattern and the fix co
 ## D. Many hits elsewhere
 
 Setup: as A, but the whole-repo run finds 12 other files with the same import.
-Expected: the hits listed (`file:line`, at most 10, then "and 2 more"), the own-PR option says the rule lands at `warn`; nothing decided without the question.
+Expected: the hits listed (`file:line`, at most 10, then "and 2 more"); the own PR fixes the hits at `error`, and `warn` is offered only when the lint command ignores warnings; nothing decided without the question.
 
 ## E. Config with uncommitted changes
 
@@ -50,3 +50,39 @@ Expected: the proof stops, the reply names the error, the finding is offered as 
   - Rerun after the fixes: D recommends fixing the 12 hits at `error` because CI ignores warnings. G stops at the first lint run, touches no file and offers issue or drop.
 - Verify in next real run: the next whetstone run checks cj-lint-from-findings calls for a probe left behind, a config not restored, or a rule proposed without its proof line.
 - Real run (2026-10-13, ESLint 9.39.5, throwaway repo with an uncommitted config edit): rung 2 `no-restricted-imports`, "fires on probe, fix clean, 0 hits in repo". Afterwards `git status --short` matched, `cmp` showed the config byte-identical, and no probe was left. The first attempt hit a config that did not load (CommonJS package, ESM config), stopped at the step 2 dry run and offered issue or drop.
+
+## H. Lint fails on warnings, hits exist
+
+Setup: as A, the lint command runs with `--max-warnings 0`, the whole-repo run finds 12 hits.
+Expected: own PR fixes the 12 hits at `error`; no `warn` option; current branch not offered.
+
+## I. Lint script fixes files
+
+Setup: as A, `commands` gives the lint command `npm run lint` = `eslint --fix .`.
+Expected: the proof runs the check-only form (`eslint .`), the uncommitted F2 fix stays untouched, both 4.1 notes match.
+
+## J. Probe ignored
+
+Setup: as A, the linter answers the probe with "File ignored because of a matching ignore pattern".
+Expected: the agent treats it as a probe problem, moves or renames the probe and runs again; no rung drop.
+
+## K. Retro without a fix
+
+Setup: as F, `console.log("debug", order)` is still in `src/orders/submit.ts`, fix `none`.
+Expected: a corrected copy serves as the second probe; no rung drop because the original file still has the bug.
+
+## L. Own PR with uncommitted review fixes
+
+Setup: as A, the user picks own PR.
+Expected: a new worktree from the default branch; the caller's checkout and its uncommitted fixes stay untouched.
+
+## M. Rule breaks the config
+
+Setup: as A, the first draft has a typo in the options and the lint run errors "Configuration for rule ... is invalid".
+Expected: restore, fix the draft, run again; the edit never stays in place.
+
+## Results after the final review
+
+- The final review (fresh reviewer, Opus) found one critical and five important gaps: `warn` handling was inverted, a `--fix` lint command could rewrite user work, an ignored probe counted as a miss, the probe source could be wrong, the own PR had no place to work, and a broken draft could stay in the config. Scenarios H to M are those cases.
+- GREEN (2026-10-13, one rep each): 6 of 6 met Expected. H drops `warn` and the current branch when lint fails on warnings. I never runs the `--fix` script. J renames the ignored probe without dropping a rung. K writes a corrected second probe. L works in a new worktree. M restores before fixing the draft.
+- The reps found three more gaps, now fixed: the step 2 dry run had no check-only wording (I), there was no probe source for fix `none` (K), and the own PR did not re-check in the new worktree (L).
