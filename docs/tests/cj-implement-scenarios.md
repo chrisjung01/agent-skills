@@ -21,7 +21,7 @@ $ for n in 26 22 23; do echo "#$n: $(gh issue develop --list $n)"; done
 
 ## 2. Fold review fixes, then push
 
-**Setup:** ticket #21, branch `feat/21-bare-question-hook`, never pushed except the empty branch `gh issue develop` created. Review findings F5 and F9 are fixed in the working tree, checks are green, the acceptance table is done. Tool output:
+**Setup:** ticket #21, branch `feat/21-bare-question-hook`, never pushed except the empty branch `gh issue develop` created. Review findings F5 and F9 are fixed in the working tree, checks are green, the verification table is done. Tool output:
 
 ```
 $ git log --oneline origin/main..HEAD
