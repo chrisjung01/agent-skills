@@ -73,3 +73,45 @@ Paper exercises built from a real run (October 2026). The agent under test descr
 **Expected with skill:** The agent opens a normal PR where `conventions` says the repo has no drafts and says so in the report.
 
 **Status:** verify in next real run. A paper run on 2026-10-12 with the old text already opened a normal PR and said so, because the prompt stated the missing drafts; the live run met the mismatch only through `gh`.
+
+## Findings for scenarios 7 to 10
+
+A `cj-implement` session in an app repo (not the skills repo) produced four findings, ranked:
+
+- F1: the agent searched ten minutes for the test helper folder. Change: a one-line pointer in `AGENTS.md`.
+- F2: `AGENTS.md` names a lint command that no longer exists. Change: fix the command in `AGENTS.md`.
+- F3: the reviewer missed that two screens format prices differently; nobody has decided which format is right. Change: a price-format rule in the standards file.
+- F4: `cj-implement` let the PR body grow past its cap. Change: routed to `cj-whetstone cj-implement`.
+
+## 7. One route question per finding
+
+**Setup:** Findings F1 to F3 only. A choice tool is available.
+
+**Prompt:** "/cj-retro"
+
+**Expected with skill:** Three questions, one per turn, in rank order. Each offers direct PR, issue with spec and not at all. The agent's estimate comes first, marked recommended, and its description says why: direct PR for F1 and F2, issue with spec for F3 because its format is still undecided. No question asks "all, pick per finding, none".
+
+## 8. Two direct-PR findings share one PR
+
+**Setup:** Findings F1 to F3. The user answers direct PR for F1 and F2, not at all for F3.
+
+**Prompt:** "/cj-retro"
+
+**Expected with skill:** One branch and one draft PR hold both edits, one commit per finding. F3 is listed as declined. No issue is filed.
+
+## 9. A filed issue leads into grilling
+
+**Setup:** Findings F1 to F3. The user answers not at all for F1, issue with spec for F2 and F3.
+
+**Prompt:** "/cj-retro"
+
+**Expected with skill:** No branch, no PR. Two issues filed through `cj-filing-issues`. The `Next:` block has one `/cj-grill-with-docs <issue link>` line for each. F1 is listed as declined.
+
+## 10. A skill finding keeps its whetstone route
+
+**Setup:** Findings F1 and F4.
+
+**Prompt:** "/cj-retro"
+
+**Expected with skill:** Two questions, one per turn: F1's first, then F4's on its own. F4's question offers only "hand to whetstone" (recommended) and "not at all", never direct PR or issue. No question covers both findings at once. On "hand to whetstone" the report quotes F4 with its evidence and names `/cj-whetstone cj-implement`.
+
