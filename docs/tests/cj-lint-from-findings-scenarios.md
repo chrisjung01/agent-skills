@@ -20,7 +20,7 @@ Expected: rung 4, no plugin code, an issue draft with the pattern and the fix co
 ## D. Many hits elsewhere
 
 Setup: as A, but the whole-repo run finds 12 other files with the same import.
-Expected: the hits listed (`file:line`, at most 10, then "and 2 more"); the own PR fixes the hits at `error`, and `warn` is offered only when the lint command ignores warnings; nothing decided without the question.
+Expected: the hits listed (`file:line`, at most 10, then "and 2 more"); with 12 hits the own-PR option names the count and makes the cleanup an issue, and `warn` is offered only when the lint command ignores warnings; nothing decided without the question.
 
 ## E. Config with uncommitted changes
 
@@ -54,7 +54,7 @@ Expected: the proof stops, the reply names the error, the finding is offered as 
 ## H. Lint fails on warnings, hits exist
 
 Setup: as A, the lint command runs with `--max-warnings 0`, the whole-repo run finds 12 hits.
-Expected: own PR fixes the 12 hits at `error`; no `warn` option; current branch not offered.
+Expected: 12 hits exceed the cap of 10, so own PR names the count and makes the cleanup an issue; no `warn` option; current branch not offered.
 
 ## I. Lint script fixes files
 
@@ -86,3 +86,42 @@ Expected: restore, fix the draft, run again; the edit never stays in place.
 - The final review (fresh reviewer, Opus) found one critical and five important gaps: `warn` handling was inverted, a `--fix` lint command could rewrite user work, an ignored probe counted as a miss, the probe source could be wrong, the own PR had no place to work, and a broken draft could stay in the config. Scenarios H to M are those cases.
 - GREEN (2026-10-13, one rep each): 6 of 6 met Expected. H drops `warn` and the current branch when lint fails on warnings. I never runs the `--fix` script. J renames the ignored probe without dropping a rung. K writes a corrected second probe. L works in a new worktree. M restores before fixing the draft.
 - The reps found three more gaps, now fixed: the step 2 dry run had no check-only wording (I), there was no probe source for fix `none` (K), and the own PR did not re-check in the new worktree (L).
+
+## N. Few hits
+
+Setup: as H, but the whole-repo run finds 4 hits.
+Expected: own PR fixes the 4 hits and lands the rule at `error`.
+
+## O. Current branch from PR feedback
+
+Setup: `cj-address-pr-feedback` after phase 3 (pushed, replies posted), F2 proven with 0 hits, the user picks current branch.
+Expected: a commit on the PR branch, then a push question through `cj-posting`; nothing pushed without the yes.
+
+## P. Retro offers no current branch
+
+Setup: as F, proven with 0 hits.
+Expected: the question offers own PR, issue and drop; no current branch.
+
+## Q. Second instance in the fixed file
+
+Setup: as A, but `src/orders/list.ts` also imports `billing/internal/rates.ts` on line 9, which the finding did not name.
+Expected: fix clean at line 3, the line-9 import counts as 1 repo hit; no rung drop.
+
+## Results after the review loop
+
+- GREEN (2026-10-13, one rep per group): D, H, N, O, P and Q met Expected.
+  - D and H: 12 hits make the cleanup an issue, and `warn` is offered only when lint ignores warnings. N: 4 hits are fixed in the own PR at `error`.
+  - O: on the PR branch the rule lands as a commit, then a push question through `cj-posting`. P: a retro offers no current branch.
+  - Q: the line-9 import counts as 1 repo hit, and there is no rung drop.
+
+## R. No linter, no CI
+
+Setup: a shell-script repo with no linter, no CI workflow and no hook; the finding: "scripts call `curl` without `--fail`".
+Expected: rung 3, a grep script, and the diff also adds a CI step or a pre-commit entry for it; the reply says so; proof on probe and fix as usual.
+  - R (after round 3): rung 3 grep script plus a new CI step in the diff, the reply says so, current branch not offered.
+
+## S. File-location finding
+
+Setup: finding "a barrel `index.ts` under `src/components/button/`, components export from their own file"; the fix deleted it, uncommitted; rung 2 restricts that file name.
+Expected: the probe sits at `src/components/button/index.ts`, the exact old path, without a prefix; the rule fires on it; the probe is deleted in 4.5.
+  - S (after round 4): the probe sits at the exact old path `src/components/button/index.ts`, rung 1 `check-file/filename-blocklist`, and the probe is removed so the caller's deletion shows again.
