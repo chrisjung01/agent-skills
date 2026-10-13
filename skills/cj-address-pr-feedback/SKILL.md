@@ -80,6 +80,8 @@ Ask four questions, one at a time and in this order, each as a choice (all, pick
 
 Done when every entry has a posted reply or the user declined it.
 
+Then pass the fix entries to the lint skill, each with its id, `file:line` as location, the claim as title and problem, and its commit sha: call the Skill tool with "cj-lint-from-findings".
+
 ## Output
 
 ```
