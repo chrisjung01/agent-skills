@@ -16,9 +16,20 @@ This is a personal repo. The skills follow how I work and change when that chang
 - The issue stays as its author wrote it. The spec is a comment starting with `## Spec`; tickets are its sub-issues; technical deviations are comments below it.
 - Steps 1 to 3 run in one session. `cj-implement` starts fresh after `/clear` and can be resumed: linked branches and open PRs are its state.
 - One ticket, one branch, one small draft PR, stacked on its blocker's PR while that is still open. `/cj-implement <issue> one-pr` puts the whole spec on one branch and PR instead.
-- `cj-accept` runs once per spec, on its last open PR before it merges: the user checks every row by hand, because green tests can still hide a broken feature. A failed row is fixed in that PR through `cj-implement` or becomes a follow-up issue.
+- `cj-accept` runs at most once per spec, on its last open PR before it merges: the user checks every row by hand, because green tests can still hide a broken feature. A failed row is fixed in that PR through `cj-implement` or becomes a follow-up issue.
 - `cj-retro` improves the repo the agent worked in; `cj-whetstone` improves the skills from the skill calls its metrics binary stores.
-- `cj-challenge` asks whether it should be built at all and blocks what has no documented goal, no evidence or a smaller lever. `cj-grill-with-docs` stops and names it for a new feature that was never challenged.
+- `cj-challenge` asks whether it should be built at all and blocks what has no documented goal, no evidence or a smaller lever. `cj-grill-with-docs` names it in one line for a new feature that was never challenged.
+
+The chain above is the big tier. A change runs only the steps its tier names.
+
+### Tiers by stakes
+
+Pick the tier before the first command, from the stakes the issue describes.
+
+- **Small**: a typo, a copy change, or a one-line fix whose expected behaviour the issue states. Only `/cj-implement <issue>`, which takes the issue as spec. No grill, no spec comment, no acceptance. Anything bigger is at least normal.
+- **Normal**: a feature that fits one ticket, or a refactor without new behaviour; the grill gives the refactor no challenge hint. `/cj-grill-with-docs`, `/cj-to-spec`, `/cj-implement`. Skip the grill's one-line hint to `/cj-challenge`. `/cj-accept` only when a user sees the new behaviour or someone else signs the feature off. A spec that turns out to need more than one ticket moves to the big tier: run `/cj-to-tickets`.
+- **Big or risky**: real effort, more than one ticket, money, data, security or an irreversible step. The whole chain: `/cj-challenge` first, `/cj-to-tickets` after the spec, `/cj-accept` before the last merge. An item a stakeholder already decided with a documented goal link gets the short challenge (steps 1, 3 and 5).
+- **Any tier**: `/cj-retro` after a session with friction.
 
 ## Skills
 
