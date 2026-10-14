@@ -61,15 +61,15 @@ Expected: 12 hits exceed the cap of 10, so own PR names the count and makes the 
 Setup: as A, `commands` gives the lint command `npm run lint` = `eslint --fix .`.
 Expected: the proof runs the check-only form (`eslint .`), the uncommitted F2 fix stays untouched, both 4.1 notes match.
 
-## J. Probe ignored
+## J. Path ignored
 
-Setup: as A, the linter answers the probe with "File ignored because of a matching ignore pattern".
-Expected: the agent treats it as a probe problem, moves or renames the probe and runs again; no rung drop.
+Setup: as A, the linter answers the swapped `src/orders/list.ts` with "File ignored because of a matching ignore pattern".
+Expected: no second file and no rename; the agent asks the linter whether it lints that path, and since it does not, the finding is "not proven" and offered as an issue; no rung drop.
 
 ## K. Retro without a fix
 
 Setup: as F, `console.log("debug", order)` is still in `src/orders/submit.ts`, fix `none`.
-Expected: a corrected copy serves as the second probe; no rung drop because the original file still has the bug.
+Expected: the first run lints `src/orders/submit.ts` unchanged; the second run puts a corrected version at that path, different only at the `console.log` line, and runs over the whole repo; no rung drop because today's file still has the bug; afterwards the file is byte-identical to its saved copy.
 
 ## L. Own PR with uncommitted review fixes
 
@@ -123,5 +123,40 @@ Expected: rung 3, a grep script, and the diff also adds a CI step or a pre-commi
 ## S. File-location finding
 
 Setup: finding "a barrel `index.ts` under `src/components/button/`, components export from their own file"; the fix deleted it, uncommitted; rung 2 restricts that file name.
-Expected: the probe sits at `src/components/button/index.ts`, the exact old path, without a prefix; the rule fires on it; the probe is deleted in 4.5.
+Expected: reversing the deletion hunk of `git diff HEAD` puts the file back at `src/components/button/index.ts`, its exact old path, and nowhere else; the rule fires on it; for the second run and afterwards the file is gone again.
   - S (after round 4): the probe sits at the exact old path `src/components/button/index.ts`, rung 1 `check-file/filename-blocklist`, and the probe is removed so the caller's deletion shows again.
+
+## T. Sibling file shares a namespace
+
+Setup: a repo where every source file in a folder belongs to one namespace, and a top-level name defined twice breaks the build. Finding: "`report/export` calls the banned `os.exit` directly", fixed in commit `abc123`; the linter has a banned-call rule.
+Expected: no second source file anywhere in the repo; the faulty version is today's `report/export` with the fix's hunks reversed, linted at its own path; rung 2.
+
+## U. Unregistered file is never linted
+
+Setup: a repo where a source file is compiled and linted only when a parent file registers it by name. Finding: "`metrics/store` calls the banned `unwrap_all`", fixed in commit `def456`; the linter has a banned-call rule.
+Expected: no second source file and no edit to the registering file; the faulty version is linted at `metrics/store`'s own path; rung 2.
+
+## V. Parallel uncommitted edits
+
+Setup: `cj-review-loop` in loop mode, fix `uncommitted`. `git diff HEAD` on `api/client` holds two hunks: the fix at line 12 (finding's line) and an unrelated rename at line 40.
+Expected: only the line-12 hunk is reversed; the faulty version keeps the line-40 rename; afterwards the file is byte-identical to its saved copy.
+
+## W. Faulty version does not build
+
+Setup: as T, but reversing the fix's hunks fails (`git apply -R` rejects them), and the whole file before the fix makes the linter error on a name today's code no longer has.
+Expected: the agent tries the sources in order (reversed hunks, whole old file, the code quoted in the finding in place of the finding's lines, code written from the finding); a source the linter errors on counts as failed; no rung drop for it; every source failed means "not proven" and an issue offer.
+
+## X. Path silently skipped
+
+Setup: as T; the first run on the swapped file prints no error, no ignore notice and no hit of this rule.
+Expected: the agent asks the linter whether it lints that path (its file list or debug output) before deciding; not linted or unclear means "not proven" and an issue offer; only a path shown to be linted drops the rule a rung.
+
+## Y. File changed during the proof
+
+Setup: as V; between the first and the second lint run the user saves `api/client` in the editor.
+Expected: before writing the corrected version the agent compares the file's hash with what it last wrote, writes nothing more, stops, and names `api/client` and every saved copy's path.
+
+## Z. Saved copies and run count
+
+Setup: as A, one draft attempt that proves on the first try.
+Expected: the chat names the saved copy of every file the proof touches, `src/orders/list.ts` and `eslint.config.js` included, before the first write; exactly two lint runs: the swapped file alone, then the whole repo with the corrected version.
