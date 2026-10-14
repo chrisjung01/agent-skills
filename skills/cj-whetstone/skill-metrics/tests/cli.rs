@@ -374,117 +374,14 @@ fn choice_and_bare_questions_are_counted_and_older_rows_re_extracted() {
     assert_eq!(question_counts(&db), [(Some(7), Some(5), 1, 0)]);
 }
 
-/// Runs `skill-metrics hook` with `payload` on stdin; returns exit success and stdout.
-fn hook(payload: &serde_json::Value) -> (bool, String) {
-    hook_while(payload, || {})
-}
-
-/// Like `hook`, running `meanwhile` after the hook got its payload.
-fn hook_while(payload: &serde_json::Value, meanwhile: impl FnOnce()) -> (bool, String) {
-    use std::io::Write;
-    let mut child = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
+#[test]
+fn hook_is_an_unknown_command() {
+    let output = Command::new(env!("CARGO_BIN_EXE_skill-metrics"))
         .arg("hook")
-        .stdin(std::process::Stdio::piped())
-        .stdout(std::process::Stdio::piped())
-        .spawn()
+        .output()
         .unwrap();
-    child
-        .stdin
-        .take()
-        .unwrap()
-        .write_all(payload.to_string().as_bytes())
-        .unwrap();
-    meanwhile();
-    let output = child.wait_with_output().unwrap();
-    (
-        output.status.success(),
-        String::from_utf8_lossy(&output.stdout).into_owned(),
-    )
-}
-
-#[test]
-fn the_hook_blocks_a_bare_question_and_lets_the_rest_through() {
-    let dir = tempfile::tempdir().unwrap();
-    let transcript = dir.path().join("s7.jsonl");
-    fs::write(&transcript, QUESTIONS).unwrap();
-    let payload = |id: &str| {
-        serde_json::json!({
-            "hook_event_name": "PreToolUse",
-            "tool_name": "AskUserQuestion",
-            "tool_use_id": id,
-            "transcript_path": transcript,
-        })
-    };
-    // Text before it: through. Right after an answer, after text and a tool call, after
-    // whitespace only: blocked, with a reason that asks for visible text first.
-    assert_eq!(hook(&payload("q1")), (true, String::new()));
-    for id in ["q2", "q3", "q4"] {
-        let (ok, stdout) = hook(&payload(id));
-        assert!(ok);
-        let decision: serde_json::Value = serde_json::from_str(&stdout).unwrap();
-        let output = &decision["hookSpecificOutput"];
-        assert_eq!(output["permissionDecision"], "deny", "{id}");
-        assert!(output["permissionDecisionReason"]
-            .as_str()
-            .unwrap()
-            .contains("as visible text first"));
-    }
-
-    // A subagent's question, another tool, an unreadable transcript, a broken payload: through.
-    let mut subagent = payload("q2");
-    subagent["agent_id"] = "a1".into();
-    assert_eq!(hook(&subagent), (true, String::new()));
-    let mut other = payload("q2");
-    other["tool_name"] = "Read".into();
-    assert_eq!(hook(&other), (true, String::new()));
-    let mut gone = payload("q2");
-    gone["transcript_path"] = dir.path().join("missing.jsonl").to_str().into();
-    assert_eq!(hook(&gone), (true, String::new()));
-    assert_eq!(
-        hook(&serde_json::json!("not a payload")),
-        (true, String::new())
-    );
-}
-
-#[test]
-fn the_hook_waits_for_its_question_to_reach_the_transcript() {
-    use std::io::Write;
-    let dir = tempfile::tempdir().unwrap();
-    let transcript = dir.path().join("s7.jsonl");
-    // Up to the thinking before q2; Claude Code writes q2 a moment after the hook starts.
-    let (before, after) = QUESTIONS.split_at(QUESTIONS.find("\"id\": \"q2\"").unwrap());
-    let cut = before.rfind('\n').unwrap() + 1;
-    fs::write(&transcript, &QUESTIONS[..cut]).unwrap();
-    let rest = format!("{}{after}", &before[cut..]);
-    let payload = serde_json::json!({
-        "tool_name": "AskUserQuestion",
-        "tool_use_id": "q2",
-        "transcript_path": transcript,
-    });
-    let (ok, stdout) = hook_while(&payload, || {
-        std::thread::sleep(std::time::Duration::from_millis(300));
-        fs::OpenOptions::new()
-            .append(true)
-            .open(&transcript)
-            .unwrap()
-            .write_all(rest.as_bytes())
-            .unwrap();
-    });
-    assert!(ok);
-    assert!(stdout.contains("\"deny\""), "{stdout}");
-}
-
-#[test]
-fn the_hook_lets_a_question_through_that_never_reaches_the_transcript() {
-    let dir = tempfile::tempdir().unwrap();
-    let transcript = dir.path().join("s7.jsonl");
-    fs::write(&transcript, QUESTIONS).unwrap();
-    let payload = serde_json::json!({
-        "tool_name": "AskUserQuestion",
-        "tool_use_id": "never-written",
-        "transcript_path": transcript,
-    });
-    assert_eq!(hook(&payload), (true, String::new()));
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unknown command hook"));
 }
 
 #[test]

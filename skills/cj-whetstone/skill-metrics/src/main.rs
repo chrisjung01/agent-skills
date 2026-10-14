@@ -10,7 +10,6 @@
 //!   skill-metrics show [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>] <start uuid>
 //!   skill-metrics import-notes [<notes dir>] [--db <file>]
 //!   skill-metrics report [--out <file>] [--db <file>]
-//!   skill-metrics hook    (PreToolUse hook: payload on stdin, blocks a bare choice question)
 //!   skill-metrics codex-hook [--db <file>]    (Codex SessionEnd hook: payload on stdin, collects
 //!                                              its transcript; bad input is an error)
 //!   skill-metrics codex-hooks install|uninstall <command> [--dry-run]
@@ -42,16 +41,6 @@ use user_text::redact_keys;
 const PARSER_VERSION: i64 = 10;
 
 fn main() -> ExitCode {
-    // Before any argument or database work: the hook exits 0 whatever happens.
-    if env::args().skip(1).eq(["hook"]) {
-        let mut payload = String::new();
-        if io::Read::read_to_string(&mut io::stdin(), &mut payload).is_ok() {
-            if let Some(decision) = question::hook(&payload) {
-                println!("{decision}");
-            }
-        }
-        return ExitCode::SUCCESS;
-    }
     match run() {
         Ok(()) => ExitCode::SUCCESS,
         Err(err) => {
