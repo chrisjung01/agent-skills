@@ -26,7 +26,7 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 
    Then ask the user to confirm them as one question with a choice: confirm all seams, change one seam (named in full words), or drop one seam (named in full words), each with its consequence, before the draft.
 3. **Size.** One spec is one goal that ships on its own. Two goals that could ship separately: propose two specs, one per issue, and continue with the one the user picks first.
-4. **Draft** the spec in the shape of [SPEC.md](SPEC.md) and run its checks.
+4. **Draft** the spec in the shape of [SPEC.md](SPEC.md), with the Acceptance line its triggers propose, and run its checks.
 5. **Fresh reader.** Dispatch one subagent on the Opus tier with effort high where the harness takes a model and an effort, as `cj-reviewing` does for its reviewer. Its prompt holds this task, the draft and the issue if one exists; no conversation, no decision list. It reports every AC or edge-case row that a wrong implementation would still pass, naming that implementation. A finding that sharpens an AC without a new decision goes into the draft. For a finding that changes behaviour or scope, call the Skill tool with "cj-grilling" and ask it as one question that quotes the AC or row; it goes into the draft only with the user's answer. After the reader's findings or the user's answers change the draft, run the checks of step 4 again. No subagent available: say so above the draft.
 6. **Show and post.** Show the full text, and below it one line per reader finding, `<finding> → worked in` or `<finding> → rejected: <reason>`. These lines are not posted. Call the Skill tool with "cj-posting":
    - The issue exists: post the spec as a **comment** on it. Never edit the issue body; it belongs to its author. Leave its title unchanged, including any existing prefix.
@@ -39,4 +39,4 @@ Done when the spec is posted, its link is in the reply, and the reply ends with 
 
 ## Changing a posted spec
 
-The approved sections (problem, acceptance criteria, out of scope) change only with the user's yes; then edit the spec comment and add a one-line comment below it saying what changed. Technical deviations during implementation never edit the spec; they are separate comments (see `cj-implement`).
+The approved sections (problem, acceptance criteria, out of scope, the Acceptance line) change only with the user's yes; then edit the spec comment and add a one-line comment below it saying what changed. Technical deviations during implementation never edit the spec; they are separate comments (see `cj-implement`).
