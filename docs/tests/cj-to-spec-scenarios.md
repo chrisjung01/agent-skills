@@ -86,3 +86,35 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 - 2026-10-13, scenarios 9 and 10 before the change: one run each. Scenario 9 dispatched no reader and found the 24-hour boundary through its own checks, with no finding lines. Scenario 10 wrote Merge danger as door and blast radius only, without old app versions. Fail.
 - 2026-10-13, scenarios 9 and 10 after the change: one run each. Scenario 9 sent only issue and draft to a reader, worked in ACs at 25 and 23 hours, and asked the 24-hour boundary and staff-slot findings as questions. Scenario 10's Merge danger named older app releases and old backend instances. Pass.
 - 2026-10-13, scenario 9 again on the text after the review fixes, three turns: the reader's prompt held task, issue and draft; two findings worked in, two asked through `cj-grilling` one per turn; checks rerun after the answers; four `<finding> → worked in` lines below the draft. Pass.
+
+## 11. A feature a user sees ends with acceptance by hand
+
+**Setup:** repo `acme/shop-web`. Issue #120 "Merkliste: Artikel per Herz speichern" is written in German and grilled in German; the decision list says: a heart on every product card saves the item, the saved items show on a new page "Merkliste", one ticket.
+**Prompt:** "/cj-to-spec #120" (draft only, do not post).
+**Expected:** the draft's last line reads `Acceptance: by hand · behaviour a user sees`, in English although the headings are German. A draft without the line, or with `verified is enough`, fails.
+
+## 12. A data migration no user sees ends with acceptance by hand
+
+**Setup:** repo `acme/fit-backend`. Issue #318 "Store workout durations in seconds instead of minutes" is grilled: a migration rewrites every stored duration, the API keeps answering in minutes, no screen changes, one ticket.
+**Prompt:** "/cj-to-spec #318" (draft only, do not post).
+**Expected:** the last line reads `Acceptance: by hand · data`. A draft that proposes `verified is enough` because no user sees a change fails.
+
+## 13. A big refactor without a trigger ends with verified is enough
+
+**Setup:** repo `acme/notes-cli`. Issue #92 "Split the storage module into reader and writer" is grilled; the decision list says: no behaviour changes, no stored format changes, five tickets, about two weeks of work, big tier.
+**Prompt:** "/cj-to-spec #92" (draft only, do not post).
+**Expected:** the last line reads `Acceptance: verified is enough · no trigger applies`. A draft that sets by hand because of the tier, the effort or the ticket count fails.
+
+## 14. The Acceptance line names its trigger
+
+**Setup:** as scenario 11. An earlier draft in the conversation ends with `Acceptance: by hand`, without a trigger.
+**Prompt:** "Prüf den Entwurf gegen die Checks und zeig ihn mir" (draft only, do not post).
+**Expected:** the checks catch the missing trigger; the draft shown ends with `Acceptance: by hand · behaviour a user sees`. A draft shown with the bare `Acceptance: by hand` fails.
+
+## 15. The user overrides the proposed value
+
+**Setup:** as scenario 11; the draft ends with `Acceptance: by hand · behaviour a user sees`.
+**Prompt:** "Mach verified is enough daraus, das teste ich nicht von Hand" (draft only, do not post).
+**Expected:** the draft shown ends with `Acceptance: verified is enough · behaviour a user sees · user chose`. A line that drops the trigger or omits `· user chose` fails.
+- 2026-10-14, scenarios 11 to 15 before the change (#95): one fresh grader. No line of `SPEC.md` or `cj-to-spec` adds an Acceptance line, so all five missed expected. Fail.
+- 2026-10-14, scenarios 11 to 15 after the change: one fresh grader. All five met expected, citing the Acceptance line section and its check in `SPEC.md`. Pass.
