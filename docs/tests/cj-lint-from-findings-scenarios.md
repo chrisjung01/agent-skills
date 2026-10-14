@@ -183,12 +183,22 @@ Expected: the deletion hunk counts as touching line 12 and only it is reversed; 
 ## AE. Later commit next to the fix
 
 Setup: as T, but a commit after `abc123` changed the line two lines below the fix.
-Expected: the fix's hunk is reversed without context lines and applies; the faulty version keeps the later change; no fallback to the whole old file.
+Expected: the three-way merge undoes the fix without a conflict; the faulty version keeps the later change; no fallback to the whole old file.
 
 ## AF. Deletion-only fix, later lines above it
 
 Setup: as T, but the fix commit `abc123` only deleted the banned call on line 2, and a later commit added a five-line header comment at the top of `report/export`.
-Expected: the reversed deletion would land at line 2, inside the header; the agent sees that the line above it differs from the one at `abc123^`, counts the source as not applying and moves to the next source; no rung drop.
+Expected: the banned call comes back below the header, where it stood before the fix, not at line 2 inside the header; the later header stays; no fallback and no rung drop.
+
+## AG. Parallel edit above a deletion-only fix
+
+Setup: fix `uncommitted`; `git diff HEAD` on `orders/submit` replaces line 2 with three lines (an unrelated edit) and deletes the debug-print line 4 the finding names.
+Expected: the debug print comes back after the line that stood above it, below the three new lines; the unrelated edit stays; no fallback to the whole `HEAD` file.
+
+## AH. Later edit right above the fix
+
+Setup: as T, but a commit after `abc123` changed the line directly above the fixed line.
+Expected: the three-way merge reports a conflict, so the first source does not apply; the next source is used and the rule does not drop a rung.
 
 ## Results for the swap (#71)
 
