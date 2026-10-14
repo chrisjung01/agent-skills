@@ -42,7 +42,7 @@ Call the Skill tool with "cj-project-context" for: commands, standards, conventi
    - **issue with spec**: an issue in that repo; the flow picks it up at grilling, so its open decisions get made before anyone builds.
    - **not at all**: nothing happens; the report lists the finding as declined.
 
-   The option you estimate fits comes first, marked recommended, and its description says why: a small edit with nothing left to decide fits a direct PR, a new check or a change that hides a decision fits an issue. A skill finding routed to `cj-whetstone` offers "hand to whetstone" (recommended) and "not at all"; a mechanical Standards finding offers "hand to cj-lint-from-findings" (recommended) and "not at all". A skill finding for a skill outside the skills repo gets no question; it is reported only.
+   The option you estimate fits comes first, marked recommended, and its description says why: a small edit with nothing left to decide fits a direct PR (where `conventions` allow auto-merge, under 100 lines it merges on its own once checks pass), a new check or a change that hides a decision fits an issue. A skill finding routed to `cj-whetstone` offers "hand to whetstone" (recommended) and "not at all"; a mechanical Standards finding offers "hand to cj-lint-from-findings" (recommended) and "not at all". A skill finding for a skill outside the skills repo gets no question; it is reported only.
 
    If the harness provides an available choice tool, use it for each question after showing the findings. If no choice tool is available, put the question and each answer option on separate lines.
 

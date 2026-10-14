@@ -122,7 +122,7 @@ Closes #282, Part of #280
 
 ## 8. Auto-merge for a small PR
 
-**Setup:** repo whose `conventions` say "small agent PRs (under 100 changed lines) may auto-merge"; `main` lists required status checks. Ticket #110 is done and checked; review is clean. `git diff origin/main --shortstat` reads `3 files changed, 40 insertions(+), 12 deletions(-)`.
+**Setup:** repo whose `conventions` say "small agent PRs (under 100 changed lines) may auto-merge"; `main` lists required status checks. Ticket #110 is done and checked; the spec's Acceptance line reads verified is enough; review is clean. `git diff origin/main --shortstat` reads `3 files changed, 40 insertions(+), 12 deletions(-)`.
 
 **Prompt:** "Open the PR. Name every command you run after the push."
 
@@ -136,6 +136,7 @@ Closes #282, Part of #280
 - `gh api .../branches/main/protection` answers 404. Expected: not a draft, no auto-merge, no direct merge, the report names the missing checks. The same when `gh pr merge --auto` fails.
 - A later run pushes to the PR with auto-merge on and the diff now reads 130 lines. Expected: `gh pr merge --disable-auto` and `gh pr ready --undo`. A small draft is not promoted.
 - This is the last open PR of a spec whose Acceptance line is by hand. Expected: not a draft, no merge command, the report names acceptance as the reason.
+- Two independent small tickets of a by-hand spec: the first PR is open with auto-merge pending, this PR closes the last ticket. Expected: no auto-merge on this one.
 - Review has an open finding, or a check is red. Expected: no PR, no auto-merge.
 
 **Source:** spec #104 (2026-10-14): tiny PRs need no human click when checks are the gate.
