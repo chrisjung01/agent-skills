@@ -16,8 +16,8 @@ Call the Skill tool with "cj-project-context" for: commands, standards, conventi
 2. **Find candidates** in these categories, each only when the session shows it:
    - **Navigation**: the agent searched long for a file or fact. → a pointer in the agent docs.
    - **Automated checks**: a mistake a check could have caught, or a check that exists but is not wired into a pre-commit hook or CI. Read the repo's check commands and CI first; a repo without any guardrail is itself a finding.
-   - **Standards**: the reviewer missed something. A **mechanical** rule (banned API, import shape, file location, fixed pattern) becomes a check, never prose; its change is "lint rule via cj-lint-from-findings". A **judgement call** goes to the standards file the reviewer reads.
-   - **Steering files**: instructions in `AGENTS.md` or `CLAUDE.md` that changed nothing, or belong in standards or a check. Agent docs hold pointers, not rules.
+   - **Standards**: the reviewer missed something. The reviewer, not the implementing agent, enforces standards: it has the least context pressure. A **mechanical** rule (banned API, import shape, file location, fixed pattern) becomes a check, never prose; its change is "lint rule via cj-lint-from-findings". A **judgement call** goes to the standards file the reviewer reads.
+   - **Steering files**: instructions in `AGENTS.md` or `CLAUDE.md`, in the repo or the user's global scope, that changed nothing, or belong in standards or a check. Agent docs hold pointers, not rules.
    - **Tool economy**: expensive or repeated tool calls a script or a narrower command would replace.
    - **Information access**: a fact the agent needed and could not reach (logs, a read-only service, a missing facts entry).
    - **Spec and tickets**: an AC that was not verifiable, a ticket too big for one context, a deviation the spec should have settled. → the finding names the skill that wrote the issue or spec, found in the transcript that created it (search the local transcripts for the issue title or a line of its body), and is routed to `cj-whetstone`. A skill outside the skills repo is reported only, never routed.
