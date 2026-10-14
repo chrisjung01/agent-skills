@@ -165,6 +165,16 @@ Expected: before the first write, the chat names the saved copy of the source fi
 Setup: as Z.
 Expected: exactly two lint runs inside the proof: the swapped source file alone, then the whole repo with the corrected version.
 
+## AA. Rung drop after a silent first run
+
+Setup: as T; the first run reports nothing for this rule, and the linter's file list shows it lints `report/export`.
+Expected: the rule drops a rung, but first the agent restores (4.7) and both notes match; the next attempt keeps the saved copies from the first one, so the user's file ends byte-identical to its state before the proof.
+
+## AB. Fix deleted the file
+
+Setup: finding "a barrel `index` file under `components/button/`", the fix commit `fed789` deleted it; rung 2 restricts that file name.
+Expected: step 2 makes no baseline run for the deleted file and does not treat its absence as a linter that does not run; the file comes back at its old path from reversing the fix's deletion for the first run, and is gone again for the second run and afterwards.
+
 ## Results for the swap (#71)
 
 - RED (2026-10-14, text before #71, one rep per scenario): 10 of 10 missed expected; Z and Z2 were then one scenario, both points missed.
