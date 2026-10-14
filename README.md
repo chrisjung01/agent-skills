@@ -10,12 +10,12 @@ This is a personal repo. The skills follow how I work and change when that chang
 
 ```
 /cj-challenge <issue>  →  /cj-grill-with-docs <issue>  →  /cj-to-spec <issue>  →  /cj-to-tickets <issue>  →  /cj-implement <issue>  →  cj-reviewing  →  /cj-accept <issue>  →  /cj-retro
-  build or block                  decisions                  "## Spec" comment        sub-issues (optional)      small draft PR per ticket  (inside implement)   "## Acceptance" by hand   environment
+  build or block                  decisions                  "## Spec" comment        sub-issues (optional)      small PR per ticket  (inside implement)   "## Acceptance" by hand   environment
 ```
 
 - The issue stays as its author wrote it. The spec is a comment starting with `## Spec`; tickets are its sub-issues; technical deviations are comments below it.
 - Steps 1 to 3 run in one session. `cj-implement` starts fresh after `/clear` and can be resumed: linked branches and open PRs are its state.
-- One ticket, one branch, one small draft PR, stacked on its blocker's PR while that is still open. `/cj-implement <issue> one-pr` puts the whole spec on one branch and PR instead.
+- One ticket, one branch, one small PR (draft, unless small and auto-merge is allowed), stacked on its blocker's PR while that is still open. `/cj-implement <issue> one-pr` puts the whole spec on one branch and PR instead.
 - `cj-accept` runs at most once per spec, on its last open PR before it merges, when the spec's Acceptance line says by hand: the user checks every row by hand, because green tests can still hide a broken feature. A failed row is fixed in that PR through `cj-implement` or becomes a follow-up issue.
 - `cj-retro` improves the repo the agent worked in; `cj-whetstone` improves the skills from the skill calls its metrics binary stores.
 - `cj-challenge` asks whether it should be built at all and blocks what has no documented goal, no evidence or a smaller lever. `cj-grill-with-docs` names it in one line for a new feature that was never challenged.
@@ -43,7 +43,7 @@ The last line of every spec, `Acceptance: by hand` or `Acceptance: verified is e
 | [`cj-grill-with-docs`](skills/cj-grill-with-docs/SKILL.md) | **Flow 1.** Grills the decisions one question at a time; glossary terms and ADRs are written as they settle; questions only the issue author can answer go into one comment. |
 | [`cj-to-spec`](skills/cj-to-spec/SKILL.md) | **Flow 2.** Turns the grilled conversation into a spec (AC-1… as Given/When/Then, edge cases, test seams, out of scope), has a fresh reader look for criteria a wrong implementation would pass, and posts it as a `## Spec` comment, or as a new issue. |
 | [`cj-to-tickets`](skills/cj-to-tickets/SKILL.md) | **Flow 3.** Slices a spec into small vertical sub-issues with blocked-by edges. Skipped when the spec fits one ticket. |
-| [`cj-implement`](skills/cj-implement/SKILL.md) | **Flow 4.** Implements the spec's tickets as small draft PRs, one per ticket, stacked while a blocker is unmerged: targeted tests, full checks once per PR, independent review, a PR body of five blocks in at most 15 lines with one Verified line per AC. Each logic test is shown red by one inverted condition; a fresh subagent writes a bug's reproduction test. `one-pr` for one PR per spec. Resumable after `/clear`. |
+| [`cj-implement`](skills/cj-implement/SKILL.md) | **Flow 4.** Implements the spec's tickets as small PRs (draft unless auto-merge applies), one per ticket, stacked while a blocker is unmerged: targeted tests, full checks once per PR, independent review, a PR body of five blocks in at most 15 lines with one Verified line per AC. Each logic test is shown red by one inverted condition; a fresh subagent writes a bug's reproduction test. `one-pr` for one PR per spec. Resumable after `/clear`. |
 | [`cj-accept`](skills/cj-accept/SKILL.md) | **Flow 5.** The user checks every acceptance criterion and edge case of the spec by hand on its last open PR, before it merges. Failed rows become a fix in that PR or a follow-up issue; the result is an `## Acceptance` comment on the spec's issue. Once nothing is left to fix, it files the kill-criterion issue and turns deviations into ADRs or glossary terms. A spec that says verified is enough gets only these records. |
 | [`cj-retro`](skills/cj-retro/SKILL.md) | **Flow 6.** Turns a session's friction into checks, standards or agent-doc pointers in the worked-in repo; skill findings go to `cj-whetstone`. |
 | [`cj-whetstone`](skills/cj-whetstone/SKILL.md) | Improves a skill from the skill calls the whetstone metrics store, after reading their windows. |
