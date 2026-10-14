@@ -68,6 +68,10 @@ _Avoid_: Verification (the agent's evidence per PR), Sign-off, Playtest
 The agent's evidence per PR that each acceptance criterion and edge-case row of its ticket is met, from a test, a check or a manual observation; it becomes the Verified block of the PR body.
 _Avoid_: Acceptance (the user's check of the whole spec)
 
+**Tier**:
+The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it.
+_Avoid_: Lane, Size class, Track
+
 ## Review
 
 **Loosened check**:
