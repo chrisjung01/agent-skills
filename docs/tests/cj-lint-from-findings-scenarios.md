@@ -185,6 +185,11 @@ Expected: the deletion hunk counts as touching line 12 and only it is reversed; 
 Setup: as T, but a commit after `abc123` changed the line two lines below the fix.
 Expected: the fix's hunk is reversed without context lines and applies; the faulty version keeps the later change; no fallback to the whole old file.
 
+## AF. Deletion-only fix, later lines above it
+
+Setup: as T, but the fix commit `abc123` only deleted the banned call on line 2, and a later commit added a five-line header comment at the top of `report/export`.
+Expected: the reversed deletion would land at line 2, inside the header; the agent sees that the line above it differs from the one at `abc123^`, counts the source as not applying and moves to the next source; no rung drop.
+
 ## Results for the swap (#71)
 
 - RED (2026-10-14, text before #71, one rep per scenario): 17 of 17 missed expected.
