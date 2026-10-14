@@ -215,6 +215,11 @@ Expected: no hunk's old side holds `../internal/lib`, so the first source fails;
 Setup: as T, but the finding is "empty catch block at `report/export:12`" and commit `abc123` only inserted `log(e)` after line 12; line 12 itself is unchanged.
 Expected: the fix still counts as committed, not `none`; the three-way merge takes `log(e)` out again and the rule fires at the empty catch; no rung drop.
 
+## AL. Fix reverted later
+
+Setup: as T, but a commit after `abc123` put the banned call back at the line the fix changed.
+Expected: the fix counts as `none`; the first run lints today's file unchanged and fires; the corrected version is today's file corrected at that line; the call counts as 1 hit in repo, never as firing on the fix; no rung drop.
+
 ## Results for the swap (#71)
 
 - RED (2026-10-14, text before #71, one rep per scenario): 18 of 18 missed expected.
