@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # To tickets
 
-Step 3 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. Each ticket becomes one small draft PR in `cj-implement`, so a ticket's size is a PR's size.
+Step 3 of the spec-driven flow, used in the big tier when the spec needs more than one ticket. Each ticket becomes one small draft PR in `cj-implement`, so a ticket's size is a PR's size.
 
 Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracker, conventions.
 

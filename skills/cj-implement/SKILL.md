@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Implement
 
-Step 4 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. Small PRs reach main faster and get better reviews, so the default is **one ticket, one branch, one draft PR**. Never merge.
+Step 4 of the spec-driven flow, in every tier; a small change starts here with its issue as spec. Small PRs reach main faster and get better reviews, so the default is **one ticket, one branch, one draft PR**. Never merge.
 
 ## Mode
 
