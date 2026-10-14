@@ -1,6 +1,6 @@
 # Spec shape
 
-The comment starts with the line `## Spec` so later steps find it. Headings in the issue's language (`conventions`); the content rules below hold in any language.
+The comment, or the body of an issue `cj-to-spec` creates, starts with the line `## Spec` so later steps find it. Headings in the issue's language (`conventions`); the content rules below hold in any language.
 
 ```
 ## Spec
@@ -26,7 +26,17 @@ The comment starts with the line `## Spec` so later steps find it. Headings in t
 **Recorded in repo.** Glossary terms and ADRs written during the grilling, by name, for `cj-implement` to commit. "none" when empty.
 
 **Merge danger.** One-way or two-way door, the blast radius in one line, and whether old clients and old code still running during the rollout stay valid.
+
+Acceptance: <by hand | verified is enough> · <trigger | no trigger applies>
 ```
+
+## Acceptance line
+
+The last line says whether the user checks the spec by hand before the last merge (`cj-accept`), or whether the Verified lines of the PRs are enough. Plain text, English words in any issue language, so later steps find it.
+
+- By hand when a trigger applies: behaviour a user sees, money, data, security, an irreversible step, or someone else signs the feature off. Name the first that applies, in these words.
+- No trigger applies: `verified is enough · no trigger applies`. Effort, ticket count and tier are no triggers.
+- The user picks the other value: keep the trigger and append `· user chose`, e.g. `Acceptance: verified is enough · behaviour a user sees · user chose`.
 
 ## Checks before showing
 
@@ -36,6 +46,7 @@ The comment starts with the line `## Spec` so later steps find it. Headings in t
 - [ ] A number in an AC (baseline, threshold, count) was computed with the spec's own definition, and the spec names the command or query that produced it.
 - [ ] A quantity, formula or growth rule in a decision or AC was checked against the limits the repo already states (design docs, decision lists, ADRs, load or performance tests), and the spec names the limit it keeps. A conflict goes back to grilling.
 - [ ] A decision that relies on how a tool, platform or check behaves (when a file is written, what a count catches) was tried once against the case it must handle, including the hard case (a leftover with a fixed name, a delayed write). Not tried: back to grilling, like any open question.
+- [ ] The last line is the Acceptance line with its value and its trigger, or `no trigger applies`; by hand comes from a trigger or the user's choice, never from effort, ticket count or tier.
 - [ ] No open question, no "TBD". Something still open goes back to grilling; it is not published.
 - [ ] The spec is shorter than the code it describes would be. Over a screen and a half for a small feature means it holds implementation.
 - [ ] Every term is the glossary's.
