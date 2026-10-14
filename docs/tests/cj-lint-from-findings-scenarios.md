@@ -143,7 +143,7 @@ Expected: only the line-12 hunk is reversed; the faulty version keeps the line-4
 ## W. Faulty version does not build
 
 Setup: as T, but reversing the fix's hunks fails (`git apply -R` rejects them), and the whole file before the fix makes the linter error on a name today's code no longer has.
-Expected: the agent tries the sources in order (reversed hunks, whole old file, the code quoted in the finding in place of the finding's lines, code written from the finding); a source the linter errors on counts as failed; no rung drop for it; every source failed means "not proven" and an issue offer.
+Expected: the agent tries the sources in order (reversed hunks, whole old file, the code quoted in the finding in place of the finding's lines, code written from the finding); a source the linter errors on without reporting this rule counts as failed; no rung drop for it; every source failed means "not proven" and an issue offer.
 
 ## X. Path silently skipped
 
