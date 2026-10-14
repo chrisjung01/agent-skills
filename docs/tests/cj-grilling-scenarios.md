@@ -15,6 +15,7 @@ Skill under test: `cj-grilling`.
 
 - 2026-10-09, before the change: variant three runs. All three wrote a bare `#4321` without a URL (one summary line each). Fail.
 - 2026-10-09, after the change: variant three runs. All three gave `https://github.com/acme/app/pull/4321` with one line on what it did. Pass.
+- 2026-10-14, after #109 (template replaced by the `cj-asking` pointer, URL rule kept in the pointer sentence): variant two runs. Both gave `https://github.com/acme/app/pull/4321` with one line on what it did, as reply text, no picker call. Pass.
 
 ## 2. A handed-back decision is asked again
 

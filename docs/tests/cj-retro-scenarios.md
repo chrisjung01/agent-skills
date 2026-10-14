@@ -34,11 +34,11 @@ Paper exercises built from a real run (October 2026). The agent under test descr
 
 **Baseline (real runs, sessions 4aadeed6, ab6be69d, dac7e3aa, a3d7de72, 70f8d77c):** After a last grep the agent called the choice tool at once; the findings stood only in the option descriptions ("1 AGENTS.md-Regel … 2 validate.sh-Check"), or only on the HTML page. In 70f8d77c, a run after the rule was added, the user rejected the question.
 
-**Expected with skill:** The turn that asks shows the numbered findings list as reply text first, then calls the choice tool; options name findings in full words with their one consequence.
+**Expected with skill:** The turn that asks shows the numbered findings list as reply text first, then the question as reply text, no picker call; options name findings in full words with their one consequence.
 
-**Status:** verify in next real run. A paper exercise does not reproduce it: an agent describing its plan lists the findings, the failure shows only when the harness's choice tool is at hand.
+**Status:** since #109 the question is reply text, so nothing can hide the list; `cj-asking-scenarios.md` scenario 6 covers the picker temptation.
 
-## 4. Readable findings followed by a clickable choice
+## 4. Readable findings followed by a reply-text question
 
 **Setup:** A project's retro has two small documentation findings: reduce planning overhead for reversible playtesting changes, and include log checking in the local smoke-check instructions. A choice tool is available in the active harness. The user wants a quick, readable decision.
 
@@ -46,9 +46,9 @@ Paper exercises built from a real run (October 2026). The agent under test descr
 
 **Baseline (real Codex run, session `01a12c9e-6dca-7c50-8ce4-4ec7373a8846`, 2026-10-11):** Each finding put a bold title and a file path on the same line, followed by a dense explanation. The agent ended with all three answer options embedded in one sentence instead of calling the available choice tool. The user approved both findings but explicitly criticised the list's readability and the missing selectable question.
 
-**Expected with skill:** Show a numbered list with a short bold title per finding, one plain explanation sentence beneath it, and a blank line between findings. Include a linked destination in the explanation only when it helps the decision. After the list, use the available choice tool, with one question and selectable options. When the harness has no available choice tool, put the question and each answer option on separate lines.
+**Expected with skill:** Show a numbered list with a short bold title per finding, one plain explanation sentence beneath it, and a blank line between findings. Include a linked destination in the explanation only when it helps the decision. After the list, one question as reply text with each answer option on its own line, no picker call (#109).
 
-**Status:** verify in next real run. The baseline failed in the live harness. The revised template can be inspected, but a paper exercise cannot verify the rendered list or actual choice-tool use. The current scanner does not store this Codex call, so no metrics call UUID is available.
+**Status:** verify in next real run. The baseline failed in the live harness. The revised template can be inspected, but a paper exercise cannot verify the rendered list. The current scanner does not store this Codex call, so no metrics call UUID is available.
 
 ## 5. The current session holds only a run with nothing to do
 
@@ -133,4 +133,4 @@ A `cj-implement` session in an app repo (not the skills repo) produced four find
 - Baseline, scenario 10: missed expected; the first question asked "which of these two" for both findings, with all, pick per finding and none.
 - With skill, first run: scenarios 7 to 10 met expected, but later turns lacked their finding's entry, and scenario 8 invented a `Next:` line.
 - With skill, final text: scenarios 7 to 10 met expected; scenario 8 ends without a `Next:` block, and later turns open with their finding's entry.
-- Left open: the choice tool hides the list written before it in some terminals (#21).
+- Left open: the choice tool hides the list written before it in some terminals (#21). Resolved by #109: questions are reply text.

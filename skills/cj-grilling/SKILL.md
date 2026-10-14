@@ -10,19 +10,7 @@ Interview the user until every decision the plan hangs on is made. Picture the p
 
 ## One question at a time
 
-The **frontier** is every open decision whose prerequisites are already settled. Why the plan exists, what problem it solves, comes first unless it is already stated. From the frontier, ask the one decision that unblocks the most others. Ask exactly one question per turn, as a choice:
-
-```
-**<title>**: one or two sentences of context
-1. <item>: <its details, written out; a PR, issue or doc it rests on as a full URL with one line on what it did>
-
-<the question>
-1) <item in full words> (recommended): <what it means>; <its one consequence>
-2) <item in full words>: <what it means>; <its one consequence>
-3) <item in full words>: <what it means>; <its one consequence>
-```
-
-The numbered list stands in the reply text before the question; the options repeat what the user needs, so nobody scrolls up while deciding. A question with nothing to list gets one line of context. Use the harness's choice tool where it offers one; the user can always answer in their own words. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
+The **frontier** is every open decision whose prerequisites are already settled. Why the plan exists, what problem it solves, comes first unless it is already stated. From the frontier, ask the one decision that unblocks the most others. Ask exactly one question per turn, in the shape `cj-asking` gives: the decision and why now, the facts it rests on with their sources (a PR, issue or doc as its full URL with one line on what it did), a list the question refers to written out in full above it, then numbered options for real alternatives or yes/no for a confirm. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
 
 Then wait. Each answer settles part of the tree and may open new decisions; pick the next question from the updated frontier. Never put a second question in the same turn, not even as a follow-up line.
 
@@ -58,7 +46,7 @@ Keep the project's language precise while plans are made. Reading the glossary f
 - **Write inline.** A term is resolved when the user confirms it or an authoritative document defines it. Add it to the glossary right then, in [GLOSSARY-FORMAT.md](GLOSSARY-FORMAT.md); never collect them for later. The glossary holds definitions only: no implementation notes, no plans.
 - **ADRs sparingly.** Offer one only when the decision is hard to reverse, surprising without context, and the result of a real trade-off. Show the text; write it after a yes.
 
-Term questions are ordinary questions: one at a time, as a choice with the recommended term first.
+Term questions are ordinary questions: one at a time, the recommended term first.
 
 ### Done when
 

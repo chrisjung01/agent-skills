@@ -24,7 +24,7 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
    - misses: <one blind spot, one per line>
    ```
 
-   Then ask the user to confirm them as one question with a choice: confirm all seams, change one seam (named in full words), or drop one seam (named in full words), each with its consequence, before the draft.
+   Then, before the draft, ask the user to confirm them as a yes/no choice question, the whole list directly above it: yes confirms every seam, no lets the user name the seam to change or drop.
 3. **Size.** One spec is one goal that ships on its own. Two goals that could ship separately: propose two specs, one per issue, and continue with the one the user picks first.
 4. **Draft** the spec in the shape of [SPEC.md](SPEC.md), with the Acceptance line its triggers propose, and run its checks.
 5. **Fresh reader.** Dispatch one subagent on the Opus tier with effort high where the harness takes a model and an effort, as `cj-reviewing` does for its reviewer. Its prompt holds this task, the draft and the issue if one exists; no conversation, no decision list. It reports every AC or edge-case row that a wrong implementation would still pass, naming that implementation. A finding that sharpens an AC without a new decision goes into the draft. For a finding that changes behaviour or scope, call the Skill tool with "cj-grilling" and ask it as one question that quotes the AC or row; it goes into the draft only with the user's answer. After the reader's findings or the user's answers change the draft, run the checks of step 4 again. No subagent available: say so above the draft.
