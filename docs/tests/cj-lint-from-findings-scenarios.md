@@ -69,7 +69,7 @@ Expected: no second file and no rename; the agent asks the linter whether it lin
 ## K. Retro without a fix
 
 Setup: as F, `console.log("debug", order)` is still in `src/orders/submit.ts`, fix `none`.
-Expected: the first run lints `src/orders/submit.ts` unchanged; the second run puts a corrected version at that path, different only at the `console.log` line, and runs over the whole repo; no rung drop because today's file still has the bug; afterwards the file is byte-identical to its saved copy.
+Expected: the first run lints `src/orders/submit.ts` unchanged; the second run puts a corrected version at that path, different only at the `console.log` line, and runs over the whole repo; no rung drop because today's file still has the bug, and that `console.log` counts as 1 hit in repo; afterwards the file is byte-identical to its saved copy.
 
 ## L. Own PR with uncommitted review fixes
 
