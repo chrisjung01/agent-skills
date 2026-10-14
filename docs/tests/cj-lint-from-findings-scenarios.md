@@ -178,7 +178,7 @@ Expected: step 2 makes no baseline run for the deleted file and does not treat i
 ## AD. Deletion-only fix with a parallel edit
 
 Setup: fix `uncommitted`; `git diff HEAD` on `orders/submit` deletes the debug-print line 12 the finding names and, as a second change, renames a variable on line 30.
-Expected: the deletion hunk counts as touching line 12 and only it is reversed; the faulty version keeps the line-30 rename; no fallback to the whole `HEAD` file.
+Expected: the deletion hunk's old side covers line 12, so only it is undone; the faulty version keeps the line-30 rename; no fallback to the whole `HEAD` file.
 
 ## AE. Later commit next to the fix
 
