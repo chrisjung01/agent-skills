@@ -178,7 +178,7 @@ Expected: step 2 makes no baseline run for the deleted file and does not treat i
 ## AD. Deletion-only fix with a parallel edit
 
 Setup: fix `uncommitted`; `git diff HEAD` on `orders/submit` deletes the debug-print line 12 the finding names and, as a second change, renames a variable on line 30.
-Expected: the deletion hunk's old side covers line 12, so only it is undone; the faulty version keeps the line-30 rename; no fallback to the whole `HEAD` file.
+Expected: the deletion hunk's old side holds the debug print, so only it is undone; the faulty version keeps the line-30 rename; no fallback to the whole `HEAD` file.
 
 ## AE. Later commit next to the fix
 
@@ -199,6 +199,11 @@ Expected: the debug print comes back after the line that stood above it, below t
 
 Setup: as T, but a commit after `abc123` changed the line directly above the fixed line.
 Expected: the three-way merge reports a conflict, so the first source does not apply; the next source is used and the rule does not drop a rung.
+
+## AI. Committed rename with the fix
+
+Setup: a file-location finding; commit `c0ffee` renamed `report/f` to `report/g` and also removed the banned call from it; no later change.
+Expected: the agent reads the old path from `git show -M --name-status c0ffee`, moves the file back and merges with the file at both paths; the probe holds the banned call, never an empty file; no rung drop.
 
 ## Results for the swap (#71)
 
