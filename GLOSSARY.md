@@ -45,8 +45,12 @@ _Avoid_: Tool error (a tool that ran and failed)
 A tool call that ran and returned an error.
 _Avoid_: Denial
 
+**Choice question**:
+A question to the user written as reply text, one per message: what is decided and the facts it rests on with their sources. A confirm or approval question is yes/no; real alternatives get numbered options `1)` `2)` `3)`, each with its meaning and one consequence, and a recommendation that "yes" accepts. Never asked through the harness's picker.
+_Avoid_: Picker question, Decision question
+
 **Bare question**:
-A choice question the agent asks with no visible text since the last tool call in the same turn; thinking does not count as visible. A question the bare-question hook blocked is a bare question, not a denial.
+A question the agent asked through the picker with no visible text since the last tool call in the same turn; thinking does not count as visible. Counted in older sessions only.
 _Avoid_: Empty question, Question without context
 
 **User text**:
