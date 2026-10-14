@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Accept
 
-Step 5 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. Green tests can hide a broken feature, so the user checks every acceptance criterion and edge-case row of the spec by hand, once, on the spec's last open PR, before it merges. That is **Acceptance**; the agent's evidence per PR is **Verification** and belongs to `cj-implement`. This skill builds nothing: a fix goes through `cj-implement`.
+Step 5 of the spec-driven flow, used in the big tier and, in the normal tier, when a user sees the new behaviour or someone else signs the feature off. Green tests can hide a broken feature, so the user checks every acceptance criterion and edge-case row of the spec by hand, once, on the spec's last open PR, before it merges. That is **Acceptance**; the agent's evidence per PR is **Verification** and belongs to `cj-implement`. This skill builds nothing: a fix goes through `cj-implement`.
 
 Call the Skill tool with "cj-project-context" for: repos, commands, conventions, issue-tracker, after the gate in step 1 passes. Call the Skill tool with "cj-posting" before any outbound action.
 
