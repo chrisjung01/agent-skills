@@ -65,7 +65,7 @@ The last line of every spec, `Acceptance: by hand` or `Acceptance: verified is e
 
 | Skill | Role |
 |---|---|
-| [`cj-asking`](skills/cj-asking/SKILL.md) | How every skill asks you: plain reply text, one question per message, yes/no for a confirm, numbered options only for real alternatives. |
+| [`cj-asking`](skills/cj-asking/SKILL.md) | How every skill asks you: plain reply text, one question per message, numbered options for every question, `1) Yes` `2) No` for a confirm. |
 | [`cj-grilling`](skills/cj-grilling/SKILL.md) | One question at a time, in the shape `cj-asking` gives, the recommended option first; keeps the domain language precise and writes the glossary and ADRs. |
 | [`cj-reviewing`](skills/cj-reviewing/SKILL.md) | The reviewer brief (CORRECTNESS, STANDARDS, SPEC) and the one severity scale. |
 | [`cj-posting`](skills/cj-posting/SKILL.md) | The one gate for anything others see: draft, clean with `unslop`, show, ask, then act. |

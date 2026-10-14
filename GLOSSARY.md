@@ -46,7 +46,7 @@ A tool call that ran and returned an error.
 _Avoid_: Denial
 
 **Choice question**:
-A question to the user written as reply text, one per message: what is decided and the facts it rests on with their sources. A confirm or approval question is yes/no; real alternatives get numbered options `1)` `2)` `3)`, each with its meaning and one consequence, and a recommendation that "yes" accepts. Never asked through the harness's picker.
+A question to the user written as reply text, one per message: what is decided and the facts it rests on with their sources. A confirm or approval question has the numbered options `1) Yes` and `2) No`; real alternatives get `1)` `2)` `3)`, each with its meaning and one consequence, and a recommendation that "yes" accepts. Never asked through the harness's picker.
 _Avoid_: Picker question, Decision question
 
 **Bare question**:

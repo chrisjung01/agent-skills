@@ -13,8 +13,8 @@ A **choice question** is a question to the user, written as reply text. The user
 1. **Plain reply text, never the picker.** No choice or question tool, whatever the harness offers (in Claude Code, `AskUserQuestion`).
 2. **One question per message.** The next question comes only after the user answered this one. No follow-up question in the same message, not even as a last line.
 3. **Everything needed to decide stands in the question.** What is decided and why now; the facts it rests on, each with its source (file, issue, command, session) when it was looked up; every domain term explained in plain words. A list the question refers to is written out in full, numbered, directly above it, never left in thinking and never only on a page; a list over 7 items splits under headings in the reply.
-4. **A confirm or approval question is yes/no.** "Post this?", "Does the list fit?", "Go ahead?": one line on what yes does, one line on what no does. No numbered options.
-5. **Numbered options only for real alternatives.** Each gets `1)` `2)` `3)`, a meaning line and a consequence line. The recommended one comes first, and a recommendation line names it with one sentence why.
+4. **A confirm or approval question has two numbered options.** "Post this?", "Does the list fit?", "Go ahead?": `1) Yes` and `2) No`, each with one line on what happens. The user answers with the number.
+5. **Real alternatives are numbered too.** Each gets `1)` `2)` `3)`, a meaning line and a consequence line. The recommended one comes first, and a recommendation line names it with one sentence why.
 6. **Yes takes the recommendation.** "yes", "ja", "ok" or the like after numbered options picks the recommended option. Do not ask again.
 7. **An answer in the user's own words counts.** Act on it; do not re-ask it as a choice. Only an answer that leaves the decision open gets a follow-up question.
 8. **A confirm question has the whole list directly above it,** even when the list was shown messages ago. Scrolling up is what the user cannot do mid-decision.
@@ -38,14 +38,14 @@ Numbered options, for real alternatives:
 Recommendation: 1, <one sentence why>. (yes takes it)
 ```
 
-Yes/no, for a confirm or approval:
+Two options, for a confirm or approval:
 
 ```
 **<what is confirmed>**
 <the whole list or draft it is about, numbered>
 
-Yes: <what happens>
-No: <what happens instead>
+1) **Yes**: <what happens>
+2) **No**: <what happens instead>
 ```
 
 Write the labels (`Consequence`, `Recommendation`, `Yes`, `No`) and `(yes takes it)` in the user's language.
@@ -58,7 +58,8 @@ Write it scannable: the first line is the result or the decision needed. One sen
 |---|---|
 | The list exists only in thinking; the reply says "Does the list fit?" | Write the whole numbered list in the reply, then ask. |
 | Three questions in one message, to save turns | One question; the rest after the answer. |
-| A confirm question as options 1) Post 2) Edit 3) Cancel | Yes/no, each with what it does. |
+| A confirm question as options 1) Post 2) Edit 3) Cancel | Exactly `1) Yes` and `2) No`, each with what it does. |
+| A confirm question the user must answer by typing "ja" or "nein" | Number the two options; the user types 1 or 2. |
 | "ja" gets a follow-up "Which option?" | Take the recommended option. |
 | The user answers in a sentence; the agent asks the same as numbered options | Act on the sentence. |
 | A skill says "as a choice through the choice tool" | Ask as reply text; this skill wins. |
