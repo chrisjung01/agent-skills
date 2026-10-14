@@ -61,8 +61,12 @@ _Avoid_: Count, Frequency (events per call; events inside one call are not indep
 ## Spec-driven flow
 
 **Acceptance**:
-The user's manual check of a whole spec, every acceptance criterion and edge-case row with the user's observation, run once on the last open PR of the spec before it merges. Posted as an `## Acceptance` comment on the spec's issue.
+The user's manual check of a whole spec, every acceptance criterion and edge-case row with the user's observation, run once on the last open PR of the spec before it merges. Posted as an `## Acceptance` comment on the spec's issue. A spec whose Acceptance line says verified is enough gets no check by hand; its `## Acceptance` comment only records the kill issue and deviations.
 _Avoid_: Verification (the agent's evidence per PR), Sign-off, Playtest
+
+**Acceptance line**:
+The last line of a spec, `Acceptance: by hand` or `Acceptance: verified is enough`, with the trigger that set it. It decides in every tier whether Acceptance checks the spec by hand.
+_Avoid_: Acceptance level, Sign-off flag
 
 **Verification**:
 The agent's evidence per PR that each acceptance criterion and edge-case row of its ticket is met, from a test, a check or a manual observation; it becomes the Verified block of the PR body.
