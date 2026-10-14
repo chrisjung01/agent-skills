@@ -45,8 +45,12 @@ _Avoid_: Tool error (a tool that ran and failed)
 A tool call that ran and returned an error.
 _Avoid_: Denial
 
+**Choice question**:
+A question to the user written as reply text, one per message: what is decided and the facts it rests on with their sources. A confirm or approval question is yes/no; real alternatives get numbered options `1)` `2)` `3)`, each with its meaning and one consequence, and a recommendation that "yes" accepts. Never asked through the harness's picker.
+_Avoid_: Picker question, Decision question
+
 **Bare question**:
-A choice question the agent asks with no visible text since the last tool call in the same turn; thinking does not count as visible. A question the bare-question hook blocked is a bare question, not a denial.
+A question the agent asked through the picker with no visible text since the last tool call in the same turn; thinking does not count as visible. Counted in older sessions only.
 _Avoid_: Empty question, Question without context
 
 **User text**:
@@ -67,6 +71,10 @@ _Avoid_: Verification (the agent's evidence per PR), Sign-off, Playtest
 **Verification**:
 The agent's evidence per PR that each acceptance criterion and edge-case row of its ticket is met, from a test, a check or a manual observation; it becomes the Verified block of the PR body.
 _Avoid_: Acceptance (the user's check of the whole spec)
+
+**Tier**:
+The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it.
+_Avoid_: Lane, Size class, Track
 
 ## Review
 
