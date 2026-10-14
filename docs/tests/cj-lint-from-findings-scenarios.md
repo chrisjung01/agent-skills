@@ -205,6 +205,11 @@ Expected: the three-way merge reports a conflict, so the first source does not a
 Setup: a file-location finding; commit `c0ffee` renamed `report/f` to `report/g` and also removed the banned call from it; no later change.
 Expected: the agent reads the old path from `git show -M --name-status c0ffee`, moves the file back and merges with the file at both paths; the probe holds the banned call, never an empty file; no rung drop.
 
+## AJ. Finding's code never committed
+
+Setup: fix `uncommitted`; `HEAD` imports `./lib`, the session changed it to `../internal/lib` without committing (the finding), and the fix changed it to `@pkg/lib`.
+Expected: no hunk's old side holds `../internal/lib`, so the first source fails; the whole `HEAD` file lacks it too and fails; the import quoted in the finding goes in at the finding's line and the rule fires; no rung drop.
+
 ## Results for the swap (#71)
 
 - RED (2026-10-14, text before #71, one rep per scenario): 18 of 18 missed expected.
