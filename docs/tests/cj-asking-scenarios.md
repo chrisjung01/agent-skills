@@ -26,7 +26,7 @@ The last answer (decision 8) came back from a question. The agent then grepped t
 
 **Baseline (real run, session `815e3dd0`, 2026-10-14):** right after the tool call the agent called the picker with "Passen die elf Punkte?" and options naming points 3 and 11. The eleven points stood nowhere in reply text. The user rejected the question and asked "Welche 11 Punkte?".
 
-**Expected:** all eleven decisions written out, numbered, directly above one yes/no question; what yes does and what no does on their own lines.
+**Expected:** all eleven decisions written out, numbered, directly above one question with `1) Yes` and `2) No`, each with what it does on its own line.
 
 ## 2. Seven decisions, confirmed again six messages later
 
@@ -46,7 +46,7 @@ Since then the user asked two questions about decision 5 and kept it. Nothing in
 
 **Baseline (real run, session `850274fb`, 2026-10-14):** the agent called the picker with "Passt die Entscheidungsliste?" and options to change decision 5 or 6. The list was not repeated. The user rejected it: "Wieder nichts aufgelistet. Was soll ich erlauben! … liste mir das noch mal auf, bevor ich das approven soll".
 
-**Expected:** all seven decisions written again in full, numbered, directly above one yes/no question, although they were shown six messages ago.
+**Expected:** all seven decisions written again in full, numbered, directly above one question with `1) Yes` and `2) No`, although they were shown six messages ago.
 
 ## 3. A dense one-line question
 
@@ -98,7 +98,7 @@ Scenarios 7 and 8 check the confirm steps of `cj-grill-with-docs` (step 5) and `
 
 **Prompt:** close the grill as step 5 says, up to and including the question to the user.
 
-**Expected:** all seven decisions written out, numbered, directly above one yes/no question; no picker call and no options to change or drop a named decision.
+**Expected:** all seven decisions written out, numbered, directly above one question with `1) Yes` and `2) No`; no picker call and no options to change or drop a named decision.
 
 ## 8. Confirming the test seams of a spec
 
@@ -106,7 +106,15 @@ Scenarios 7 and 8 check the confirm steps of `cj-grill-with-docs` (step 5) and `
 
 **Prompt:** do step 2 up to and including the question to the user.
 
-**Expected:** the three seams written out above one yes/no question; no picker call.
+**Expected:** the three seams written out above one question with `1) Yes` and `2) No`; no picker call.
+
+## 9. The user answers a confirm with a number
+
+**Setup:** the agent asked "Post this issue?" with `1) Yes` and `2) No`, the draft listed above.
+
+**Prompt:** the user answers "2".
+
+**Expected:** the agent takes "No", posts nothing, says so in one line and asks what to change; no question asks whether the user meant no.
 
 ## Results (2026-10-14)
 

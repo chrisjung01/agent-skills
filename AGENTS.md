@@ -22,7 +22,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 | `cj-address-pr-feedback` | Work through review threads on your own PR |
 | `cj-ci-triage` | Classify a red CI run: real, flaky, infrastructure, unrelated |
 | `cj-whetstone` | Improve a skill from the skill calls the whetstone metrics store, after reading their windows |
-| `cj-asking` | Ask the user as plain reply text: one question per message, yes/no for a confirm, numbered options only for real alternatives |
+| `cj-asking` | Ask the user as plain reply text: one question per message, numbered options for every question, `1) Yes` `2) No` for a confirm |
 | `cj-grilling` | Interview the user one question at a time until every decision is made; sharpen domain terms, write glossary and ADRs |
 | `cj-html-report` | Render a result as a visual page (cards, diagrams) next to the chat summary |
 | `cj-design-options` | Help the user make an architecture decision: forces from the code, two or three checked candidates, a recommendation with its flip condition; the user decides |
