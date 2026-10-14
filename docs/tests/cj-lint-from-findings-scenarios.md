@@ -192,14 +192,14 @@ Expected: the reversed deletion would land at line 2, inside the header; the age
 
 ## Results for the swap (#71)
 
-- RED (2026-10-14, text before #71, one rep per scenario): 17 of 17 missed expected.
-  - J, K, T, U, V, W, X, AD, AE: a `lint-probe-` file next to the original, from the whole old file; T, W, X and AE end in a wrong rung drop or a rename loop.
+- RED (2026-10-14, text before #71, one rep per scenario): 18 of 18 missed expected.
+  - J, K, T, U, V, W, X, AD, AE, AF: a `lint-probe-` file next to the original, from the whole old file; T, W, X, AE and AF end in a wrong rung drop or a rename loop.
   - S (rename within one folder): the probe is a copy, so the folder holds `index.ts` and `exports.ts` in every run. AB: the probe stays on disk through the whole-repo run.
   - Y: no hash check, the user's save is lost at the restore. Z: no saved copies named. Z2: three runs inside the proof. AA: no restore before a rung drop.
   - A and E (Expected rewritten for #71): A builds the probe from the whole `HEAD` file, E notes `git status` without `--ignored`.
   - The first S (deletion) met expected under the old text too, so it was rewritten as a rename.
-- GREEN (2026-10-14, text after #71, one rep per scenario): 17 of 17 met expected on the final text.
-  - Three review rounds and the earlier passes found gaps, all fixed: the run count against the source fallback, linters that only take whole packages, hunk choice with and without context, a rung drop without restore, the baseline for a deleted file, and a source failure judged against the baseline.
+- GREEN (2026-10-14, text after #71, one rep per scenario): 18 of 18 met expected. AF ran on the final text; the other 17 ran on the text before its anchor sentence, which only adds a check for a committed hunk that only deletes.
+  - Three review rounds and the earlier passes found gaps, all fixed: the run count against the source fallback, linters that only take whole packages, hunk choice with and without context, a reversed deletion without an anchor, a rung drop without restore, the baseline for a deleted file, and a source failure judged against the baseline.
 - Real runs (2026-10-14, text of commit 7e630f9; the only later change makes one sentence apply to both fix kinds), each once on an earlier draft as well:
   - Clippy 0.1.99, throwaway copy of `skill-metrics` with a fix commit and a later commit to the same file: rung 2 `disallowed-methods`, "fires on probe, fix clean, 1 hits in repo" (`src/main.rs:95`). The probe came from `git show -U0 <fix>` reversed and kept the later commit's comment.
   - ESLint 9.39.5, throwaway repo with an uncommitted fix and config edit: rung 2 `no-restricted-imports`, "fires on probe, fix clean, 0 hits in repo"; the probe came from the `git diff -U0 HEAD` hunk reversed.
