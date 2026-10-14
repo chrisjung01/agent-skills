@@ -566,8 +566,8 @@ pub fn html(calls: &[ReportCall], dates: &Dates) -> String {
     } else {
         format!(
             "<p>A rate is the share of skill calls with at least one such event, with its 95 % \
-             Wilson interval. A bare question is a choice question asked with no visible text since \
-             the last tool call; its rate counts every call, also those that asked nothing. \
+             Wilson interval. A bare question is a question asked through the picker with no visible \
+             text since the last tool call; its rate counts every call, also those that asked nothing. \
              Recommended is recommended answers over questions. A skill marked \
              nested never had a call of its own; its row counts the windows of other skills' \
              calls that loaded it. Those calls still count only in their own skill's row. Calls \

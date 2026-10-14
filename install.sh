@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Symlinks every skill in ./skills into the skill directories of Claude Code and Codex, builds
 # the cj-whetstone metrics binary, registers its Codex SessionEnd hook in $CODEX_HOME/hooks.json
-# (default ~/.codex, backed up first) and prints its Claude Code hook lines (settings.json stays
+# (default ~/.codex, backed up first) and prints its Claude Code hook line (settings.json stays
 # untouched).
 #
 #   ./install.sh                      global: ~/.claude/skills + ~/.agents/skills
@@ -105,12 +105,10 @@ if [[ -z "$ONLY" || "$ONLY" == "cj-whetstone" ]]; then
       echo "Without the hook, /cj-whetstone's full scan still collects Codex sessions."
     fi
     hook="$SKILLS_DIR/cj-whetstone/scripts/session-end-hook.sh"
-    bare="$SKILLS_DIR/cj-whetstone/scripts/bare-question-hook.sh"
     cat <<HOOK
 
-Add these hooks to ~/.claude/settings.json under "hooks", if they are not there yet:
-  "SessionEnd": [{ "hooks": [{ "type": "command", "command": "bash \"$hook\"" }] }],
-  "PreToolUse": [{ "matcher": "AskUserQuestion", "hooks": [{ "type": "command", "command": "bash \"$bare\"" }] }]
+Add this hook to ~/.claude/settings.json under "hooks", if it is not there yet:
+  "SessionEnd": [{ "hooks": [{ "type": "command", "command": "bash \"$hook\"" }] }]
 HOOK
   elif [[ "$TARGET_ROOT" != "$HOME" ]]; then
     :  # the global Codex hook stays for the global install
@@ -120,4 +118,9 @@ HOOK
   elif [[ -f "$codex_home/hooks.json" ]]; then
     echo "⚠ skill-metrics not built: remove the SessionEnd hook running $codex_hook from $codex_home/hooks.json yourself"
   fi
+fi
+
+# The bare-question hook is gone (#107); an old entry for it in settings.json is dead weight.
+if grep -qs "bare-question-hook.sh" "$HOME/.claude/settings.json"; then
+  echo "⚠ ~/.claude/settings.json still runs bare-question-hook.sh: remove the hook entry that runs it, the script no longer exists"
 fi
