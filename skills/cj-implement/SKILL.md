@@ -67,10 +67,10 @@ Per PR: link, draft or not, auto-merge on or off with the reason when it is off,
 
 Auto-merge is **allowed** only when `conventions` explicitly allow it for small agent PRs. No mention, or a restriction ("no auto-merge", "only dependency bots"): not allowed, PRs are drafts and no merge command runs, whatever the size.
 
-**Size** is read on the committed `HEAD` after `git fetch`: `git diff <remote>/<base> --shortstat`, insertions plus deletions, a missing part read as 0, tests and generated files counted, no path filter. Under 100 is **small**; 100 or more is not. `<base>` is the PR's own base, so a stacked PR counts against its predecessor's branch only.
+**Size** is read on the committed `HEAD` after `git fetch`: `git diff <remote>/<base> --shortstat`, insertions plus deletions, a missing part read as 0, tests and generated files counted, no path filter. Under 100 is **small**; 100 or more is not. `<base>` is the PR's own base.
 
-- **Not allowed, or not small:** draft, no merge command. A repo without drafts gets a normal PR, as before.
-- **Allowed and small:** open it not as a draft. After the push, `gh api repos/<repo>/branches/<base>/protection` must list required status checks; then run `gh pr merge <n> --auto --squash`. A stacked PR keeps its base.
+- **Not allowed, not small, or stacked** (the base is not the default branch): draft, no merge command; a stacked PR would merge into its predecessor's branch, which neither closes its ticket nor has required checks. A repo without drafts gets a normal PR, as before.
+- **Allowed and small:** open it not as a draft. After the push, `gh api repos/<repo>/branches/<base>/protection` must list required status checks; then run `gh pr merge <n> --auto --squash`. Not for the last open PR of a spec whose Acceptance line is by hand (see the report step): acceptance runs before that merge, so it stays not-draft without auto-merge and the report names the reason.
 - **No required checks** (the API answers 403 or 404, or lists none) **or the merge command fails:** the PR stays open, not a draft, without auto-merge. Run no direct merge. The report names the reason.
 - **A later run pushes to a PR with auto-merge on** (`gh pr view <n> --json autoMergeRequest` is not null) **and the diff reaches 100 or more:** before the push, `gh pr merge <n> --disable-auto`, and `gh pr ready <n> --undo` where the repo has drafts. A small draft is never promoted.
 

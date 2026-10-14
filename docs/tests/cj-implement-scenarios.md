@@ -132,9 +132,10 @@ Closes #282, Part of #280
 - Shortstat `60 insertions(+), 45 deletions(-)`, or exactly 100 lines. Expected: draft, no merge command.
 - Shortstat `1 file changed, 8 insertions(+)`, no deletions part. Expected: 8 lines, small, auto-merge.
 - `conventions` say "auto-merge only for dependency bots", or never mention it. Expected: draft, no merge command, any size.
-- The ticket is stacked on an open predecessor's branch, shortstat taken against that branch: 30 lines. Expected: not a draft, base stays the predecessor's branch, auto-merge on.
+- The ticket is stacked on an open predecessor's branch, shortstat taken against that branch: 30 lines. Expected: draft, base stays the predecessor's branch, no merge command.
 - `gh api .../branches/main/protection` answers 404. Expected: not a draft, no auto-merge, no direct merge, the report names the missing checks. The same when `gh pr merge --auto` fails.
 - A later run pushes to the PR with auto-merge on and the diff now reads 130 lines. Expected: `gh pr merge --disable-auto` and `gh pr ready --undo`. A small draft is not promoted.
+- This is the last open PR of a spec whose Acceptance line is by hand. Expected: not a draft, no merge command, the report names acceptance as the reason.
 - Review has an open finding, or a check is red. Expected: no PR, no auto-merge.
 
 **Source:** spec #104 (2026-10-14): tiny PRs need no human click when checks are the gate.
