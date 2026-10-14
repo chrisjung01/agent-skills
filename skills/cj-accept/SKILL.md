@@ -1,12 +1,12 @@
 ---
 name: cj-accept
-description: Check a whole spec by hand on its last open PR before it merges, row by row, and post the result as an "## Acceptance" comment. Step 5 of the spec-driven flow.
+description: Check a whole spec by hand on its last open PR before it merges, row by row, and post the result as an "## Acceptance" comment; only the records when the spec says verified is enough. Step 5 of the spec-driven flow.
 disable-model-invocation: true
 ---
 
 # Accept
 
-Step 5 of the spec-driven flow, used in the big tier and, in the normal tier, when a user sees the new behaviour or someone else signs the feature off. Green tests can hide a broken feature, so the user checks every acceptance criterion and edge-case row of the spec by hand, once, on the spec's last open PR, before it merges. That is **Acceptance**; the agent's evidence per PR is **Verification** and belongs to `cj-implement`. This skill builds nothing: a fix goes through `cj-implement`.
+Step 5 of the spec-driven flow, used when the spec's Acceptance line says by hand; with verified is enough it only writes the records (step 1). Green tests can hide a broken feature, so the user checks every acceptance criterion and edge-case row of the spec by hand, once, on the spec's last open PR, before it merges. That is **Acceptance**; the agent's evidence per PR is **Verification** and belongs to `cj-implement`. This skill builds nothing: a fix goes through `cj-implement`.
 
 Call the Skill tool with "cj-project-context" for: repos, commands, conventions, issue-tracker, after the gate in step 1 passes. Call the Skill tool with "cj-posting" before any outbound action.
 
@@ -16,11 +16,13 @@ Call the Skill tool with "cj-project-context" for: repos, commands, conventions,
 - **The tickets** are the spec's sub-issues, or the spec's issue itself when it has none. A closed ticket is done.
 - **The open PRs of the spec** are the open PRs that close one of its tickets. Look them up in the spec's repo and every repo that holds a ticket: `gh pr list --repo <repo> --state open --json number,url,headRefName,headRefOid,closingIssuesReferences`.
 - Gate, first match wins:
-  - No `## Spec` comment: stop and name `/cj-grill-with-docs <issue>` and `/cj-to-spec <issue>`.
+  - No `## Spec` comment and no issue body starting with `## Spec`: stop and name `/cj-grill-with-docs <issue>` and `/cj-to-spec <issue>`.
   - An open ticket without an open PR: stop and name `/cj-implement <issue>`.
   - Two or more open PRs: stop. Name the open PRs with links, in blocked-by order, and say to merge all but the last before acceptance. Nothing is asked.
   - Exactly one open PR: it is the **last PR**. A one-ticket spec and `one-pr` mode land here with their single PR.
   - Every ticket closed, no open PR: every PR is merged; acceptance runs on the default branch, and a failed row can only become a follow-up.
+- **The Acceptance line**: the last `Acceptance:` line of the latest `## Spec` comment, or of the issue body when it starts with `## Spec`. Only `verified is enough` counts as verified is enough; any other value, or no line, counts as by hand. By hand: go on with step 2.
+- **Records-only run.** Verified is enough, and records that no earlier `## Acceptance` comment holds yet: a `**Kill criterion:**` line in a `## Challenge` comment, or a `Deviation:` comment. It runs step 2 without any merge of the default branch and without the line on how to start the feature, skips step 3, and runs steps 4 to 6 without rows, follow-ups or fix-now; its next step names `/cj-retro` only after a session with friction. Verified is enough and nothing to record: say nothing is to be checked or recorded, post nothing, stop.
 
 ## 2. Set up
 
@@ -32,7 +34,7 @@ Call the Skill tool with "cj-project-context" for: repos, commands, conventions,
 ## 3. Ask every row
 
 - **Rows**: every AC of the spec in order, then every row of its edge-case table. No edge-case table: the ACs only.
-- **Rerun.** The latest `## Acceptance` comment names the sha it checked. Read `git diff <that sha> <checked sha>`. Ask only the rows marked not met with fix now, and the rows whose behaviour that diff changes; carry every other row over unchanged, a follow-up row with its link. Before the first row, list the rows to ask, each with one line on why (failed, or which change touches it); name the default branch's commits since the earlier comment's date (`git log <remote>/<default branch> --since=<date>`), which that diff does not cover; and ask once whether to add rows ("as listed" first, "add rows", "ask every row").
+- **Rerun.** The latest `## Acceptance` comment with rows names the sha it checked; a records-only comment counts as no earlier check, so every row is asked. Read `git diff <that sha> <checked sha>`. Ask only the rows marked not met with fix now, and the rows whose behaviour that diff changes; carry every other row over unchanged, a follow-up row with its link. Before the first row, list the rows to ask, each with one line on why (failed, or which change touches it); name the default branch's commits since the earlier comment's date (`git log <remote>/<default branch> --since=<date>`), which that diff does not cover; and ask once whether to add rows ("as listed" first, "add rows", "ask every row").
 - **One row per turn.** Show the row verbatim and what to try: the Given as setup, the When as the action, the Then as what to look for. Ask as a choice: "Met" or "Not met"; the user's own words are the observation. This question and the next have two options and no recommended one: the agent has no evidence to recommend from. "Met" without words records "as described". "Not met" without words: ask once what they saw.
 - **A row not met** gets a second question, a choice with two options: "Fix now" (built in the last PR through `cj-implement`) or "Follow-up" (a new issue, the last PR merges without it). With every PR merged, only "Follow-up" exists: say so and ask nothing.
 - Keep the results in the harness's task list, one entry per row, so a long run loses none.
@@ -68,7 +70,9 @@ Only in a run with no fix-now row left: a fix through `cj-implement` can add dev
    - <decision>: listed
    ```
 
-   A row asked again and now met has an empty choice. A carried row keeps its result, observation and choice, followed by "(carried from <link to the comment where it was last asked>)", which replaces an earlier such marker. Every row of the spec appears, none twice. The kill line otherwise reads "no challenge comment, nothing filed", "no kill criterion, nothing filed" or "declined, nothing filed"; the deviations line reads "none" without `Deviation:` comments. A run with fix-now rows left has neither line.
+   A records-only run replaces the line under the heading with `Verified is enough, per the spec's Acceptance line; no row checked by hand.` and has no table.
+
+   A row asked again and now met has an empty choice. A carried row keeps its result, observation and choice, followed by "(carried from <link to the comment where it was last asked>)", which replaces an earlier such marker. Every row of the spec appears, none twice; a records-only run has no rows. The kill line otherwise reads "no challenge comment, nothing filed", "no kill criterion, nothing filed" or "declined, nothing filed"; the deviations line reads "none" without `Deviation:` comments. A run with fix-now rows left has neither line.
 3. Show the follow-up drafts, the kill issue draft, the ADR and glossary text with its commit message and, when every PR is merged, the records PR's title and body, and the comment (issue numbers as placeholders), all in one reply. Then ask through `cj-posting`, one question at a time; nothing to file or write skips its question:
    1. Filing the follow-ups and the kill issue. A follow-up the user declines: ask that row's choice again while the last PR is open; with every PR merged, the row stays not met with "no follow-up" as its choice. A row that turns fix now: drop the kill issue draft, the records and both lines from the comment, and show the changed comment. Then run File for what got a yes; this skill carries that yes, so File asks nothing.
    2. Writing and pushing the ADR and glossary text, with the records PR when every PR is merged. Write them as step 4 says; declined text leaves its deviation listed only.
@@ -81,8 +85,8 @@ Report the comment's link, one line per row not met with its choice, the follow-
 The next step:
 
 - Fix-now rows left: `/clear`, then `/cj-implement <issue>` to build them on the last PR, then `/cj-accept <issue>` again.
-- No fix-now row left: merge the last PR (when one is still open) and the records PR (when one was opened), close the spec's issue, then `/cj-retro`. Merging and closing are the user's; this skill does neither.
+- No fix-now row left: merge the last PR (when one is still open) and the records PR (when one was opened), close the spec's issue, then `/cj-retro`, after a records-only run only after a session with friction. Merging and closing are the user's; this skill does neither.
 
 Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command or action per line, each followed by ` · ` and its reason in a few words. A step that names a PR, issue or comment carries its full link, even when the link appears earlier in the reply. No table. Name the worktree with `git worktree remove <path>` as the last line once no fix-now row is left.
 
-Done when every row has a result, every failed row has its choice, the kill issue, the records and the comment are done after a yes or their decline reported, and the reply ends with the next step.
+Done when every row has a result (a records-only run has none), every failed row has its choice, the kill issue, the records and the comment are done after a yes or their decline reported, and the reply ends with the next step.
