@@ -10,9 +10,9 @@ A **choice question** is a question to the user, written as reply text. The user
 
 ## The rules
 
-1. **Plain reply text, never the picker.** No `AskUserQuestion`, no choice or question tool, whatever the harness offers.
+1. **Plain reply text, never the picker.** No choice or question tool, whatever the harness offers (in Claude Code, `AskUserQuestion`).
 2. **One question per message.** The next question comes only after the user answered this one. No follow-up question in the same message, not even as a last line.
-3. **Everything needed to decide stands in the question.** What is decided and why now; the facts it rests on, each with its source (file, issue, command, session) when it was looked up; every domain term explained in plain words. A list the question refers to is written out in full, numbered, directly above it, never left in thinking.
+3. **Everything needed to decide stands in the question.** What is decided and why now; the facts it rests on, each with its source (file, issue, command, session) when it was looked up; every domain term explained in plain words. A list the question refers to is written out in full, numbered, directly above it, never left in thinking and never only on a page; a list over 7 items splits under headings in the reply.
 4. **A confirm or approval question is yes/no.** "Post this?", "Does the list fit?", "Go ahead?": one line on what yes does, one line on what no does. No numbered options.
 5. **Numbered options only for real alternatives.** Each gets `1)` `2)` `3)`, a meaning line and a consequence line. The recommended one comes first, and a recommendation line names it with one sentence why.
 6. **Yes takes the recommendation.** "yes", "ja", "ok" or the like after numbered options picks the recommended option. Do not ask again.
@@ -48,9 +48,9 @@ Yes: <what happens>
 No: <what happens instead>
 ```
 
-Write the labels (`Consequence`, `Recommendation`, `Yes`, `No`) in the user's language.
+Write the labels (`Consequence`, `Recommendation`, `Yes`, `No`) and `(yes takes it)` in the user's language.
 
-Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, load the `cj-asking` skill and ask as it says.
+Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
 
 ## Common mistakes
 
