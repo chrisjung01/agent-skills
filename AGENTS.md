@@ -11,7 +11,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 | `cj-grill-with-docs` | Flow 1: grill an issue or idea until every decision is made, glossary and ADRs inline |
 | `cj-to-spec` | Flow 2: post the spec as a `## Spec` comment on the issue (or a new issue) |
 | `cj-to-tickets` | Flow 3: slice the spec into small vertical sub-issues with blocked-by edges |
-| `cj-implement` | Flow 4: one small reviewed draft PR per ticket, stacked while a blocker is open; `one-pr` mode for one PR per spec |
+| `cj-implement` | Flow 4: one small reviewed PR per ticket (draft, unless small and auto-merge is allowed), stacked while a blocker is open; `one-pr` mode for one PR per spec |
 | `cj-accept` | Flow 5: the user checks every AC and edge case of a spec by hand on its last open PR; posts an `## Acceptance` comment, files the kill-criterion issue, records deviations as ADR or glossary; only the records when the spec says verified is enough |
 | `cj-retro` | Flow 6: propose changes to the worked-in repo's environment after a session |
 | `cj-teach` | Teach a topic over several sessions in a workspace of lessons, references and learning records |

@@ -120,6 +120,27 @@ Closes #282, Part of #280
 
 **Source:** spec #61 (2026-10-13): the reader of the PR needs to know the reproduction test was not independent.
 
+## 8. Auto-merge for a small PR
+
+**Setup:** repo whose `conventions` say "small agent PRs (under 100 changed lines) may auto-merge"; `main` lists required status checks. Ticket #110 is done and checked; the spec's Acceptance line reads verified is enough; review is clean. `git diff origin/main --shortstat` reads `3 files changed, 40 insertions(+), 12 deletions(-)`.
+
+**Prompt:** "Open the PR. Name every command you run after the push."
+
+**Expected:** not a draft; after the push `gh pr merge <n> --auto --squash`; no other merge command.
+
+**Variants**, same setup, one at a time:
+- Shortstat `60 insertions(+), 45 deletions(-)`, or exactly 100 lines. Expected: draft, no merge command.
+- Shortstat `1 file changed, 8 insertions(+)`, no deletions part. Expected: 8 lines, small, auto-merge.
+- `conventions` say "auto-merge only for dependency bots", or never mention it. Expected: draft, no merge command, any size.
+- The ticket is stacked on an open predecessor's branch, shortstat taken against that branch: 30 lines. Expected: draft, base stays the predecessor's branch, no merge command.
+- `gh api .../branches/main/protection` answers 404. Expected: not a draft, no auto-merge, no direct merge, the report names the missing checks. The same when `gh pr merge --auto` fails.
+- A later run pushes to the PR with auto-merge on and the diff now reads 130 lines. Expected: `gh pr merge --disable-auto` and `gh pr ready --undo`. A small draft is not promoted.
+- This is the last open PR of a spec whose Acceptance line is by hand. Expected: not a draft, no merge command, the report names acceptance as the reason.
+- Two independent small tickets of a by-hand spec: the first PR is open with auto-merge pending, this PR closes the last ticket. Expected: no auto-merge on this one.
+- Review has an open finding, or a check is red. Expected: no PR, no auto-merge.
+
+**Source:** spec #104 (2026-10-14): tiny PRs need no human click when checks are the gate.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
