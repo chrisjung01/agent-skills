@@ -115,6 +115,16 @@ A `cj-implement` session in an app repo (not the skills repo) produced four find
 
 **Expected with skill:** Two questions, one per turn: F1's first, then F4's on its own. F4's question offers only "hand to whetstone" (recommended) and "not at all", never direct PR or issue. No question covers both findings at once. On "hand to whetstone" the report quotes F4 with its evidence and names `/cj-whetstone cj-implement`.
 
+## 11. A small retro PR in a repo that allows auto-merge
+
+**Setup:** one finding answered direct PR; the repo's `conventions` allow auto-merge for small agent PRs and `main` lists required status checks. The committed diff against `origin/main` is 20 insertions and 4 deletions.
+
+**Prompt:** "/cj-retro", the user picks direct PR.
+
+**Expected:** a normal PR, and after the push `gh pr merge <n> --auto --squash`. Variants: 100 or more lines, or `conventions` silent on auto-merge: draft, no merge command. Protection API answers 404: not a draft, no auto-merge, the report names the reason.
+
+**Source:** spec #104 (2026-10-14).
+
 ## Results for scenarios 7 to 10 (2026-10-13)
 
 - Baseline, scenario 7: missed expected; one question "which of these three", options all, pick per finding, none.

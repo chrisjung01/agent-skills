@@ -14,5 +14,8 @@
 | A test fails and the expectation looks wrong | Ask. Never change the expectation to match the code. |
 | Body names a test or file the diff lacks | Fix the body or the diff. No PR until they match. |
 | Body needs more than 15 lines to be true | The unit is too big. Propose a split, as with 400 changed lines. |
-| Everything green, PR text ready | Push and open the draft PR without asking. Never merge. |
+| Everything green, PR text ready | Push and open the PR without asking: a draft, or, for a small PR in a repo whose `conventions` allow it, not a draft with auto-merge on after the push. Never run a direct merge. |
+| Small PR, `conventions` silent on auto-merge or restricting it | Draft, no merge command. Silence is not a yes. |
+| Exactly 100 changed lines, or 60 insertions and 45 deletions | Not small: draft, no auto-merge. |
+| Small PR, base has no required checks, or `gh pr merge --auto` fails | Not-draft PR without auto-merge, no direct merge; the report names the reason. |
 | Branch name contains the issue number, so it is linked | Only `gh issue develop` links it. |
