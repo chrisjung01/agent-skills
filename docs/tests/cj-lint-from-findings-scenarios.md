@@ -187,12 +187,15 @@ Expected: the fix's hunk is reversed without context lines and applies; the faul
 
 ## Results for the swap (#71)
 
-- RED (2026-10-14, text before #71, one rep per scenario): 10 of 10 missed expected; Z and Z2 were then one scenario, both points missed.
-  - J, K, T, U, V, W, X: a `lint-probe-` file next to the original, from the whole old file; T, W and X end in a wrong rung drop or a rename loop.
-  - S (rename within one folder): the probe is a copy, so the folder holds `index.ts` and `exports.ts` in every run.
-  - Y: no hash check, the user's save is lost at the restore. Z: no saved copies named. Z2: three runs inside the proof.
+- RED (2026-10-14, text before #71, one rep per scenario): 17 of 17 missed expected.
+  - J, K, T, U, V, W, X, AD, AE: a `lint-probe-` file next to the original, from the whole old file; T, W, X and AE end in a wrong rung drop or a rename loop.
+  - S (rename within one folder): the probe is a copy, so the folder holds `index.ts` and `exports.ts` in every run. AB: the probe stays on disk through the whole-repo run.
+  - Y: no hash check, the user's save is lost at the restore. Z: no saved copies named. Z2: three runs inside the proof. AA: no restore before a rung drop.
+  - A and E (Expected rewritten for #71): A builds the probe from the whole `HEAD` file, E notes `git status` without `--ignored`.
   - The first S (deletion) met expected under the old text too, so it was rewritten as a rename.
-- GREEN (2026-10-14, text after #71, one rep per scenario, run twice): 10 of 10 met expected; Z and Z2 were then one scenario.
-  - The first pass found gaps, now fixed: the run count against the source fallback, a linter that only lints whole packages, partial hunk reversal, and the saved diff carrying the corrected source line.
-- Real run (2026-10-14, Clippy 0.1.99, throwaway copy of `skill-metrics` with a fix commit and a later commit to the same file): rung 2 `disallowed-methods`, "fires on probe, fix clean, 1 hits in repo" (`src/main.rs:95`). The faulty version kept the later commit's comment; status, diff hash and every file matched afterwards, and `clippy.toml` was gone.
-- Real run (2026-10-14, ESLint 9.39.5, throwaway repo with an uncommitted fix and config edit): rung 2 `no-restricted-imports`, "fires on probe, fix clean, 0 hits in repo"; status, diff hash and every file matched afterwards, the config edit still there.
+- GREEN (2026-10-14, text after #71, one rep per scenario): 17 of 17 met expected on the final text.
+  - Three review rounds and the earlier passes found gaps, all fixed: the run count against the source fallback, linters that only take whole packages, hunk choice with and without context, a rung drop without restore, the baseline for a deleted file, and a source failure judged against the baseline.
+- Real runs (2026-10-14, text of commit 7e630f9; the only later change makes one sentence apply to both fix kinds), each once on an earlier draft as well:
+  - Clippy 0.1.99, throwaway copy of `skill-metrics` with a fix commit and a later commit to the same file: rung 2 `disallowed-methods`, "fires on probe, fix clean, 1 hits in repo" (`src/main.rs:95`). The probe came from `git show -U0 <fix>` reversed and kept the later commit's comment.
+  - ESLint 9.39.5, throwaway repo with an uncommitted fix and config edit: rung 2 `no-restricted-imports`, "fires on probe, fix clean, 0 hits in repo"; the probe came from the `git diff -U0 HEAD` hunk reversed.
+  - Both: status with ignored files, diff hash and the hash of every file matched the state before the proof (checked outside the run), no new file was left, the config edit was still there.
