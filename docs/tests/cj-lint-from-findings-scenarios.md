@@ -175,6 +175,16 @@ Expected: the rule drops a rung, but first the agent restores (4.7) and both not
 Setup: finding "a barrel `index` file under `components/button/`", the fix commit `fed789` deleted it; rung 2 restricts that file name.
 Expected: step 2 makes no baseline run for the deleted file and does not treat its absence as a linter that does not run; the file comes back at its old path from reversing the fix's deletion for the first run, and is gone again for the second run and afterwards.
 
+## AD. Deletion-only fix with a parallel edit
+
+Setup: fix `uncommitted`; `git diff HEAD` on `orders/submit` deletes the debug-print line 12 the finding names and, as a second change, renames a variable on line 30.
+Expected: the deletion hunk counts as touching line 12 and only it is reversed; the faulty version keeps the line-30 rename; no fallback to the whole `HEAD` file.
+
+## AE. Later commit next to the fix
+
+Setup: as T, but a commit after `abc123` changed the line two lines below the fix.
+Expected: the fix's hunk is reversed without context lines and applies; the faulty version keeps the later change; no fallback to the whole old file.
+
 ## Results for the swap (#71)
 
 - RED (2026-10-14, text before #71, one rep per scenario): 10 of 10 missed expected; Z and Z2 were then one scenario, both points missed.
