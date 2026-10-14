@@ -210,6 +210,11 @@ Expected: the agent reads the old path from `git show -M --name-status c0ffee`, 
 Setup: fix `uncommitted`; `HEAD` imports `./lib`, the session changed it to `../internal/lib` without committing (the finding), and the fix changed it to `@pkg/lib`.
 Expected: no hunk's old side holds `../internal/lib`, so the first source fails; the whole `HEAD` file lacks it too and fails; the import quoted in the finding goes in at the finding's line and the rule fires; no rung drop.
 
+## AK. Fix that only inserts a line
+
+Setup: as T, but the finding is "empty catch block at `report/export:12`" and commit `abc123` only inserted `log(e)` after line 12; line 12 itself is unchanged.
+Expected: the fix still counts as committed, not `none`; the three-way merge takes `log(e)` out again and the rule fires at the empty catch; no rung drop.
+
 ## Results for the swap (#71)
 
 - RED (2026-10-14, text before #71, one rep per scenario): 18 of 18 missed expected.
