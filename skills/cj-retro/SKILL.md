@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Retro
 
-Step 6 of the flow `cj-challenge` → `cj-grill-with-docs` → `cj-to-spec` → `cj-to-tickets` → `cj-implement` → `cj-accept` → `cj-retro`. It changes the **repo the agent worked in** so the next run starts better. Changes to a skill itself are `cj-whetstone`'s job, from its collected notes.
+Runs after any session with friction, in every tier of the spec-driven flow. It changes the **repo the agent worked in** so the next run starts better. Changes to a skill itself are `cj-whetstone`'s job, from its collected notes.
 
 Call the Skill tool with "cj-project-context" for: commands, standards, conventions.
 
