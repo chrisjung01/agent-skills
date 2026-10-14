@@ -24,7 +24,7 @@ Exact commands are in [COMMANDS.md](COMMANDS.md); read it before the first `gh` 
 
 ## Phase 0: find the PR and every thread
 
-1. The PR: number or URL from the user, else the PR of the current branch. None (typical on the main branch)? List the user's recent PRs, drafts included, and ask which one as a choice: the three most recent, then "another PR". Not the user's PR? Stop and point to cj-review-teammate-pr.
+1. The PR: number or URL from the user, else the PR of the current branch. None (typical on the main branch)? List the user's recent PRs, drafts included, and ask which one as a choice question: the three most recent, then "another PR". Not the user's PR? Stop and point to cj-review-teammate-pr.
 2. Work in a worktree of the PR branch, never in the user's checkout: the one `git worktree list` shows for it, else a new one at the path from `conventions`. Tell the user once: `Worktree: <absolute path> (branch <branch>)`. Pull, fetch the base.
 3. Fetch threads (with resolved and outdated state) and review bodies.
 4. Ledger, one row per entry: `id, author, file:line, claim in one sentence, class (empty), status`.
@@ -71,12 +71,12 @@ Draft one reply per entry, in the review language from `conventions`, else the l
 
 Call the Skill tool with "cj-posting" before any outbound action. Show the diff against the PR base, all replies, and which threads you would resolve: fix threads only. Explain threads stay open for the reviewer to close; clarify and out-of-scope threads stay open too.
 
-Ask four questions, one at a time and in this order, each as a choice (all, pick per thread, none), and run only the yeses:
+Ask four yes/no questions, one at a time and in this order, each with its items listed above it, and run only the yeses; a no that names threads or reviewers runs exactly those:
 
 1. Push? (first, so no fix reply names a sha that is not on GitHub)
-2. Post which replies?
-3. Resolve which threads?
-4. Re-request review from which human reviewers? Bots are not re-requested.
+2. Post these replies?
+3. Resolve these threads?
+4. Re-request review from these human reviewers? Bots are not re-requested.
 
 Done when every entry has a posted reply or the user declined it.
 

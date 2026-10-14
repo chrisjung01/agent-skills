@@ -49,7 +49,7 @@ Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md
 
 ## Rules when editing
 
-- A skill asks the user one question per turn, as a choice with the recommended option first (the harness's choice tool where it offers one). Never a batch of questions.
+- A skill asks the user one question per message, as plain reply text in the shape `cj-asking` gives, the recommended option first. Never a batch of questions.
 
 - Own skills carry the `cj-` prefix. `name` in the frontmatter must match the folder name (lowercase letters, digits, hyphens).
 - A model-invoked skill's `description` starts with "Use when ..." and lists only triggers. It decides whether the skill fires; a workflow summary there makes agents skip the body.

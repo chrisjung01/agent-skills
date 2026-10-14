@@ -20,7 +20,7 @@ All commands run from this skill's folder through `bash scripts/skill-metrics.sh
 - **One call's window:** `bash scripts/skill-metrics.sh show <start uuid>`. Its first line names the source. It prints the user texts with their kind (`prompt`, `denial reason`, `own-word answer`) and flags (`correction`, `strong`), then the agent text and tool calls of the window while the transcript exists. A deleted transcript leaves only the user texts; the output says so.
 - **Skill folder:** the folder under `skills/` in this repo (`~/.claude/skills` holds symlinks to it). A skill with no folder there: `git log --diff-filter=D --oneline -- skills/<skill>/` names the commit that removed it; no such commit means it is outside this repo ([ROUTING.md](ROUTING.md)).
 
-No skill named: show `open` grouped by skill and ask which skills or sessions to take, as a choice.
+No skill named: show `open` grouped by skill and ask which skills or sessions to take, as a choice question.
 
 ## 1. Build the ledger
 
@@ -64,7 +64,7 @@ Show the user:
 
 Diff snippets keep their shape. For the rest of the summary: Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
 
-Number the patterns in the reply text. Ask for approval one change at a time, each as a choice (apply, change, reject) whose question names the pattern in full words and whose options each state their one consequence, then the statuses as one more question. No pattern: say so in one sentence; "no change" is a valid result, even when the user asked for an improvement.
+Number the patterns in the reply text. Ask for approval one change at a time, each as a yes/no choice question that names the pattern in full words: yes applies it, no rejects it, and a change the user names in their own words is applied instead. Then the statuses as one more question. No pattern: say so in one sentence; "no change" is a valid result, even when the user asked for an improvement.
 
 ## 4. Apply
 

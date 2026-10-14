@@ -10,7 +10,7 @@ Step 4 of the spec-driven flow, in every tier; a small change starts here with i
 
 ## Mode
 
-The argument after the issue picks the mode. No mode given and the spec has more than one ticket in this repo: ask once, before any branch, as a choice with three options where the harness offers one: "One PR per ticket (recommended)", "One PR for the whole spec" and "Stop before any branch", each with its consequence. One ticket, or fix-now rows from acceptance (step 2): no question; for fix-now rows the mode is the last PR's (a ticket checklist means `one-pr`). State the mode in the first line of the reply.
+The argument after the issue picks the mode. No mode given and the spec has more than one ticket in this repo: ask once, before any branch, as a choice question with three options: "One PR per ticket (recommended)", "One PR for the whole spec" and "Stop before any branch", each with its consequence. One ticket, or fix-now rows from acceptance (step 2): no question; for fix-now rows the mode is the last PR's (a ticket checklist means `one-pr`). State the mode in the first line of the reply.
 
 | | `per-ticket` (default) | `one-pr` (argument `one-pr`, "ein PR", "one PR") |
 |---|---|---|
