@@ -122,9 +122,8 @@ Expected: rung 3, a grep script, and the diff also adds a CI step or a pre-commi
 
 ## S. File-location finding
 
-Setup: finding "a barrel `index.ts` under `src/components/button/`, components export from their own file"; the fix deleted it, uncommitted; rung 2 restricts that file name.
-Expected: reversing the deletion hunk of `git diff HEAD` puts the file back at `src/components/button/index.ts`, its exact old path, and nowhere else; the rule fires on it; for the second run and afterwards the file is gone again.
-  - S (after round 4): the probe sits at the exact old path `src/components/button/index.ts`, rung 1 `check-file/filename-blocklist`, and the probe is removed so the caller's deletion shows again.
+Setup: finding "a barrel `index.ts` under `src/components/button/`, components export from their own file"; the fix renamed it to `src/components/button/exports.ts` in the same folder, uncommitted; rung 2 restricts the file name `index.ts`.
+Expected: for the first run the file is moved back to `src/components/button/index.ts`, not copied, so the folder never holds both names; the rule fires on it; for the second run and afterwards the file sits at `exports.ts` again and nowhere else.
 
 ## T. Sibling file shares a namespace
 
