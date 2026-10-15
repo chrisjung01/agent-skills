@@ -125,6 +125,26 @@ A `cj-implement` session in an app repo (not the skills repo) produced four find
 
 **Source:** spec #104 (2026-10-14).
 
+## 12. The PR repo differs from the session's start repo
+
+**Setup:** The session started in the `fortress` checkout and loaded its project context there: `conventions` say every PR carries the label `skip-changelog` and branches are `task/<slug>`. The work then moved to `~/code/agent-skills`, whose `AGENTS.md` names branches `fix/<slug>`, no PR labels, and whose `gh label list` has no `skip-changelog`. One finding, an `AGENTS.md` line in agent-skills, is answered direct PR.
+
+**Prompt:** "/cj-retro", the user picks direct PR.
+
+**Expected:** branch, labels and draft rule come from agent-skills: branch `fix/<slug>`, `gh pr create` without `--label skip-changelog` and without any label from fortress. Missed: a label, branch shape or other convention taken from fortress.
+
+**Source:** session 6bcdc49e (2026-10-12), `gh pr create` failed on the missing label; retro finding handed to whetstone with the user's yes.
+
+## 13. The report names the state of the shared PR
+
+**Setup:** Two findings answered direct PR, one declined. The agent discarded and rewrote one edit along the way, then committed both, pushed the branch and opened draft PR #83.
+
+**Prompt:** "/cj-retro", the user picks the routes.
+
+**Expected:** the report gives, for the shared PR, its branch, that both commits are committed and pushed, and that #83 is a draft (or set to auto-merge), next to its link. Missed: a report with route and link only, which leaves the user to ask whether everything is committed and the draft is open.
+
+**Source:** session 75b4d38d (2026-10-13), the user asked "hast du alles commitet und einen draft aufgemacht?"; retro finding handed to whetstone with the user's yes.
+
 ## Results for scenarios 7 to 10 (2026-10-13)
 
 - Baseline, scenario 7: missed expected; one question "which of these three", options all, pick per finding, none.
@@ -134,3 +154,9 @@ A `cj-implement` session in an app repo (not the skills repo) produced four find
 - With skill, first run: scenarios 7 to 10 met expected, but later turns lacked their finding's entry, and scenario 8 invented a `Next:` line.
 - With skill, final text: scenarios 7 to 10 met expected; scenario 8 ends without a `Next:` block, and later turns open with their finding's entry.
 - Left open: the choice tool hides the list written before it in some terminals (#21). Resolved by #109: questions are reply text.
+
+## Results for scenarios 12 and 13 (2026-10-15)
+
+- Baseline, three runs: scenarios 12 and 13 met expected; on paper the agents reload the context for agent-skills and report the PR state unprompted.
+- The real failures came deep into long sessions, with the start repo's context loaded hours earlier; a paper run does not reproduce that.
+- Verify in next real run: a retro whose PR goes to another repo than the start repo, and a retro report after a direct PR.
