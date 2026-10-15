@@ -32,7 +32,7 @@ BLOCKER_ID=$(gh api repos/<owner>/<repo>/issues/<blocker> --jq .id)
 gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id="$BLOCKER_ID"
 ```
 
-For a batch: `bash scripts/link-issues.sh` (copy it next to the plan, fill in `EPIC`, `TICKET`, `BLOCKED_BY`).
+For a batch: `bash scripts/link-issues.sh` (copy it next to the plan, fill in `EPIC`, `TICKETS`, `BLOCKED_BY`).
 
 ## Read back
 
