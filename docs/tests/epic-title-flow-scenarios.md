@@ -1,6 +1,6 @@
 # Scenarios: Epic titles in the spec-driven flow
 
-Skills under test: `cj-to-spec`, `cj-to-tickets`, `cj-implement`.
+Skills under test: `cj-to-spec` (with `TICKETS.md`), `cj-implement`.
 
 Paper exercises. Give the agent the skill texts and one setup at a time, without the expected result. Ask it to record the publication preview, approval state, simulated GitHub actions in order, and final issue title. It must run no live writes. Other gates, checks and review have passed unless the setup says otherwise. Compare the action record with the expected result; format validation alone cannot prove these rules. Run each scenario five times to check whether the wording produces consistent decisions.
 
@@ -26,7 +26,7 @@ Shared setup: issue #40, title `Improve search: filters`, an approved spec, no s
 
 ## 4. One-ticket spec
 
-**Setup:** `cj-to-tickets` finds that the spec fits one context window in one repo.
+**Setup:** `cj-to-spec` finds that the posted spec fits one context window in one repo.
 **Prompt:** "Evaluate the spec and record the next step and any GitHub actions."
 **Expected:** No sub-issues, no Epic proposal and no title write; name `cj-implement`. Covers AC-3.
 
@@ -51,8 +51,8 @@ Shared setup: issue #40, title `Improve search: filters`, an approved spec, no s
 ## 8. Rejected split
 
 **Setup:** The user rejects scenario 5's proposed split.
-**Prompt:** "Keep it as one ticket. Record the next step and any GitHub actions."
-**Expected:** No sub-issues and no title write. Final title `Improve search: filters`. Covers AC-6 and the rejected-split edge case.
+**Prompt:** "No, not like this. Record the next step and any GitHub actions." To the next question: "Build it in one PR."
+**Expected:** First a question: revise the slice or build everything in one PR. After "one PR": no sub-issues and no title write; final title `Improve search: filters`; next step `/clear`, then `/cj-implement #40 one-pr`, never without `one-pr`. Covers AC-6 and the rejected-split edge case; rewritten for #97.
 
 ## 9. Revised split before approval
 

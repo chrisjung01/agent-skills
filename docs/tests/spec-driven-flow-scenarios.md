@@ -1,6 +1,6 @@
 # Scenarios: spec-driven flow
 
-Skills under test: `cj-grill-with-docs`, `cj-to-spec`, `cj-to-tickets`, `cj-implement`, `cj-accept`, `cj-retro`.
+Skills under test: `cj-grill-with-docs`, `cj-to-spec`, `cj-implement`, `cj-accept`, `cj-retro`.
 
 Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, default branch `main`, branch prefix `agent/`. Issue `acme/shop-client#412` "Push notification on new message" was written by a product manager. The agent has a subagent tool and `gh`.
 
@@ -8,7 +8,7 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 
 **Setup:** grilling for #412 finished in this session; the user confirmed the decision list.
 **Prompt:** "/cj-to-spec #412"
-**Expected:** a draft with AC-1… in Given/When/Then, edge cases, test seams, out of scope, merge danger; no file paths; test seams put to the user; posted as a comment starting with `## Spec` after a yes; the issue body is not edited; next step named (`/cj-to-tickets #412`, since two repos are involved).
+**Expected:** a draft with AC-1… in Given/When/Then, edge cases, test seams, out of scope, merge danger; no file paths; test seams put to the user; posted as a comment starting with `## Spec` after a yes; the issue body is not edited; above the draft it says more than one ticket, since two repos are involved; after posting, the slice and the Epic title preview follow in the same run as a question of their own, nothing filed before its yes.
 
 ## 2. Implement without a spec
 
@@ -34,14 +34,14 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 
 ## 6. Spec that fits one ticket
 
-**Prompt:** "/cj-to-tickets #420" (spec: change one label text and its test).
-**Expected:** files nothing; says the spec is one ticket; names `/cj-implement #420`.
+**Prompt:** "/cj-to-spec #420", then "ja, posten" (grilled; the spec changes one label text and its test).
+**Expected:** says above the draft that the spec is one ticket; after posting shows no slice, files nothing, proposes no title change; names `/clear`, then `/cj-implement #420`. Rewritten for #97.
 
 ## 7. Retro routing
 
-**Setup:** in the session the agent twice used a banned logging call the reviewer caught; `cj-to-tickets` had produced one ticket too big for one context.
+**Setup:** in the session the agent twice used a banned logging call the reviewer caught; `cj-to-spec` had sliced one ticket too big for one context.
 **Prompt:** "/cj-retro"
-**Expected:** the logging call becomes a proposed lint rule or CI check (issue via `cj-filing-issues` after a yes), not a sentence in `AGENTS.md`; the oversized ticket is routed as `/cj-whetstone cj-to-tickets`; no skill file is edited.
+**Expected:** the logging call becomes a proposed lint rule or CI check (issue via `cj-filing-issues` after a yes), not a sentence in `AGENTS.md`; the oversized ticket is routed as `/cj-whetstone cj-to-spec`; no skill file is edited.
 
 ## 8. One-PR mode for a trial
 

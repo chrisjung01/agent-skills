@@ -24,7 +24,8 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 **Setup:** the spec for #5091 is posted; it needs three tickets. The conversation is in German.
 **Prompt:** "ja, posten" (write the reply after posting).
-**Expected:** the reply ends with an instruction: run `/cj-to-tickets <issue>` now, in this session, without `/clear` first. A line that only names the command and "in this same session" fails.
+**Expected:** after posting, the same run shows the slice and the Epic title preview and asks for them as a question of their own; nothing is filed before that yes. A reply that names another command for the slice, files sub-issues on the spec's yes, or ends with `/cj-implement`, fails.
+**Rewritten** for #97: the slice moved into `cj-to-spec`; the two runs below test the text before #97.
 **Origin:** session 8d055489 (same wording in `cj-grill-with-docs`).
 - 2026-10-09, scenario 3 before the change: one run. "Nächster Schritt: `/cj-to-tickets …` hier in dieser Session." No word on `/clear`. Fail.
 - 2026-10-09, scenario 3 after the change: one run. "Nächster Schritt: Führ jetzt `/cj-to-tickets …` aus, in dieser Session. Vorher kein `/clear`." Pass.
@@ -33,7 +34,7 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 **Setup:** issue #6031 exists; the grilled spec fits one ticket in one repo. The conversation is in German.
 **Prompt:** "ja, posten" (write the reply after posting).
-**Expected:** the spec goes out as a comment on #6031, no new issue and no `cj-filing-issues`. The reply ends with an instruction: `/clear`, then `/cj-implement <issue>`. A reply that names `/cj-implement` without `/clear`, or files an issue, fails.
+**Expected:** the spec goes out as a comment on #6031, no new issue and no `cj-filing-issues`, no slice and no title proposal. The reply ends with an instruction: `/clear`, then `/cj-implement <issue>`. A reply that names `/cj-implement` without `/clear`, or files an issue, fails.
 **Origin:** 2026-10-09, a user asked why the flow skipped `cj-filing-issues` and got no word on `/clear`.
 
 ## 5. A number in an AC comes with its counting definition
@@ -144,3 +145,28 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 - 2026-10-14, scenarios 16 and 17 before the change: two runs each. All four met expected: the setup listed the places and the numbers. Rewritten as 16b and 17b.
 - 2026-10-14, 16b and 17b before the change: two runs each. 17b met expected in both: each worked out the cap from the decisions and asked. 16b met expected in one run (an AC per place) and nearly in the other (one behaviour AC for all approvals, the places under Decisions). A paper run does not reproduce the failure; the real ones came late in long sessions (#92, #104, #47, #46).
 - Status: verify in next real run. The next whetstone run for `cj-to-spec` checks later specs for an AC that only greps, and for ACs that contradict each other.
+
+## 18. The draft states how many tickets the spec needs
+
+**Setup:** repo `acme/shop-client`, with the backend in `acme/shop-backend`. Issue #412 "Push notification on new message" is grilled in German in this session; the decisions touch both repos. No `## Challenge` comment, no challenge in the conversation.
+**Prompt:** "/cj-to-spec #412" (show the draft and the question, do not post).
+**Expected:** above the draft, one line says the spec needs more than one ticket because it spans two repos. The draft's Decisions hold `Not challenged: more than one ticket, no challenge ran`. The question asks for the spec only; the slice is not asked yet. A reply without the count, without the line, or that asks spec and slice together, fails.
+
+## 19. A rejected slice ends in one PR, never plain `cj-implement`
+
+**Setup:** as scenario 3; the spec is posted, the slice of three sub-issues and the Epic title preview are shown.
+**Prompt:** "Nein, das will ich so nicht schneiden." Then, to the next question: "Alles in einem PR."
+**Expected:** the first answer asks whether to revise the slice or build everything in one PR, nothing filed. After "one PR": no sub-issue, no title write, and the next step is `/clear`, then `/cj-implement #5091 one-pr`. A reply that names `/cj-implement #5091` without `one-pr`, or files anything, fails.
+
+## 20. A rerun on a posted spec drafts no second spec
+
+**Setup:** a fresh session. Issue #412 holds a `## Spec` comment with AC-1 to AC-4 for two repos, and two sub-issues that deliver AC-1 to AC-3; a filing stopped halfway. No grill ran in this session.
+**Prompt:** "/cj-to-spec #412"
+**Expected:** no new draft and no second `## Spec` comment; the slice for AC-4 only, shown as its own question. Variant b: the posted spec fits one ticket and has no sub-issues; expected: no draft, no slice, next step `/clear`, then `/cj-implement #412`. A run that drafts or posts a spec again fails.
+
+## 21. "Not challenged" only for an unchallenged multi-ticket spec
+
+**Setup:** as scenario 18, in three variants: a) the issue has a `## Challenge` comment with verdict build; b) the spec fits one ticket in one repo, no challenge; c) the challenge ran earlier in this conversation, its verdict only in chat.
+**Prompt:** "/cj-to-spec #412" (show the draft, do not post).
+**Expected:** none of the three drafts holds the line `Not challenged: more than one ticket, no challenge ran`. A draft that holds it in any variant fails.
+
