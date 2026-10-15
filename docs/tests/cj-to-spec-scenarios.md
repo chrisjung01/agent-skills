@@ -150,7 +150,7 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 **Setup:** repo `acme/shop-client`, with the backend in `acme/shop-backend`. Issue #412 "Push notification on new message" is grilled in German in this session; the decisions touch both repos. No `## Challenge` comment, no challenge in the conversation.
 **Prompt:** "/cj-to-spec #412" (show the draft and the question, do not post).
-**Expected:** above the draft, one line says the spec needs more than one ticket because it spans two repos. The draft's Decisions hold `Not challenged: more than one ticket, no challenge ran`. The question asks for the spec only; the slice is not asked yet. A reply without the count, without the line, or that asks spec and slice together, fails.
+**Expected,** one catch each: a) above the draft, one line says the spec needs more than one ticket because it spans two repos; b) the draft's Decisions hold `Not challenged: more than one ticket, no challenge ran`; c) the question asks for the spec only, the slice is not asked yet. A reply without the count, without the line, or that asks spec and slice together, fails.
 
 ## 19. A rejected slice ends in one PR, never plain `cj-implement`
 
@@ -171,5 +171,7 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Expected:** none of the three drafts holds the line `Not challenged: more than one ticket, no challenge ran`. A draft that holds it in any variant fails.
 
 
-- 2026-10-15, scenarios 3, 4 and 18 to 21 before #97: one fresh grader, setups without expected results. 3, 18, 19 and 20 missed expected: the reply named `/cj-to-tickets`, no ticket count above the draft, no one-PR mapping, a rerun grilled and drafted again. 4 and 21 met expected; 21 stays as a guard for the new line.
+## Results for #97
+
+- 2026-10-15, scenarios 3, 4 and 18 to 21 before #97: one fresh grader, setups without expected results. 3, 18, 19 and 20 missed expected: the reply named `/cj-to-tickets`, no ticket count above the draft (18a), no `Not challenged` line (18b), no one-PR mapping, a rerun grilled and drafted again. 18c (spec and slice asked together) met expected, as did 4 and 21; these stay as guards and are no evidence for #97.
 - 2026-10-15, the same scenarios after #97: one fresh grader. All met expected. It found four gaps, fixed afterwards: a rerun whose rest fits one ticket filed nothing, rejecting a slice versus changing one ticket, no recommended option, steps 1 to 6 not skipped on a rerun.

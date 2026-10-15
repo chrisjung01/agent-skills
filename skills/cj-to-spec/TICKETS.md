@@ -6,7 +6,7 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 
 ## Steps
 
-1. **Read** the posted spec, the comments after it, the sub-issues already filed and the affected code, where this session has not read them yet. On a rerun, slice only the ACs no sub-issue delivers.
+1. **Read** the posted spec, the comments after it, the sub-issues already filed and the affected code, where this session has not read them yet. On a rerun, slice only the ACs no sub-issue delivers, and give the fresh eyes of step 6 the filed sub-issues' bodies too, marked as filed.
 2. **One ticket?** No sub-issue is filed yet and the slice fits one fresh context window in one repo: say so, file nothing, withdraw any Epic proposal, and end with `cj-to-spec`'s one-ticket next step. On a rerun with sub-issues filed, the ACs none delivers become sub-issues, even one.
 3. **Existing work.** Call the Skill tool with "cj-filing-issues" (Find) with the spec's modules and entities. Open work this builds on becomes a blocked-by edge; a duplicate shrinks the scope and goes to the user.
 4. **Slice.**
