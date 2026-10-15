@@ -170,3 +170,6 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Prompt:** "/cj-to-spec #412" (show the draft, do not post).
 **Expected:** none of the three drafts holds the line `Not challenged: more than one ticket, no challenge ran`. A draft that holds it in any variant fails.
 
+
+- 2026-10-15, scenarios 3, 4 and 18 to 21 before #97: one fresh grader, setups without expected results. 3, 18, 19 and 20 missed expected: the reply named `/cj-to-tickets`, no ticket count above the draft, no one-PR mapping, a rerun grilled and drafted again. 4 and 21 met expected; 21 stays as a guard for the new line.
+- 2026-10-15, the same scenarios after #97: one fresh grader. All met expected. It found four gaps, fixed afterwards: a rerun whose rest fits one ticket filed nothing, rejecting a slice versus changing one ticket, no recommended option, steps 1 to 6 not skipped on a rerun.

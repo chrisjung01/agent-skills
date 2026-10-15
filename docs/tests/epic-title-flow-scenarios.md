@@ -102,3 +102,5 @@ Two additional probes, five paper repetitions each, also passed without variatio
 - A generic "go" covering only spec publication posts the comment; it authorizes neither the later ticket split nor its title change.
 
 No scenario executed live GitHub writes. The checks establish the action plans produced in these paper exercises, not compliance in every future session.
+
+2026-10-15, scenarios 4 and 8 after the move into `cj-to-spec` (#97): one fresh grader each on the text before and after, setups without expected results. Before: 4 met expected, 8 missed (no question between revise and one PR, next step `/cj-implement #40` without `one-pr`). After: both met expected.
