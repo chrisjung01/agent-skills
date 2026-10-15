@@ -4,8 +4,9 @@ This skill is adapted from [mattpocock/skills](https://github.com/mattpocock/ski
 
 - [`to-spec`](https://github.com/mattpocock/skills/blob/6fd947921b935b7e1e69293a200400f0fdd5c15f/skills/engineering/to-spec/SKILL.md)
 - [`pr`](https://github.com/mattpocock/skills/blob/6fd947921b935b7e1e69293a200400f0fdd5c15f/skills/engineering/pr/SKILL.md)
+- [`to-tickets`](https://github.com/mattpocock/skills/blob/6fd947921b935b7e1e69293a200400f0fdd5c15f/skills/engineering/to-tickets/SKILL.md)
 
-Taken from there: the synthesis step and the seam rule in `SKILL.md`, the section order and the prototype-snippet rule in `SPEC.md`, and the merge-danger line from `pr`.
+Taken from there: the synthesis step and the seam rule in `SKILL.md`, the section order and the prototype-snippet rule in `SPEC.md`, and the merge-danger line from `pr`. Taken from `to-tickets` for `TICKETS.md`: vertical slices through every layer, the prefactoring and expand/migrate/contract guidance, and the order of the questions to the user.
 
 The fresh reader in `SKILL.md` and the old-clients question in `SPEC.md` come from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) at commit [`1be8e34`](https://github.com/addyosmani/agent-skills/tree/1be8e34187e34647bb83adc3a1323b26ae6f6abe), MIT licence:
 
