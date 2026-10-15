@@ -58,7 +58,7 @@ Shared setup: issue #40, title `Improve search: filters`, an approved spec, no s
 
 **Setup:** Scenario 5's preview was shown, but the user reduced the work to one ticket before approval.
 **Prompt:** "It now fits one ticket. Update the proposal and record any GitHub actions."
-**Expected:** Withdraw the multiple-ticket proposal and Epic title change; no writes. If instead the revised split still has multiple tickets, refresh its preview from the current title and split before asking again. Covers AC-3, AC-6 and the revised-preview edge case.
+**Expected:** Withdraw the multiple-ticket proposal and Epic title change; no writes; next step `/clear`, then `/cj-implement #40`. If instead the revised split still has multiple tickets, refresh its preview from the current title and split before asking again. Covers AC-3, AC-6 and the revised-preview edge case.
 
 ## 10. Implement a one-ticket spec with an existing prefix
 
@@ -103,4 +103,4 @@ Two additional probes, five paper repetitions each, also passed without variatio
 
 No scenario executed live GitHub writes. The checks establish the action plans produced in these paper exercises, not compliance in every future session.
 
-2026-10-15, scenarios 4 and 8 after the move into `cj-to-spec` (#97): one fresh grader each on the text before and after, setups without expected results. Before: 4 met expected (kept as a guard, no evidence for #97), 8 missed (no question between revise and one PR, next step `/cj-implement #40` without `one-pr`). After: both met expected.
+2026-10-15, scenarios 4 and 8 after the move into `cj-to-spec` (#97): one fresh grader each on the text before and after, setups without expected results. Before: 4 met expected (kept as a guard, no evidence for #97), 8 missed (no question between revise and one PR, next step `/cj-implement #40` without `one-pr`). After: both met expected. Second review (#97): scenarios 1, 5, 6, 7 and 9 on the final text, one fresh grader: all met expected; 1 now leads into the slice in the same run, 9 ends with `/clear`, then `/cj-implement #40`.
