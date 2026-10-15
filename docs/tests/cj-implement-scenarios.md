@@ -141,6 +141,20 @@ Closes #282, Part of #280
 
 **Source:** spec #104 (2026-10-14): tiny PRs need no human click when checks are the gate.
 
+## 9. The base changed during the run
+
+**Setup:** `per-ticket` run on spec #92. Step 2, an hour ago, found ticket #109 ready with its one blocker #108 open in draft PR #112 (branch `feat/108-cj-asking`), so step 3.1 branched `feat/109-x` from it and the body draft starts with `Stacked on #112, merge that one first.` Review is clean, checks are green, the body is checked. What the agent sees only if it runs the command: `git fetch` prints `- [deleted] (none) -> origin/feat/108-cj-asking`; `gh pr view 112 --json state,mergedAt` gives `MERGED`, 18:47; `git ls-remote origin feat/108-cj-asking` prints nothing.
+
+**Prompt:** "Weiter mit Schritt 9. Name every command you run, in order, and the PR's base."
+
+**Expected:** before the push the agent fetches and checks the base again, finds #112 merged, moves the branch onto `origin/main` (`git rebase --onto origin/main <#112 head sha>`), reruns the checks, drops the Stack line and opens the PR against `main`. A run that pushes and calls `gh pr create --base feat/108-cj-asking`, or keeps the Stack line, fails.
+
+**Variants**, same setup, one at a time:
+- Not stacked: base `main`. Since step 2 two PRs merged into `main` that change the same `README.md` lines as this branch; `git merge-tree --write-tree origin/main HEAD` exits 1 with a conflict in `README.md`. Expected: rebase onto `origin/main`, resolve, rerun the checks, then push and open the PR. Pushing first fails.
+- Nothing changed: #112 still open, `git merge-tree` exits 0. Expected: no rebase; push and PR against `feat/108-cj-asking` with the Stack line.
+
+**Source:** sessions `b4f9eafc` (base branch of PR #35 gone before the PR), `c7e24ecd` (`gh pr create` failed with "Base ref must be a branch" after #112 merged), `ff7c12f6` ("neee … sind immer noch konflikte" after `main` moved), `b4ec64c9` (blocker merged between pause and resume).
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
@@ -148,3 +162,4 @@ Closes #282, Part of #280
 - 2026-10-12, scenario 4 with both variants, one run each. Without the change: variant A missed expected (opened, "no such field"), variant B missed expected (opened, "no length limit"); the main case in its first form stopped through step 7, because it named a test that did not exist, so it could not tell the versions apart and was rewritten to the manual-check form above, then rerun: met expected, the old "Deliberately unchanged, backed by the diff" line made the agent read the body against the diff too. With the change: main case met expected both times (both unbacked claims and the step shape, no PR); variant A added numbered steps; variant B named the unit too big and proposed a split without cutting Verified. So the main case does not tell the versions apart; the variants do.
 - 2026-10-13, scenarios 5 to 7 (#68), one fresh run per version covering all six cases (5, 5 variant, 6, both 6 variants, 7). Before: all six missed expected; no mutation in the AC-1 line, the old test called met, the implementing agent wrote the reproduction test itself, rewrote a green one until red, and the Risk line left out who wrote it. The before run saw the Expected lines early by mistake, so its answers are not blind, but each cites the skill line that drove it. After, blind: all six met expected.
 - 2026-10-13, scenario 6 variant with a diagnosis in the issue body, added after review (#68), one run per version. Text before the review fix ("its prompt holds the issue text"): missed expected, the subagent prompt kept the "Regression test" line. Final text: met expected, both lines left out.
+- 2026-10-15, scenario 9 with both variants, two runs per version. Before: all missed expected in the main case and the not-stacked variant; no `git fetch` before the push, `gh pr create --base feat/108-cj-asking` with the Stack line, the README conflict unseen. After: all met expected; fetch, `#112` found merged, `rebase --onto origin/main`, checks rerun, Stack line dropped, PR on `main`; the conflict variant rebased before the push; the unchanged variant kept base and Stack line.
