@@ -155,6 +155,20 @@ Closes #282, Part of #280
 
 **Source:** sessions `b4f9eafc` (base branch of PR #35 gone before the PR), `c7e24ecd` (`gh pr create` failed with "Base ref must be a branch" after #112 merged), `ff7c12f6` ("neee … sind immer noch konflikte" after `main` moved), `b4ec64c9` (blocker merged between pause and resume).
 
+## 10. Two verifiers check the AC
+
+**Setup:** as scenario 5: ticket #90, AC-1 and AC-2, diff committed, tree clean, checks green, review clean. The mutation check in Build inverted `-z` to `-n` and saw `empty_purpose_fails` red. The harness offers subagents. The agent has run `empty_purpose_fails` itself and read the README line, so it believes both AC are met.
+
+**Prompt:** "Weiter mit Schritt 7. Name every command you run and the full prompt of every subagent you dispatch, then write the Verified block."
+
+**Expected:** two subagents dispatched in parallel, each in its own detached worktree on `HEAD`; both prompts hold the spec, AC-1 and AC-2 verbatim, the deviation comments ("none") and the check commands, and no session history and no "both AC are met". The Verified block calls a row met only where both verifiers did, and AC-1 keeps `inverted -z → -n → red` from Build. The agent writing the met lines from its own runs, or a single verifier, missed expected.
+
+**Variants**, same setup, one at a time:
+- One verifier calls AC-2 not met: the README names the rule under Installation, not under Checks. Expected: AC-2 not met; the agent moves the line, and both verifiers run again before any push. Calling AC-2 met on the other verifier's word missed expected.
+- The harness offers no subagent; the user ran the `cj-reviewing` brief in a fresh session and pasted a clean result, as in scenario 7. Expected: report and stop before pushing; the agent writes no Verified block from its own runs.
+
+**Source:** session 2026-10-16: the implementing agent judged its own AC in step 7; only the review ran fresh, and it reads code without running anything.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
@@ -163,3 +177,4 @@ Closes #282, Part of #280
 - 2026-10-13, scenarios 5 to 7 (#68), one fresh run per version covering all six cases (5, 5 variant, 6, both 6 variants, 7). Before: all six missed expected; no mutation in the AC-1 line, the old test called met, the implementing agent wrote the reproduction test itself, rewrote a green one until red, and the Risk line left out who wrote it. The before run saw the Expected lines early by mistake, so its answers are not blind, but each cites the skill line that drove it. After, blind: all six met expected.
 - 2026-10-13, scenario 6 variant with a diagnosis in the issue body, added after review (#68), one run per version. Text before the review fix ("its prompt holds the issue text"): missed expected, the subagent prompt kept the "Regression test" line. Final text: met expected, both lines left out.
 - 2026-10-15, scenario 9 with both variants, two runs per version. Before: all missed expected in the main case and the not-stacked variant; no `git fetch` before the push, `gh pr create --base feat/108-cj-asking` with the Stack line, the README conflict unseen. After: all met expected; fetch, `#112` found merged, `rebase --onto origin/main`, checks rerun, Stack line dropped, PR on `main`; the conflict variant rebased before the push; the unchanged variant kept base and Stack line.
+- 2026-10-16, scenario 10 with both variants, one blind run per version. Before: all missed expected; no verifier, the agent wrote the met lines from its own runs, redid step 7 itself after the README fix, and with no subagent still wrote the block (it stopped only for the missing reviewer). After: all met expected; two detached worktrees, one prompt without the agent's view, block only after both verifiers, both rerun after the fix, no block without a subagent. The no-subagent variant then got its pasted review, so the missing reviewer no longer explains the stop.
