@@ -75,6 +75,18 @@ Shared setup: repo `acme/shop-client`, default branch `main`. Spec #412 "Push no
 **Prompt:** "/cj-accept #412"
 **Expected:** the muted row's choice is asked again before anything is filed; once it is fix now, no kill issue is filed, no ADR or glossary text is written, the changed comment without kill and deviation lines is shown before the posting question; next step `/cj-implement #412`.
 
+## 13. User asks the agent to check, app change
+
+**Setup:** as scenario 3, PR #421 open at head `abc1234`, no `## Acceptance` comment. The PR adds unit tests for AC-1, AC-2 and AC-4 and a layout script for the foreground row; nothing in the repo shows whether a muted chat's phone buzzes.
+**Prompt:** "/cj-accept #412 prüf alles automatisch"
+**Expected:** no row asked one per turn; each row checked on `abc1234` with the cheapest evidence (the tests, the script, a short probe); no sessions played by subagents. One reply lists every row with its evidence, then one yes/no question whether to record them as met; the muted row, without evidence, is then asked by hand as in step 3. The comment opens `Checked by the agent at the user's request on <#421 link> at abc1234.`, never "Checked by hand", and each observation names its evidence.
+
+## 14. User asks the agent to check, skill text change
+
+**Setup:** spec #96 in a skills repo changes only a `SKILL.md` and adds `docs/tests/<skill>-scenarios.md`; PR #123 open at `8e7dc22`. Its Results section records that `cj-implement` ran every scenario against the new text, all met expected. The spec has 13 ACs and 7 edge rows, all about what an agent following the text does.
+**Prompt:** "/cj-accept #96 einmal bitte automatisch prüfen"
+**Expected:** evidence per row is the changed line of the skill text, a command for file rows, or the recorded scenario result that covers it; no scenario re-run, no role-play sessions with subagents. One reply with every row and its evidence, one yes/no question, then the comment as in scenario 13.
+
 ## Results
 
 2026-10-13, fresh subagents reading the texts literally.
@@ -86,3 +98,4 @@ Shared setup: repo `acme/shop-client`, default branch `main`. Spec #412 "Push no
 - Review rounds 1 and 2 (fresh reviewer): gate on ticket state and open PRs, follow-up Find before File with one carried yes, carried rows keep their observation, declined follow-ups, merge conflict named as next step. Scenario 7 added for the follow-up cases.
 - After the review fixes, all scenarios on the final text: 1 to 7 met expected.
 - 2026-10-13, kill issue and deviations (#55). Before: scenarios 8 to 11 missed expected; the text never read the challenge or `Deviation:` comments. After, first version: 1 to 11 met expected. Also found: a declined follow-up turned fix now after the records were written, the records PR had no yes, the kill body asked for a fact the criterion lacks. Review round 1: the kill issue could be filed before that row turned fix now, an interrupted run filed the kill issue twice, the records PR was not shown. Scenario 12 added; all fixed. After the fixes: 1 to 12 met expected, graded before two wording fixes in step 4 (Find loads `cj-filing-issues`, a new glossary is shown). Review round 2: a rerun after every PR merged would draft the records branch again; it is now reused.
+- 2026-10-16, checked by the agent on request (whetstone, sessions b5b34fc9, 756b318c, 8a09d650). Before: 13 and 14 missed expected; the text has no such path, so the request is ignored and every row asked by hand (6 and 20 turns), comment "Checked by hand". After: 13 and 14 met expected, evidence from tests, script and recorded scenario results, no subagents, one yes/no. Also found: a mixed run's opening line claimed the agent checked rows the user checked; rows checked by hand now end with "(by hand)".
