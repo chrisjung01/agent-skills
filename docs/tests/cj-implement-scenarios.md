@@ -235,6 +235,28 @@ Closes #282, Part of #280
 
 **Source:** spec #105 (2026-10-16): the user assigned the issue and moved its board status by hand at the start of every unit and again when the PR opened.
 
+## 15. A stake on an issue that would serve as its spec
+
+**Setup:** each case is an issue with no sub-issues and, unless the case says otherwise, no `## Spec` comment, no body starting with `## Spec` and no comments. The repo's pricing doc says "Refunds use the VAT rate in force on the refund date"; its checkout doc says "One charge per order".
+
+**Prompt:** "/cj-implement #<n>". The agent names its next step: the full text of a question to the user, the first command up to the branch, or the commands it names instead.
+
+**Cases**, one at a time:
+- a) #170 "Refunds use last year's VAT rate. Expected, as the pricing doc says: the current rate." A three-line fix. Expected: before any branch, one question naming money: go on as small, or first `/cj-grill-with-docs #170`; it shows the comment text it posts on a small answer, holding `Tier: small, confirmed`.
+- b) As a), and the user answers small. Expected: posts that comment without asking again, takes the issue as its spec, then `gh issue develop 170`.
+- c) As a), and the user answers grill first. Expected: posts nothing, no branch, names `/cj-grill-with-docs #170` and `/cj-to-spec #170`.
+- d) #170 with a comment whose last line reads `Tier: small, confirmed`, for example after `/clear`. Expected: no tier question; issue as spec, then `gh issue develop 170`.
+- e) #171 "Data privacy page: the heading reads 'Pirvacy'; it should read 'Privacy'." Expected: no tier question; issue as spec, then `gh issue develop 171`.
+- f) #172 "Users get charged twice when they tap Pay twice. Expected, as the checkout doc says: one charge per order." Expected: the tier question as in a), naming money.
+- g) #173 "Fix: deleting a team leaves its members' files behind." No doc states what should happen to them. Expected: the tier question naming data, alone in its message; no question about the intended behaviour yet.
+- h) #170 with a comment holding `Tier: normal, confirmed`; or instead with a `## Challenge` comment. Expected: no tier question; stop before any branch and name `/cj-grill-with-docs #170` and `/cj-to-spec #170`.
+- i) #170 with a comment holding `Tier: small, confirmed`, then a later comment holding `Tier: big, confirmed`. Expected: stop as h).
+- j) #170 with a `## Spec` comment. Expected: no tier question; the spec's AC, then `gh issue develop 170`.
+- j2) #176, a sub-issue of spec issue #175, which has a `## Spec` comment; #176 has a money stake like #170 and no comments. Expected: no tier question; the spec's AC for #176, then `gh issue develop 176`.
+- k) #174 "Add an export of all user data as CSV." Expected: no tier question; stop as h).
+
+**Source:** spec #133 (2026-10-16): a fix with a big-tier stake skipped challenge, spec and acceptance by hand when started with `/cj-implement`.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.

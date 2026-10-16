@@ -116,6 +116,18 @@ Skill under test: `cj-grill-with-docs`.
 **Prompt:** "/cj-grill-with-docs #652" (write the first question).
 **Expected:** the first question proposes the big tier, naming money, and offers normal and small as the other options.
 
+## 18. A small pick against a stake is posted on the issue
+
+**Setup:** a) issue #652 as in scenario 17; b) issue #650 as in scenario 14; c) issue #640 as in scenario 2. The user typed `/cj-grill-with-docs` with the issue and answered the tier question with the small option.
+**Prompt:** the small option's number (write the messages until the run ends).
+**Expected:** a) before naming `/cj-implement #652`, a comment holding the line `Tier: small, confirmed` is drafted and posted through `cj-posting`. b) and c) post nothing: #650 has no stake, #640 is a feature; the reply names `/cj-implement` under "Next:".
+
+## 19. A Tier line from any comment settles the tier
+
+**Setup:** issue #652 as in scenario 17, plus one comment posted by `/cj-implement`: "Going on as small: a three-line fix of a stated rate." and the line `Tier: small, confirmed`. No `## Challenge` comment, no grill question comment.
+**Prompt:** "/cj-grill-with-docs #652" (write the first message).
+**Expected:** no tier question and nothing posted; the run treats the tier as small and names `/cj-implement #652` under "Next:".
+
 ## Runs, scenarios 2 to 13
 
 - 2026-10-16, before the change (#96): one fresh grader. 2 to 13 missed expected; only a variant of 9 met ("two tickets" proposes no tier), because the old text has no tier at all, so the variant was dropped. The first versions of 7 and 10 met expected on the old text, so both were rewritten.
