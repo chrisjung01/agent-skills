@@ -1,6 +1,6 @@
 # Scenarios: Epic titles in the spec-driven flow
 
-Skills under test: `cj-to-spec`, `cj-to-tickets`, `cj-implement`.
+Skills under test: `cj-to-spec` (with `TICKETS.md`), `cj-implement`.
 
 Paper exercises. Give the agent the skill texts and one setup at a time, without the expected result. Ask it to record the publication preview, approval state, simulated GitHub actions in order, and final issue title. It must run no live writes. Other gates, checks and review have passed unless the setup says otherwise. Compare the action record with the expected result; format validation alone cannot prove these rules. Run each scenario five times to check whether the wording produces consistent decisions.
 
@@ -26,7 +26,7 @@ Shared setup: issue #40, title `Improve search: filters`, an approved spec, no s
 
 ## 4. One-ticket spec
 
-**Setup:** `cj-to-tickets` finds that the spec fits one context window in one repo.
+**Setup:** `cj-to-spec` finds that the posted spec fits one context window in one repo.
 **Prompt:** "Evaluate the spec and record the next step and any GitHub actions."
 **Expected:** No sub-issues, no Epic proposal and no title write; name `cj-implement`. Covers AC-3.
 
@@ -51,14 +51,14 @@ Shared setup: issue #40, title `Improve search: filters`, an approved spec, no s
 ## 8. Rejected split
 
 **Setup:** The user rejects scenario 5's proposed split.
-**Prompt:** "Keep it as one ticket. Record the next step and any GitHub actions."
-**Expected:** No sub-issues and no title write. Final title `Improve search: filters`. Covers AC-6 and the rejected-split edge case.
+**Prompt:** "No, not like this. Record the next step and any GitHub actions." To the next question: "Build it in one PR."
+**Expected:** First a question: revise the slice or build everything in one PR. After "one PR": no sub-issues and no title write; final title `Improve search: filters`; next step `/clear`, then `/cj-implement #40 one-pr`, never without `one-pr`. Covers AC-6 and the rejected-split edge case; rewritten for #97.
 
 ## 9. Revised split before approval
 
 **Setup:** Scenario 5's preview was shown, but the user reduced the work to one ticket before approval.
 **Prompt:** "It now fits one ticket. Update the proposal and record any GitHub actions."
-**Expected:** Withdraw the multiple-ticket proposal and Epic title change; no writes. If instead the revised split still has multiple tickets, refresh its preview from the current title and split before asking again. Covers AC-3, AC-6 and the revised-preview edge case.
+**Expected:** Withdraw the multiple-ticket proposal and Epic title change; no writes; next step `/clear`, then `/cj-implement #40`. If instead the revised split still has multiple tickets, refresh its preview from the current title and split before asking again. Covers AC-3, AC-6 and the revised-preview edge case.
 
 ## 10. Implement a one-ticket spec with an existing prefix
 
@@ -102,3 +102,5 @@ Two additional probes, five paper repetitions each, also passed without variatio
 - A generic "go" covering only spec publication posts the comment; it authorizes neither the later ticket split nor its title change.
 
 No scenario executed live GitHub writes. The checks establish the action plans produced in these paper exercises, not compliance in every future session.
+
+2026-10-15, scenarios 4 and 8 after the move into `cj-to-spec` (#97): one fresh grader each on the text before and after, setups without expected results. Before: 4 met expected (kept as a guard, no evidence for #97), 8 missed (no question between revise and one PR, next step `/cj-implement #40` without `one-pr`). After: both met expected. Second review (#97): scenarios 1, 5, 6, 7 and 9 on the final text, one fresh grader: all met expected; 1 now leads into the slice in the same run, 9 ends with `/clear`, then `/cj-implement #40`.

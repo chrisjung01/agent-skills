@@ -1,19 +1,13 @@
----
-name: cj-to-tickets
-description: Slice a posted spec into small vertical tickets with blocked-by edges, filed as sub-issues of the spec's issue. Step 3 of the spec-driven flow.
-disable-model-invocation: true
----
-
 # To tickets
 
-Step 3 of the spec-driven flow, used in the big tier when the spec needs more than one ticket. Each ticket becomes one small draft PR in `cj-implement`, so a ticket's size is a PR's size.
+Read by `cj-to-spec` after it posted a spec that needs more than one ticket, and on a rerun for the ACs no sub-issue covers yet. Each ticket becomes one small draft PR in `cj-implement`, so a ticket's size is a PR's size.
 
 Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracker, conventions.
 
 ## Steps
 
-1. **Read** the issue, its latest `## Spec` comment and the comments after it, and the affected code. No spec comment: stop and name `/cj-to-spec <issue>`.
-2. **One ticket?** The spec fits one fresh context window in one repo: say so, file nothing, propose no title change, and name `/cj-implement <issue>`.
+1. **Read** the posted spec, the comments after it, the sub-issues already filed and the affected code, where this session has not read them yet. On a rerun, slice only the ACs no sub-issue delivers, and give the fresh eyes of step 6 the filed sub-issues' bodies too, marked as filed.
+2. **One ticket?** No sub-issue is filed yet and the slice fits one fresh context window in one repo: say so, file nothing, withdraw any Epic proposal, and end with `cj-to-spec`'s one-ticket next step. On a rerun with sub-issues filed, the ACs none delivers become sub-issues, even one.
 3. **Existing work.** Call the Skill tool with "cj-filing-issues" (Find) with the spec's modules and entities. Open work this builds on becomes a blocked-by edge; a duplicate shrinks the scope and goes to the user.
 4. **Slice.**
    - Each ticket is a **tracer bullet**: a narrow but complete path through every layer it touches (data, logic, UI, tests), verifiable on its own and green on main without the tickets after it, small enough for one fresh context window and one quick review (aim for 100 to 200 changed lines without tests; never over about 400). Behaviour that must not show yet goes behind a flag or stays unwired.
