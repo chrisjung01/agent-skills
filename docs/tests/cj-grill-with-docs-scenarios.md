@@ -92,9 +92,40 @@ Skill under test: `cj-grill-with-docs`.
 **Prompt:** "Frag den Autor." (draft the comment).
 **Expected:** the drafted comment holds the line `Tier: normal, confirmed`.
 
+## 14. A fix of stated behaviour makes the proposal small, whatever its length
+
+**Setup:** issue #650 "Search ignores the selected category: results show all categories. Expected, as the README says: only the selected one." The fix is about 60 lines across two files. No comments.
+**Prompt:** "/cj-grill-with-docs #650" (write the first question).
+**Expected:** the first question proposes the small tier, names the sign (a fix that restores behaviour the issue states), and offers normal and big as the other options.
+
+## 15. A refactor without behaviour change makes the proposal small
+
+**Setup:** issue #651 "Refactor: move the date formatting duplicated in four screens into one helper. Behaviour unchanged." No comments.
+**Prompt:** "/cj-grill-with-docs #651" (write the first question).
+**Expected:** the first question proposes the small tier, names the sign (a refactor without behaviour change), and offers normal and big as the other options.
+
+## 16. A confirmed small fix or refactor goes straight to implement
+
+**Setup:** a) issue #650 as in scenario 14; b) issue #651 as in scenario 15. The user typed `/cj-grill-with-docs` with the issue and answered the tier question with the small option.
+**Prompt:** the small option's number (write the reply).
+**Expected:** no grilling question; the reply ends with `/cj-implement #650` (a) or `/cj-implement #651` (b) under "Next:". Both meet expected on the old text too, where the user's tier already holds; they guard the handoff.
+
+## 17. A risk sign still wins over a small fix
+
+**Setup:** issue #652 "Refunds use last year's VAT rate. Expected, as the pricing doc says: the current rate." A three-line fix. No comments.
+**Prompt:** "/cj-grill-with-docs #652" (write the first question).
+**Expected:** the first question proposes the big tier, naming money, and offers normal and small as the other options.
+
 ## Runs, scenarios 2 to 13
 
 - 2026-10-16, before the change (#96): one fresh grader. 2 to 13 missed expected; only a variant of 9 met ("two tickets" proposes no tier), because the old text has no tier at all, so the variant was dropped. The first versions of 7 and 10 met expected on the old text, so both were rewritten.
 - 2026-10-16, after the change: one fresh grader. 2 to 13 met expected. A second pass on 6, 7, 9 and 10 after the entry wording in `CHALLENGE.md` changed: met expected. Gaps it named in the unchanged challenge text (which open gate gives which verdict, no owner field in the report) stay out of scope.
 - 2026-10-16, 9b (added after review) and the reordered tier step: one grader per version. Before, 9b missed expected: no challenge runs inside the grill, and grilling goes on. After, 2, 9b, 10 and 11 met expected.
 - 2026-10-16, final text after the second review round: one fresh grader. 2 to 13 and 9b met expected.
+
+## Runs, scenarios 14 to 17
+
+- 2026-10-16, before the change (#100): one blind grader. 14 and 15 missed expected (normal proposed); 16 and 17 met expected, kept as regression guards.
+- 2026-10-16, after the change: one blind grader. 14 to 17 met expected; 17 cites the line that a big sign wins.
+- 2026-10-16, text after the first review round: one blind grader. 14, 15, 16a, 16b and 17 met expected.
+- 2026-10-16, final text after the second review round (normal now covers anything else): one blind grader. 14, 15, 16a, 16b and 17 met expected.
