@@ -80,6 +80,10 @@ _Avoid_: Acceptance (the user's check of the whole spec)
 The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it.
 _Avoid_: Lane, Size class, Track
 
+**Plan**:
+An optional record of technical decisions, risks and experiment results, approved as a `## Plan` comment on the issue before the spec is published. The spec links to it; it contains no implementation steps.
+_Avoid_: Implementation plan (prescribes implementation steps)
+
 ## Review
 
 **Loosened check**:
