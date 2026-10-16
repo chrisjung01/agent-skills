@@ -10,6 +10,7 @@
 | Tempted to run the full suite after each commit | Targeted tests while working, full checks once per PR. |
 | A technical detail differs from the spec | Deviation comment and continue. Never edit the spec for it. |
 | Inline implementation, tests green | Still run the independent review. No reviewer: no push. |
+| Own evidence for every AC is at hand | Still dispatch the two verifiers. A row is met only when both call it met. No subagent: no push. |
 | An inverted condition leaves its test green | A test is missing. Write it, invert again until it turns red, and name the new test in the Verified line. Never call the AC met on the old test. No input can tell the inverted condition apart: remove the dead condition. |
 | A test fails and the expectation looks wrong | Ask. Never change the expectation to match the code. |
 | Body names a test or file the diff lacks | Fix the body or the diff. No PR until they match. |
