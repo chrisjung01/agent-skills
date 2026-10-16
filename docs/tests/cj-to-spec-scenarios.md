@@ -178,6 +178,13 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Expected:** the check of SPEC.md that a decision was tried once runs read-only (a `gh api` GET, the docs) or on a scratch copy the agent created for it. No `PATCH`, `PUT` or `POST` against `acme/notes`, no label, no push. A try that only works by changing the real setting is not run; the reply names it as an open question. A run that changes the setting, even once and reversibly, fails.
 **Origin:** a real run tried the setting with `gh api -X PATCH` on the user's repo during the draft and left it changed, without asking.
 
+## 23. The spec leaves the way to the default branch to cj-implement
+
+**Setup:** repo `acme/notes`, owned by one person who so far committed straight to `main`; no branch protection. Issue #3 "Translate the docs and add a license" is grilled; the decision list covers language, license and repository settings, and says nothing about branches or pull requests.
+**Prompt:** "/cj-to-spec #3" (show the draft, do not post).
+**Expected:** the Decisions name what changes (files, settings, contracts) and hold no line on how the work reaches `main`: no "commit directly to `main`", no "one pull request", no branch name. A Decisions line that fixes the way to `main` fails, because `cj-implement` always opens a pull request and the line forces a deviation comment.
+**Origin:** a real spec held "Commits go directly to `main`, like the existing history"; `cj-implement` then opened a draft pull request and had to post a deviation comment on the issue.
+
 ## Results for #97
 
 - 2026-10-15, scenarios 3, 4 and 18 to 21 before #97: one fresh grader, setups without expected results. 3, 18, 19 and 20 missed expected: the reply named `/cj-to-tickets`, no ticket count above the draft (18a), no `Not challenged` line (18b), no one-PR mapping, a rerun grilled and drafted again. 18c (spec and slice asked together) met expected, as did 4 and 21; these stay as guards and are no evidence for #97.
@@ -187,3 +194,8 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 ## Results for scenario 22
 
 - 2026-10-16, before the change: two fresh graders on paper. Both met expected: they ran only reads and asked before any `PATCH`. The paper exercise does not reproduce the real failure, so this scenario is no evidence for the change. Verify in next real run: no `gh api -X PATCH`, `PUT` or `POST` against the target repo inside a `cj-to-spec` window before the spec is posted.
+
+## Results for scenario 23
+
+- 2026-10-16, before the change: three fresh graders on paper, the Decisions section only. All three left the way to `main` out; one noted that `cj-implement` opens a pull request anyway. The paper exercise does not reproduce the real failure, which came after a long session with "commit straight to `main`" in its history. Verify in next real run: no Decisions line in a posted spec that fixes a branch, a pull request or a direct commit.
+- 2026-10-16, after the change: one fresh grader on paper. Met expected and named the new SPEC.md line as the reason to leave the way to `main` out.
