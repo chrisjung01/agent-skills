@@ -17,7 +17,7 @@ The comment, or the body of an issue `cj-to-spec` creates, starts with the line 
 | Input or state | Expected |
 |---|---|
 
-**Decisions.** One line each with its reason: modules and interfaces that change, data or schema changes, contracts, permissions. Module and entity names, no file paths, no code; a snippet only when a prototype pinned a decision more precisely than prose can.
+**Decisions.** One line each with its reason: modules and interfaces that change, data or schema changes, contracts, permissions. How the change reaches the default branch (branch, pull request, direct commit) is `cj-implement`'s, not a decision here. Module and entity names, no file paths, no code; a snippet only when a prototype pinned a decision more precisely than prose can.
 
 **Test seams.** Per seam: what it observes, what it catches, what it misses.
 
