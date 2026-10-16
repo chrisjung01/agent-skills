@@ -12,7 +12,7 @@ Everything that leaves the session goes through one gate. An **outbound action**
 
 1. **Draft as text in chat.** Drafting is never a tool call. A scheduled message or a draft saved in a tool counts as sending.
 2. **Clean it.** Run the `unslop` skill over every text a person will read, unless the calling skill names a target that keeps its own style.
-3. **Show it.** The first line names the action and its target. For each action: the target (repo and number, channel, page), the full text, and for API calls the exact command.
+3. **Show it.** The first line names the action and its target. When the draft's language differs from the chat's, the first line also names the draft's language and its source (`conventions`, or the thread being answered). For each action: the target (repo and number, channel, page), the full text, and for API calls the exact command.
    Shown means in the chat, in the same turn as the question; a draft that only sits in a file was not shown.
    The draft keeps its target's shape; the rule block in step 4 governs the text around it.
    A draft longer than one screen gets a summary of 3 to 5 lines between the draft and the question: the target, what is new, what changed against the previous version. The full draft stays above it. A shorter draft needs no summary.
