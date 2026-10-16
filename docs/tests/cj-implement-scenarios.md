@@ -169,6 +169,27 @@ Closes #282, Part of #280
 
 **Source:** session 2026-10-16: the implementing agent judged its own AC in step 7; only the review ran fresh, and it reads code without running anything.
 
+## 11. An issue without a spec: which ones serve as their own spec
+
+**Setup:** each case is an issue with no `## Spec` comment and no body starting with `## Spec`, no sub-issues, no comments. The repo's README documents under "Search": "Results show only the selected category."
+
+**Prompt:** "/cj-implement #<n>". The agent says whether it uses the issue as its spec, and names its next step: the first command up to the branch, a question to the user, or the commands it names instead.
+
+**Cases**, one at a time:
+- a) #150 "Search ignores the selected category: results show all categories. Expected, as the README says: only the selected one." The fix is three lines in one file. Expected: issue as spec in one line, AC-1 from the stated behaviour, then `gh issue develop 150`.
+- b) #151, as a), but the fix is about 60 lines across two files. Expected: as a); length alone does not send it to a spec.
+- c) #152 "Refactor: move the date formatting duplicated in the four screens listed into one helper. Behaviour unchanged: the same strings on every screen." Expected: issue as spec, then `gh issue develop 152`.
+- d) #153 "Add sorting by price to the search list." Expected: stop before any branch, naming `/cj-grill-with-docs #153` and `/cj-to-spec #153`.
+- e) #154 "Fix: a cart takes more than 10 items. Limit carts to 10 items." No doc names a limit. Expected: a new rule is a feature; stop as d).
+- f) #155 "Fix the category filter as the README says, and add a 'Clear all filters' button." Expected: a fix mixed with a feature; stop as d).
+- g) #156 "Fix: search results look wrong after changing the category." No expected behaviour stated anywhere. Expected: stop before any branch and ask the user for the intended behaviour; no assumed behaviour.
+- h) #157 "Refactor the three search queries in `search/` into one service. Behaviour unchanged. Open: keep the legacy endpoint or drop it?" Expected: stop before any branch and ask about the open decision.
+- i) #158 "Typo on the login button: 'Sing in' should read 'Sign in'." Expected: issue as spec, then `gh issue develop 158`.
+- j) #159 "Inbox empty state should read 'No messages yet' instead of 'Nothing here'." Expected: issue as spec, then `gh issue develop 159`.
+- k) #160 "Refactor the search code, it is messy." No scope, nothing said about behaviour. Expected: stop before any branch, naming `/cj-grill-with-docs #160` and `/cj-to-spec #160`.
+
+**Source:** spec #100 (2026-10-16): fully decided fixes and refactors went through grill and spec only because the direct path took one-line fixes.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
@@ -178,3 +199,5 @@ Closes #282, Part of #280
 - 2026-10-13, scenario 6 variant with a diagnosis in the issue body, added after review (#68), one run per version. Text before the review fix ("its prompt holds the issue text"): missed expected, the subagent prompt kept the "Regression test" line. Final text: met expected, both lines left out.
 - 2026-10-15, scenario 9 with both variants, two runs per version. Before: all missed expected in the main case and the not-stacked variant; no `git fetch` before the push, `gh pr create --base feat/108-cj-asking` with the Stack line, the README conflict unseen. After: all met expected; fetch, `#112` found merged, `rebase --onto origin/main`, checks rerun, Stack line dropped, PR on `main`; the conflict variant rebased before the push; the unchanged variant kept base and Stack line.
 - 2026-10-16, scenario 10 with both variants, one blind run per version. Before: all missed expected; no verifier, the agent wrote the met lines from its own runs, redid step 7 itself after the README fix, and with no subagent still wrote the block (it stopped only for the missing reviewer). After: all met expected; two detached worktrees, one prompt without the agent's view, block only after both verifiers, both rerun after the fix, no block without a subagent. The no-subagent variant then got its pasted review, so the missing reviewer no longer explains the stop.
+- 2026-10-16, scenario 11 (#100), one blind run per version. Before: a, b, c, e, g and h missed expected; only a one-line fix passed, a cart limit passed as a one-line guard, and g and h named the grill instead of asking. d, f, i and j met expected. After: all ten met expected. The grader found a refactor without stated scope matched no rule, so the stop now ends in "anything else".
+- 2026-10-16, scenario 11 on the final text after two review rounds (#100): h sharpened to state scope and unchanged behaviour, k added. Before: h missed expected (named the grill instead of asking), k met expected (regression guard). After: a to k met expected.
