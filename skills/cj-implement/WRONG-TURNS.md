@@ -2,7 +2,7 @@
 
 | Situation | Required reaction |
 | --- | --- |
-| No spec, issue looks clear, time pressure | Only a typo, copy change, fix or refactor as step 1 names uses the issue as its spec. A feature, also one called a fix, goes back to `/cj-grill-with-docs` and `/cj-to-spec`; a fix without its intended behaviour, or an open decision: ask first. |
+| No spec, issue looks clear, time pressure | Only a typo, copy change, fix or refactor as step 1 names uses the issue as its spec. Money, data, security or an irreversible step beats small unless the user confirmed small: ask once, unless the latest `Tier:` line or a `## Challenge` comment settles it. A feature, also one called a fix, goes back to `/cj-grill-with-docs` and `/cj-to-spec`; a fix without its intended behaviour, or an open decision: ask first. |
 | No mode given, several tickets | Ask once with the two options. Never pick `one-pr` yourself. Fix-now rows from acceptance: no question, the last PR's mode. |
 | A ticket grows past about 400 lines | Stop and propose a split. A big PR is the problem this skill avoids. |
 | Two blockers still open | The ticket waits. Never stack on a local merge of two branches. |
