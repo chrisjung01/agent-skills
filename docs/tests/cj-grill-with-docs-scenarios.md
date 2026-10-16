@@ -141,3 +141,7 @@ Skill under test: `cj-grill-with-docs`.
 - 2026-10-16, after the change: one blind grader. 14 to 17 met expected; 17 cites the line that a big sign wins.
 - 2026-10-16, text after the first review round: one blind grader. 14, 15, 16a, 16b and 17 met expected.
 - 2026-10-16, final text after the second review round (normal now covers anything else): one blind grader. 14, 15, 16a, 16b and 17 met expected.
+
+## Runs, scenarios 18 and 19
+
+- 2026-10-16, one blind run per version (#133), before on c763457, after on 900900d. Before: 18a missed expected (nothing posted), 19 missed expected (tier question, the line was not in the grill's own comment); 18b and 18c met expected, kept as regression guards. After: 18a, 18b, 18c and 19 met expected.
