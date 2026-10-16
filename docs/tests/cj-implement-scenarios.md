@@ -190,6 +190,51 @@ Closes #282, Part of #280
 
 **Source:** spec #100 (2026-10-16): fully decided fixes and refactors went through grill and spec only because the direct path took one-line fixes.
 
+## 12. Assignment and board status when a unit starts
+
+**Setup:** spec #140 in `acme/tracker`, tickets #141 and #142 (#142 blocked by #141), code in `acme/app`, the run in a checkout of `acme/app`, mode `per-ticket`. No branch or PR exists yet; #141 is unassigned. Each issue has one item on the board "Roadmap", whose `Status` options are `Todo`, `🏗 In progress`, `👀 In review`, `Done`; #140 and #141 read `Todo`. What the agent sees only if it runs the command: a GraphQL `projectItems` query on #141 returns item `PVTI_141`, project `PVT_9` "Roadmap", field `PVTSSF_1` and option IDs `opt_todo`, `opt_prog`, `opt_rev`, `opt_done`.
+
+**Prompt:** "/cj-implement #140 per-ticket". The agent names every command from step 3.1 up to its first Build command, in order, and what it leaves untouched.
+
+**Expected:** after `gh issue develop` and the worktree, and before Build: `gh issue view 141 --repo acme/tracker --json assignees`, `gh api user -q .login`, `gh issue edit 141 --repo acme/tracker --add-assignee @me`, the GraphQL lookup with `o=acme`, `r=tracker`, `gh project item-edit` with `PVTI_141`, `PVT_9`, `PVTSSF_1`, `opt_prog`. Nothing on #140 or #142, no `gh project list`, no `gh project item-add`, no question. A run that assigns nothing, sets no status, assigns before the branch, touches #140, or passes `--repo acme/app` missed expected.
+
+**Variants**, same setup, one at a time:
+- Mode `one-pr`. Expected: only #140 is assigned and moved; #141 and #142 stay unchanged.
+- #141 has no board item. Expected: assignment runs; status skipped; the report line reads `#141 · none: no board item`, no other reason.
+- The board's options are `Backlog`, `Doing`, `Done`. Expected: assignment runs; status skipped; the line names "Roadmap" and "no matching option". A line like "board status not set" without board and reason missed expected.
+
+**Source:** as scenario 14.
+
+## 13. Assignment and board status on resume and fix-now runs
+
+**Setup:** as scenario 12, mode `per-ticket`. An earlier run created the linked branch `feat/141-x` for #141 and stopped before a PR; #141 is assigned to the user and its status reads `👀 In review`, set by hand.
+
+**Prompt:** "/cj-implement #140 per-ticket". The agent names every command from step 2 up to its first Build command.
+
+**Expected:** no second `gh issue develop 141`; the worktree is reused; `gh issue edit 141 --repo acme/tracker --add-assignee @me` runs again; the status lookup runs and leaves `👀 In review` as it is.
+
+**Variants**, same setup, one at a time:
+- The status reads `Todo`. Expected: set to `🏗 In progress`.
+- #141 has no branch yet and is assigned to `mira`. Expected: the agent stops before assigning and asks the user, naming `mira`, and the report names `mira`; no second assignee is added silently.
+- The latest `## Acceptance` comment on #140 has a fix-now row for the open PR #150 of #141, status `👀 In review`. Expected: the agent continues on #150's branch; no `gh issue edit`, no `gh project item-edit`, also not after the PR update.
+
+**Source:** as scenario 14.
+
+## 14. Board status when the PR opens
+
+**Setup:** as scenario 12, unit #141, review clean, checks green, Verified block done, body checked. Board "Roadmap" as there.
+
+**Prompt:** "Weiter mit Schritt 9. Name every command you run after the push, in order."
+
+**Expected:** `gh pr create --draft ...` first; only after it succeeded, `gh project item-edit` with `opt_rev`. Setting the status before `gh pr create`, or when it failed, missed expected.
+
+**Variants**, same setup, one at a time:
+- The board has only `Todo`, `In Progress`, `Done`. Expected: no status change at PR open and no skip line for it.
+- The run resumed the linked branch of scenario 13 with the status at `🏗 In progress`. Expected: set to `👀 In review` after `gh pr create` succeeded; the resume rule does not hold it back.
+- The GraphQL lookup fails with `INSUFFICIENT_SCOPES: Your token has not been granted the required scopes ... ['read:project']`. Expected: status skipped; the report names the missing `project` scope and `gh auth refresh -s project`, never "no board item".
+
+**Source:** spec #105 (2026-10-16): the user assigned the issue and moved its board status by hand at the start of every unit and again when the PR opened.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
