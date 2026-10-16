@@ -9,6 +9,8 @@ errors=0
 user_invoked=()
 for dir in skills/*/; do
   skill="$(basename "$dir")"; file="$dir/SKILL.md"; before=$errors
+  # git mv leaves the source folder behind, empty and unknown to git.
+  [[ -z "$(ls -A "$dir")" ]] && { echo "! $skill: empty folder, skipped (leftover from a move? rmdir it)"; continue; }
   if [[ ! -f "$file" ]]; then echo "✗ $skill: SKILL.md missing"; errors=$((errors+1)); continue; fi
   if [[ "$(head -n1 "$file")" != "---" ]]; then echo "✗ $skill: frontmatter missing"; errors=$((errors+1)); continue; fi
   fm="$(awk 'NR==1{next} /^---$/{exit} {print}' "$file")"
