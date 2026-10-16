@@ -81,7 +81,7 @@ The agent's evidence per PR that each acceptance criterion and edge-case row of 
 _Avoid_: Acceptance (the user's check of the whole spec)
 
 **Tier**:
-The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it.
+The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it, and `cj-implement` asks once for a stake on an issue without a spec. A confirmed tier stands on the issue as a `Tier: <tier>, confirmed` line; the latest one counts.
 _Avoid_: Lane, Size class, Track
 
 **Plan**:
