@@ -1,6 +1,6 @@
 # Challenge result
 
-Read in the last step of [SKILL.md](SKILL.md). One format for a GitHub comment and a docs page, in the language from `conventions`, else the issue's language.
+Read in the last step of [CHALLENGE.md](CHALLENGE.md). One format for a GitHub comment and a docs page, in the language from `conventions`, else the issue's language.
 
 ```
 ## Challenge: [issue title]
