@@ -28,11 +28,12 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 
    Then, before the draft, ask the user to confirm them as a yes/no choice question, the whole list directly above it: yes confirms every seam, no lets the user name the seam to change or drop.
 3. **Size.** One spec is one goal that ships on its own. Two goals that could ship separately: propose two specs, one per issue, and continue with the one the user picks first.
-4. **Draft** the spec in the shape of [SPEC.md](SPEC.md), with the Acceptance line its triggers propose, and run its checks. Judge the ticket count: more than one ticket when the work needs more than one fresh context window, or touches more than one repo. More than one ticket and no challenge verdict (no `## Challenge` comment on the issue, none in this conversation, none on a docs page the issue or conversation links): the Decisions hold the line `Not challenged: more than one ticket, no challenge ran`. A one-ticket spec never holds it; a posted line stays when a revised slice later fits one ticket, since no challenge ran.
+4. **Draft** the spec in the shape of [SPEC.md](SPEC.md), with the Acceptance line its triggers propose. Judge the ticket count: more than one ticket when the work needs more than one fresh context window, or touches more than one repo. More than one ticket and no challenge verdict (no `## Challenge` comment on the issue, none in this conversation, none on a docs page the issue or conversation links): the Decisions hold the line `Not challenged: more than one ticket, no challenge ran`. A one-ticket spec never holds it; a posted line stays when a revised slice later fits one ticket, since no challenge ran.
+   Before step 5, run "Optional Plan" below against the draft. Incorporate its findings and run the checks of SPEC.md before the spec is shown for approval.
 5. **Fresh reader.** Dispatch one subagent on the Opus tier with effort high where the harness takes a model and an effort, as `cj-reviewing` does for its reviewer. Its prompt holds this task, the draft and the issue if one exists; no conversation, no decision list. It reports every AC or edge-case row that a wrong implementation would still pass, naming that implementation. A finding that sharpens an AC without a new decision goes into the draft. For a finding that changes behaviour or scope, call the Skill tool with "cj-grilling" and ask it as one question that quotes the AC or row; it goes into the draft only with the user's answer. After the reader's findings or the user's answers change the draft, run the checks of step 4 again. No subagent available: say so above the draft.
 6. **Show and post.** Above the draft, one line states whether the spec needs one ticket or more, with its reason (fresh context windows, repos). The user's answer to the spec can override the count; the `Not challenged` line follows the count that is posted. Show the full text, and below it one line per reader finding, `<finding> → worked in` or `<finding> → rejected: <reason>`. These lines are not posted. Call the Skill tool with "cj-posting":
    - The issue exists: post the spec as a **comment** on it. Never edit the issue body; it belongs to its author. Leave its title unchanged, including any existing prefix.
-   - No issue yet: call the Skill tool with "cj-filing-issues" (Find, then File) and create one whose body is the spec. Use the approved title without automatically adding `[Epic] `.
+   - No issue yet and no Plan chosen: call the Skill tool with "cj-filing-issues" (Find, then File) and create one whose body is the spec. Use the approved title without automatically adding `[Epic] `. With a Plan chosen, "Optional Plan" creates the issue first; post the spec as a comment on that issue.
    - So `cj-filing-issues` runs here only without an issue. Sub-issues are filed in step 7 with [TICKETS.md](TICKETS.md), and only when the spec needs more than one ticket. A one-ticket spec goes from its comment straight to `cj-implement`, with no new issue.
    - Publishing a spec does not propose or authorize Epic marking. The slice in [TICKETS.md](TICKETS.md) proposes the Epic title when it has multiple sub-issues.
    - Apply the ready label from `issue-tracker`, if the repo has one.
@@ -40,6 +41,32 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 
 Done when the spec is posted, its link is in the reply, and the reply ends with the next step. One ticket: `/clear`, then `/cj-implement <issue>` (`cj-implement` reads the issue and the spec comment itself and needs a fresh context window). More than one ticket: the next step [TICKETS.md](TICKETS.md) names once the slice is filed. Slice rejected and one PR chosen: `/clear`, then `/cj-implement <issue> one-pr`; never `/cj-implement <issue>` without `one-pr` for that spec. Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command per line, each followed by ` · ` and its reason in a few words. A step that names a PR, issue or comment carries its full link, even when the link appears earlier in the reply. No table.
 
+## Optional Plan
+
+Before publishing a draft, check for each of these triggers: a hard-to-reverse change, a new data model, persistent storage, or untried tool behaviour. Any one is sufficient, even for one ticket. Ticket count alone is not a trigger. With none, add no Plan proposal or comment and continue the existing flow.
+
+When a trigger applies, name each applicable trigger and offer one choice: create a Plan, recommended, or skip it. Explain that a Plan records technical decisions and evidence. Wait for the answer before continuing; several triggers still get one choice. Write it scannable: the first line is the result or the decision needed. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
+
+Skipping creates and publishes no Plan. In either choice, the hard-case experiment check in [SPEC.md](SPEC.md) still applies before spec publication. Run relevant experiments read-only or on a scratch copy under that check's shared-state restrictions. Failed, inconclusive, unavailable or unperformed experiments leave the decision unresolved: call the Skill tool with "cj-grilling" and settle it before publishing. An intended procedure is not an observed result.
+
+If the user chooses create, draft the Plan in this shape, with one entry per relevant decision and experiment:
+
+```
+## Plan
+
+**Decisions**
+- <decision>: <choice>; reason: <why>; remaining risk: <what is still uncertain>.
+
+**Experiments**
+- <assumption>; procedure: <what was tried>; observed result: <what happened>.
+```
+
+Complete relevant experiments before Plan approval and publication. When none are needed, say so without inventing results. The Plan prescribes no implementation steps and requires no implementation-planning skill. Incorporate its findings into the spec draft before spec approval and publication.
+
+Call the Skill tool with "cj-posting" for approval and publication of the full Plan as a comment starting with `## Plan` on the spec's issue. Choosing create is not approval to publish. No issue exists: first call the Skill tool with "cj-filing-issues" for Find and File, using the approved problem description as the issue body through its posting approvals; then approve and post the Plan comment. Use the approved issue title without adding `[Epic] `. Add the actual published Plan comment link to the spec's Decisions, then obtain approval for and publish the spec in step 6. Ticket slicing stays after spec publication. If Plan approval is withheld or posting fails, stop this publication path; never publish a spec claiming or linking an unpublished Plan.
+
 ## Changing a posted spec
 
 The approved sections (problem, acceptance criteria, out of scope, the Acceptance line) change only with the user's yes; then edit the spec comment and add a one-line comment below it saying what changed. Technical deviations during implementation never edit the spec; they are separate comments (see `cj-implement`).
+
+Before approving and publishing a revision, run "Optional Plan" for any new or changed technical risk matching a trigger. Unchanged decisions do not prompt again; resuming a posted spec without changed risks creates no duplicate Plan. If create is chosen, publish an approved Plan comment covering the revised decisions and link it from the revised spec. If skip is chosen, the experiment check still applies. Incorporate findings and rerun the spec checks before obtaining approval for the revision.
