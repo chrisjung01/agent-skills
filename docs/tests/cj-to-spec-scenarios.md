@@ -206,3 +206,8 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 - 2026-10-16, before the change: three fresh graders on paper, the Decisions section only. All three left the way to `main` out; one noted that `cj-implement` opens a pull request anyway. The paper exercise does not reproduce the real failure, which came after a long session with "commit straight to `main`" in its history. Verify in next real run: no Decisions line in a posted spec that fixes a branch, a pull request or a direct commit.
 - 2026-10-16, after the change: one fresh grader on paper. Met expected and named the new SPEC.md line as the reason to leave the way to `main` out.
+
+## Results for scenario 24
+
+- 2026-10-19, before the change (#138): one fresh grader on paper. The draft showed every section in the open, with no note, summary or collapsed block. Missed expected.
+- 2026-10-19, after the change: one fresh grader on paper. German note and summary sat above a `<details>` block with a German label, blank lines in place, Acceptance line last inside it. Met expected.
