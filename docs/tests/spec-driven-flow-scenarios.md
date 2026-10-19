@@ -56,7 +56,7 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 
 ## 10. Chat output against the rule block
 
-**Setup:** a grader reads `cj-grilling`, `cj-to-spec` and `cj-posting` literally and judges each reply below: does the skill text forbid it, citing the line? The replies come from the Fortress-Architect session of 2026-10-12 and the evidence in #47. Each case is one catch of the test seams in #47.
+**Setup:** a grader reads `cj-grilling`, `cj-to-spec` and `cj-posting` literally and judges each reply below: does the skill text forbid it, citing the line? Cases a to f come from the Fortress-Architect session of 2026-10-12 and the evidence in #47, each one catch of its test seams; g and h come from #137.
 **Cases:**
 - a) Inline enumeration: "Open are the HP curve, the elite peak and the boss count."
 - b) Nested list: a decision list whose items carry sub-bullets with the reasons.
@@ -64,7 +64,9 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 - d) Option names only a number: the reply text lists test seams 1 to 3, the confirmation question reads "A) confirm B) change seam 2".
 - e) Made-up abbreviation: an option reads "1 HP linear ab W1 (Daten), Empf."
 - f) Long draft, no summary: a spec of 4,600 characters, then right after it the question whether to post it.
-**Expected:** every case is marked failed, each with the line that forbids it.
+- g) Padded prose: "I have now finished looking through the branch, and I am happy to report that all of the checks have passed successfully."
+- h) Regression guard: the draft of a PR body shown before posting, written in full sentences.
+**Expected:** cases a to g are marked failed, each with the line that forbids it; h is not.
 
 ## 11. Handoff to acceptance
 
@@ -99,3 +101,4 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 - 2026-10-13, handoff to acceptance (#56), fresh grader reading `cj-implement` literally. Before: scenarios 11 and 12 missed expected; the report had no step between an open last PR and `/cj-retro`, and fix-now rows counted as done tickets. After: 2, 3, 5, 8, 9, 11, 12 met expected. Also found and fixed: the next step dropped the mode argument, a fix-now row on a merged PR could loop back to `/cj-implement`, the `/cj-accept` line lacked the PR link. Review rounds 1 and 2: a fix-now row counted as done through the PR's own earlier Verified line, the worktree was not fetched, not-ready tickets and tickets in another repo looped or had no next step; all fixed, scenario 12 extended. After the fixes: 3, 5, 11, 12 met expected on the text before three wording fixes in step 2 and 4.
 - 2026-10-14, scenario 11 variants (#95), fresh grader reading `cj-implement` and `cj-accept` literally. Before: base, a, d and g met expected, b, c, e, f and h missed. a, d and g stay as guards that specs by hand, specs without the line and a finished records-only run keep today's next step. After: all nine met expected. Review then found that a spec in an issue body could read as the small tier, and that the gate of `cj-accept` stopped records-only runs on such specs; both fixed with the `## Spec` start of the body as the marker. Review round 2 found four more gaps (an edited line after a records-only comment, step 1 of `cj-implement`, two wordings of records waiting, a needless merge); after their fixes all nine still met expected.
 - 2026-10-15, scenarios 1, 6 and 7 (#97), one fresh grader each on the text before and after, setups without expected results. Before: all three missed expected (next step `/cj-to-tickets`, no ticket count above the draft, retro routed to `cj-to-tickets`). After: all three met expected.
+- 2026-10-19, scenario 10 cases g and h (#137), fresh grader reading `cj-grilling`, `cj-to-spec`, `cj-posting` literally. Before (8e4ce25): g missed expected, no line asked for terse chat text; h met expected. After (eb7145d): g and h met expected; h is a regression guard, the draft keeps its shape through `cj-posting` and "Text others read keeps full sentences".
