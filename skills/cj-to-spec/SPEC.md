@@ -24,11 +24,13 @@ _Input for the agent that implements this issue. Nothing to review here; expand 
 | Input or state | Expected |
 |---|---|
 
+**Non-functional requirements.** Measurable requirements such as speed, limits, security or accessibility, each with its measured value (within 2 s, up to 500 notes); `none` when empty. Every requirement that can be checked gets an AC.
+
 **Decisions.** One line each with its reason: modules and interfaces that change, data or schema changes, contracts, permissions. How the change reaches the default branch (branch, pull request, direct commit) is `cj-implement`'s, not a decision here. Module and entity names, no file paths, no code; a snippet only when a prototype pinned a decision more precisely than prose can.
 
 **Test seams.** Per seam: what it observes, what it catches, what it misses.
 
-**Out of scope.** What this deliberately leaves out, at least one item when the scope has an obvious neighbour.
+**Out of scope.** What this deliberately leaves out, at least one item when the scope has an obvious neighbour. The coverage table's Out of scope rows go here.
 
 **Recorded in repo.** Glossary terms and ADRs written during the grilling, by name, for `cj-implement` to commit. "none" when empty.
 
