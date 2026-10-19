@@ -39,3 +39,24 @@ Skill under test: `cj-grilling`.
 - 2026-10-13, after the change: one run each, on the text before the review fixes (second hand-back, predicted answers in the summary). Scenario 2 recorded nothing and asked the restore decision again with two options: met expected. Scenario 3 named its next three questions, predicted two, and asked the shared-note decision it could not predict before the summary: met expected.
 - 2026-10-13, again on the text of review round 2: one run each. Scenario 2 asked again with two options, and after a second hand-back recorded "owner only" as delegated, marked for the summary: met expected. Scenario 3 asked the unpredicted age decision before the summary and kept two predicted answers for it: met expected.
 - 2026-10-13, scenario 3 on the current Done-when text, two turns: asked the unpredicted age rule first, recorded the read-only rule as predicted, then asked the collaborator decision: met expected. It read "after two such rounds" as round 2, so the stop now names a third round.
+
+## 4. Non-functional quality never discussed is asked before close
+
+**Setup:** repo `acme/notes-app`, issue #230 "Export a note as PDF". Decided: 1) one note per export, 2) the button sits in the note's menu, 3) A4 with images, 4) a failed export shows an error with a retry button, 5) done when the PDF opens in the system viewer, 6) no new library, the existing print module renders it, 7) nothing about exports is stored, 8) the menu entry shows a spinner until the PDF opens. Every answer took the recommended option. Never discussed: how large a note may be, how long an export may take, what happens to the app meanwhile. The agent ran the "predict the user" check: its next three decisions (file name, page margins, dark-mode colours) are all predicted from earlier answers.
+**Prompt:** the user answers decision 8 with "1". (Write the agent's next reply.)
+**Expected:** the agent asks about non-functional quality (note size, export time, app responsiveness) in a turn of its own, one question, before any closing summary. A reply that shows the closing summary fails.
+**Origin:** agent-skills#74, test seam case 1.
+
+## 5. A skill-text change rules UX flow out with a fact
+
+**Setup:** repo `acme/agent-skills`, a repo of agent skills (Markdown instructions, no app, no screens). Issue #88 "cj-review: name the severity scale in the reviewer prompt". Decided: 1) the reviewer prompt names the scale by its four levels, 2) only `skills/cj-review/SKILL.md` changes, 3) no new term, the glossary's *Severity* is used, 4) a finding without a level counts as low, 5) the prompt stays under 20 lines, 6) done when a scenario run shows a finding with its level, 7) old review comments stay as they are. The agent ran the "predict the user" check: its next three decisions are all predicted.
+**Prompt:** the user answers decision 7 with "1". (Write the agent's next reply.)
+**Expected:** the closing summary shows a coverage table above the numbered decision list, seven rows: functional scope, domain and data model, UX flow, non-functional quality attributes, edge cases and error handling, constraints and tradeoffs, completion signals. UX flow reads Out of scope with the fact that the change touches skill text only. No question about UX flow is asked. Clear rows name decision numbers; no row reads Partial or Missing. A summary without the table, or a question about UX flow, fails.
+**Origin:** agent-skills#74, test seam case 2. Its "no UX question" part is a regression guard.
+
+## 6. A UI change asks UX flow instead of ruling it out
+
+**Setup:** repo `acme/notes-app`, issue #241 "Delete several notes at once". Decided: 1) any notes the user owns can be selected, 2) deleted notes go to the trash for 30 days, 3) a note shared with others is removed only for the owner's view after a warning, 4) deleting 500 notes finishes within two seconds, 5) a failed delete keeps the remaining notes selected and names the failed ones, 6) done when the trash shows the deleted notes, 7) no new database table. Never discussed: how the user enters selection mode, selects, and confirms. The agent ran the "predict the user" check: its next three decisions (trash sort order, undo toast duration, selection limit) are all predicted.
+**Prompt:** the user answers decision 7 with "1". (Write the agent's next reply.)
+**Expected:** the agent asks about the UX flow (entering selection mode, selecting, confirming) in a turn of its own before any closing summary. A reply that closes, or that rates UX flow Out of scope, fails.
+**Origin:** agent-skills#74, test seam case 3.
