@@ -92,31 +92,31 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 **Setup:** repo `acme/shop-web`. Issue #120 "Merkliste: Artikel per Herz speichern" is written in German and grilled in German; the decision list says: a heart on every product card saves the item, the saved items show on a new page "Merkliste", one ticket.
 **Prompt:** "/cj-to-spec #120" (draft only, do not post).
-**Expected:** the draft's last line reads `Acceptance: by hand · behaviour a user sees`, in English although the headings are German. A draft without the line, or with `verified is enough`, fails.
+**Expected:** the draft's last line before `</details>` reads `Acceptance: by hand · behaviour a user sees`, in English although the headings are German. A draft without the line, or with `verified is enough`, fails.
 
 ## 12. A data migration no user sees ends with acceptance by hand
 
 **Setup:** repo `acme/fit-backend`. Issue #318 "Store workout durations in seconds instead of minutes" is grilled: a migration rewrites every stored duration, the API keeps answering in minutes, no screen changes, one ticket.
 **Prompt:** "/cj-to-spec #318" (draft only, do not post).
-**Expected:** the last line reads `Acceptance: by hand · data`. A draft that proposes `verified is enough` because no user sees a change fails.
+**Expected:** the last line before `</details>` reads `Acceptance: by hand · data`. A draft that proposes `verified is enough` because no user sees a change fails.
 
 ## 13. A big refactor without a trigger ends with verified is enough
 
 **Setup:** repo `acme/notes-cli`. Issue #92 "Split the storage module into reader and writer" is grilled; the decision list says: no behaviour changes, no stored format changes, five tickets, about two weeks of work, big tier.
 **Prompt:** "/cj-to-spec #92" (draft only, do not post).
-**Expected:** the last line reads `Acceptance: verified is enough · no trigger applies`. A draft that sets by hand because of the tier, the effort or the ticket count fails.
+**Expected:** the last line before `</details>` reads `Acceptance: verified is enough · no trigger applies`. A draft that sets by hand because of the tier, the effort or the ticket count fails.
 
 ## 14. The Acceptance line names its trigger
 
 **Setup:** as scenario 11. An earlier draft in the conversation ends with `Acceptance: by hand`, without a trigger.
 **Prompt:** "Prüf den Entwurf gegen die Checks und zeig ihn mir" (draft only, do not post).
-**Expected:** the checks catch the missing trigger; the draft shown ends with `Acceptance: by hand · behaviour a user sees`. A draft shown with the bare `Acceptance: by hand` fails.
+**Expected:** the checks catch the missing trigger; the draft shown has `Acceptance: by hand · behaviour a user sees` as its last line before `</details>`. A draft shown with the bare `Acceptance: by hand` fails.
 
 ## 15. The user overrides the proposed value
 
 **Setup:** as scenario 11; the draft ends with `Acceptance: by hand · behaviour a user sees`.
 **Prompt:** "Mach verified is enough daraus, das teste ich nicht von Hand" (draft only, do not post).
-**Expected:** the draft shown ends with `Acceptance: verified is enough · behaviour a user sees · user chose`. A line that drops the trigger or omits `· user chose` fails.
+**Expected:** the draft shown has `Acceptance: verified is enough · behaviour a user sees · user chose` as its last line before `</details>`. A line that drops the trigger or omits `· user chose` fails.
 - 2026-10-14, scenarios 11 to 15 before the change (#95): one fresh grader. No line of `SPEC.md` or `cj-to-spec` adds an Acceptance line, so all five missed expected. Fail.
 - 2026-10-14, scenarios 11 to 15 after the change: one fresh grader. All five met expected, citing the Acceptance line section and its check in `SPEC.md`. Pass.
 
@@ -185,6 +185,13 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Expected:** the Decisions name what changes (files, settings, contracts) and hold no line on how the work reaches `main`: no "commit directly to `main`", no "one pull request", no branch name. A Decisions line that fixes the way to `main` fails, because `cj-implement` always opens a pull request and the line forces a deviation comment.
 **Origin:** a real spec held "Commits go directly to `main`, like the existing history"; `cj-implement` then opened a draft pull request and had to post a deviation comment on the issue.
 
+## 24. Teammates see a note and a summary, the spec stays collapsed
+
+**Setup:** repo `acme/shop-web`, its issues in German. Issue #140 "Merkliste: Artikel per Herz speichern" is grilled; one ticket. A teammate who opens the issue should see at a glance that the spec needs no review.
+**Prompt:** "/cj-to-spec #140" (show the draft, do not post).
+**Expected:** the draft starts with `## Spec`, then one German line saying it is input for the implementing agent and needs no review, then a German summary of problem and goal in at most two sentences. Everything else sits in a `<details>` block with a German `<summary>` label, a blank line after `</summary>` and before `</details>`, and the Acceptance line last inside it. A draft with sections above `<details>` other than the note and the summary, or without the blank lines, fails.
+**Origin:** a teammate opened a spec comment, saw a wall of text and could not tell whether to review it (#138).
+
 ## Results for #97
 
 - 2026-10-15, scenarios 3, 4 and 18 to 21 before #97: one fresh grader, setups without expected results. 3, 18, 19 and 20 missed expected: the reply named `/cj-to-tickets`, no ticket count above the draft (18a), no `Not challenged` line (18b), no one-PR mapping, a rerun grilled and drafted again. 18c (spec and slice asked together) met expected, as did 4 and 21; these stay as guards and are no evidence for #97.
@@ -199,3 +206,8 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 - 2026-10-16, before the change: three fresh graders on paper, the Decisions section only. All three left the way to `main` out; one noted that `cj-implement` opens a pull request anyway. The paper exercise does not reproduce the real failure, which came after a long session with "commit straight to `main`" in its history. Verify in next real run: no Decisions line in a posted spec that fixes a branch, a pull request or a direct commit.
 - 2026-10-16, after the change: one fresh grader on paper. Met expected and named the new SPEC.md line as the reason to leave the way to `main` out.
+
+## Results for scenario 24
+
+- 2026-10-19, before the change (#138): one fresh grader on paper. The draft showed every section in the open, with no note, summary or collapsed block. Missed expected.
+- 2026-10-19, after the change: one fresh grader on paper. German note and summary sat above a `<details>` block with a German label, blank lines in place, Acceptance line last inside it. Met expected.
