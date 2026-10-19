@@ -19,7 +19,7 @@ Skill under test: `cj-grilling`.
 
 ## 2. A handed-back decision is asked again
 
-**Setup:** repo `acme/notes-app`. The agent is grilling issue #212 "Archive old notes". Settled so far: notes older than a year are archived, not deleted. The agent asked "Who can restore an archived note?" with A) the owner only (recommended), B) the owner and every collaborator, C) nobody, archive is final.
+**Setup:** repo `acme/notes-app`. The agent is grilling issue #212 "Archive old notes". Settled so far: notes older than a year are archived, not deleted. The agent asked "Who can restore an archived note?" with 1) the owner only (recommended), 2) the owner and every collaborator, 3) nobody, archive is final.
 **Prompt:** the user answers "whatever you think is best".
 **Expected:** the agent does not record A as the decision. It asks the same decision again with two concrete options, each with its consequence, and waits. A reply that records "owner only" and moves on to the next decision fails.
 **Origin:** agent-skills#61, adapted from addyosmani/agent-skills `interview-me`.
@@ -27,7 +27,7 @@ Skill under test: `cj-grilling`.
 ## 3. The agent checks it can predict the user before closing
 
 **Setup:** repo `acme/notes-app`, issue #212 "Archive old notes". Decided: notes older than a year are archived; the owner restores them; archived notes are hidden from search; the archive job runs nightly. Each was answered with the recommended option except search, where the user picked "hidden" over the recommended "shown with a label" and said "people complain about clutter". Not asked: whether shared notes that a collaborator edited last month count as old by their creation date or by their last edit. The agent sees no further open decision of its own.
-**Prompt:** the user answers the nightly-job question with "A". (Write the agent's next reply.)
+**Prompt:** the user answers the nightly-job question with "1". (Write the agent's next reply.)
 **Expected:** before it closes, the agent checks whether it can predict the user's answers to its next three questions. The age of a recently edited shared note is one it cannot predict, because the user already overruled a recommendation once on clutter. It asks that decision before the summary. A reply that goes straight to the summary of decisions fails.
 **Origin:** agent-skills#61, adapted from addyosmani/agent-skills `interview-me`.
 
