@@ -73,7 +73,7 @@ The user's manual check of a whole spec, every acceptance criterion and edge-cas
 _Avoid_: Verification (the agent's evidence per PR), Sign-off, Playtest
 
 **Acceptance line**:
-The last line of a spec, `Acceptance: by hand` or `Acceptance: verified is enough`, with the trigger that set it. It decides in every tier whether Acceptance checks the spec by hand.
+The last line of a spec before its collapsed block closes, `Acceptance: by hand` or `Acceptance: verified is enough`, with the trigger that set it. It decides in every tier whether Acceptance checks the spec by hand.
 _Avoid_: Acceptance level, Sign-off flag
 
 **Verification**:

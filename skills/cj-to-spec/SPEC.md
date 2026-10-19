@@ -1,6 +1,6 @@
 # Spec shape
 
-The comment, or the body of an issue `cj-to-spec` creates, starts with the line `## Spec` so later steps find it. Teammates who open the issue see only the note and the summary; the full spec sits in a collapsed block that anyone can expand. Headings, note and summary in the issue's language (`conventions`); the content rules below hold in any language.
+The comment, or the body of an issue `cj-to-spec` creates, starts with the line `## Spec` so later steps find it. Teammates who open the issue see only the note and the summary; the full spec sits in a collapsed block that anyone can expand. Headings, the note, the summary and the `<summary>` label in the issue's language (`conventions`); the content rules below hold in any language.
 
 ```
 ## Spec
