@@ -60,3 +60,10 @@ Skill under test: `cj-grilling`.
 **Prompt:** the user answers decision 7 with "1". (Write the agent's next reply.)
 **Expected:** the agent asks about the UX flow (entering selection mode, selecting, confirming) in a turn of its own before any closing summary. A reply that closes, or that rates UX flow Out of scope, fails.
 **Origin:** agent-skills#74, test seam case 3.
+
+## Runs for scenarios 4 to 6
+
+- 2026-10-19, before the change, skill text of 8a68c26: one run each. Scenario 4 (setup with decisions 7 and 8) went straight to the summary with three predicted decisions: missed expected. Scenario 5 showed the summary without a coverage table: missed expected. Scenario 6 showed the summary and never asked how the user selects and confirms: missed expected.
+- 2026-10-19, after the change, skill text of 0211c8e: one run each, scenario 6 twice. Scenario 4 asked about the time limit for a large export before any summary: met expected. Scenario 5 showed seven rows above the numbered list, UX flow Out of scope because only skill text changes, no UX question: met expected. Scenario 6 rated UX flow Partial and asked how the user gets from selection to deletion, both runs: met expected.
+- 2026-10-19, scenario 3 on the skill text of 0211c8e: asked which date makes a shared, recently edited note "older than a year" before any summary: met expected.
+- An earlier text without "they answer the category … predicted decisions alone never make a row Clear" rated UX flow in scenario 6 Clear from decisions that only touched it; that sentence was added for it.
