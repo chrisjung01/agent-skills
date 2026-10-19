@@ -88,6 +88,10 @@ _Avoid_: Lane, Size class, Track
 An optional record of technical decisions, risks and experiment results, approved as a `## Plan` comment on the issue before the spec is published. The spec links to it; it contains no implementation steps.
 _Avoid_: Implementation plan (prescribes implementation steps)
 
+**Coverage table**:
+The table `cj-grilling` shows before it closes a session: one row per category of a plan, each rated Clear, Partial, Missing or Out of scope.
+_Avoid_: Clarify gate (a mandatory step, which this is not), Checklist
+
 ## Review
 
 **Loosened check**:
