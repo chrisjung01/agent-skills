@@ -1,9 +1,16 @@
 # Spec shape
 
-The comment, or the body of an issue `cj-to-spec` creates, starts with the line `## Spec` so later steps find it. Headings in the issue's language (`conventions`); the content rules below hold in any language.
+The comment, or the body of an issue `cj-to-spec` creates, starts with the line `## Spec` so later steps find it. Teammates who open the issue see only the note and the summary; the full spec sits in a collapsed block that anyone can expand. Headings, note and summary in the issue's language (`conventions`); the content rules below hold in any language.
 
 ```
 ## Spec
+
+_Input for the agent that implements this issue. Nothing to review here; expand the block below for the full spec._
+
+**Summary.** The problem and the goal in at most two sentences, for a teammate who reads nothing else.
+
+<details>
+<summary>Full spec</summary>
 
 **Problem.** What is wrong or missing today, from the user's point of view. One to three sentences, no solution.
 
@@ -28,11 +35,15 @@ The comment, or the body of an issue `cj-to-spec` creates, starts with the line 
 **Merge danger.** One-way or two-way door, the blast radius in one line, and whether old clients and old code still running during the rollout stay valid.
 
 Acceptance: <by hand | verified is enough> · <trigger | no trigger applies>
+
+</details>
 ```
+
+GitHub renders Markdown inside `<details>` only with a blank line after `</summary>` and one before `</details>`; without them headings and tables show as raw text.
 
 ## Acceptance line
 
-The last line says whether the user checks the spec by hand before the last merge (`cj-accept`), or whether the Verified lines of the PRs are enough. Plain text, English words in any issue language, so later steps find it.
+The last line before `</details>` says whether the user checks the spec by hand before the last merge (`cj-accept`), or whether the Verified lines of the PRs are enough. Plain text, English words in any issue language, so later steps find it.
 
 - By hand when a trigger applies: behaviour a user sees, money, data, security, an irreversible step, or someone else signs the feature off. Name the first that applies, in these words.
 - No trigger applies: `verified is enough · no trigger applies`. Effort, ticket count and tier are no triggers.
@@ -48,7 +59,8 @@ The last line says whether the user checks the spec by hand before the last merg
 - [ ] The ACs hold together: a limit one AC sets (a line cap, a count, a size) still fits what the other ACs demand, worked out with the spec's own numbers.
 - [ ] A quantity, formula or growth rule in a decision or AC was checked against the limits the repo already states (design docs, decision lists, ADRs, load or performance tests), and the spec names the limit it keeps. A conflict goes back to grilling.
 - [ ] A decision that relies on how a tool, platform or check behaves (when a file is written, what a count catches) was tried once against the case it must handle, including the hard case (a leftover with a fixed name, a delayed write), read-only or on a scratch copy. A try that would change shared state (repo settings, labels, a remote) is not run; it is an open question. Not tried, failed, inconclusive or unavailable: back to grilling, like any open question. This check applies whether a Plan is created or skipped; a planned experiment is not observed evidence.
-- [ ] The last line is the Acceptance line with its value and its trigger, or `no trigger applies`; by hand comes from a trigger or the user's choice, never from effort, ticket count or tier.
+- [ ] Only `## Spec`, the note and the summary sit above `<details>`, and the blank lines around the block's content are there.
+- [ ] The last line before `</details>` is the Acceptance line with its value and its trigger, or `no trigger applies`; by hand comes from a trigger or the user's choice, never from effort, ticket count or tier.
 - [ ] No open question, no "TBD". Something still open goes back to grilling; it is not published.
 - [ ] The spec is shorter than the code it describes would be. Over a screen and a half for a small feature means it holds implementation.
 - [ ] Every term is the glossary's.
