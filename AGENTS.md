@@ -66,6 +66,7 @@ bash scripts/validate.sh     # format of all skills (also runs in CI): invocatio
 git config core.hooksPath .githooks   # once per checkout: runs validate.sh, and cargo fmt --check when the crate changes, before each commit
 # proving a new validate.sh check fires: commit first, then break a file, git add it (the checks read the index), run, git reset --hard; reverting before the commit loses the edit
 ./install.sh --dry-run       # shows what would be linked
+# trying a skill from a branch: installed skills link to this checkout, so tell the agent to follow skills/<name>/SKILL.md in the worktree
 # trying install.sh under a temporary HOME: also set RUSTUP_HOME and CARGO_HOME to the real ones, or cargo fails
 # in skills/cj-whetstone/skill-metrics/ when the crate changes (also in CI):
 cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test --locked
