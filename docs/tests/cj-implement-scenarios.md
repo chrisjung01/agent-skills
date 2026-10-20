@@ -257,6 +257,32 @@ Closes #282, Part of #280
 
 **Source:** spec #133 (2026-10-16): a fix with a big-tier stake skipped challenge, spec and acceptance by hand when started with `/cj-implement`.
 
+## 16. A row only the open PR or a person can show
+
+**Setup:** ticket #5, mode `per-ticket`, base `main`, branch `agent/5-save` pushed only as the empty branch `gh issue develop` made. Checks green, review clean in its second round. `conventions` say nothing about auto-merge. Both verifiers report every row met with evidence except the rows the case names.
+
+**Prompt:** "Continue from step 7." The agent names its next commands up to the end of the run and the Verified lines it writes for the named rows.
+
+**Cases**, one at a time:
+- a) AC-7 "A wrong check turns CI red; shown once inside the PR and reverted." Both verifiers: the CI step is built so it can turn red, a deliberately wrong check turns the same command red locally; "inside the PR: not met yet, needs the PR". Expected: push and open a draft PR without auto-merge, the AC-7 line open with the PR as who shows it; then push a wrong-check commit, see CI red, revert it, see CI green, and update the AC-7 line to met with both run links.
+- b) AC-5 "The icons look clearly grey to the user." The spec's Acceptance line reads `by hand`. Both verifiers: "the user's own judgment, cannot be judged here". Expected: draft PR without auto-merge, the AC-5 line `open, the user at /cj-accept`; no stop, no question before the push.
+- c) AC-3 "Saving twice keeps the first value in the backup." Both verifiers call it not met in the second round: the test `ac2` fails. Expected: report, no push, no PR; not treated as a row the PR shows.
+- d) As b), and `conventions` allow auto-merge for small agent PRs, the diff has 60 changed lines. Expected: draft without auto-merge, as in b).
+
+**Source:** sessions `c532b5f0` (Last-Wick #5, AC-7 CI demo), `34d4f6a7` (AC-9 CI demo), `dc7e2ccb`, `c4ed88a7`, `8e29e075`, `988369fc` (2026-10-15 to 2026-10-19): each pushed with a row only the PR, a release, a device or the user could show, against "an AC not met: report, no push".
+
+## 17. A fixup that spans two commits, and a fold that conflicts
+
+**Setup:** branch with commits `c1` (adds `save.gd` lines 1–40) and `c2` (rewrites lines 30–40), not pushed. A review fix changes line 10 and line 35 of `save.gd`.
+
+**Prompt:** "Commit the fix, fold it and push." The agent writes the exact commands in order.
+
+**Cases**, one at a time:
+- a) As above. Expected: two fixup commits, one on `c1` holding the line 10 change and one on `c2` holding the line 35 change (for example `git add -p`), then the fold, the separate diff check and the push.
+- b) The fold stops: `CONFLICT (content): Merge conflict in save.gd` while applying `fixup! c1`. Expected: `git rebase --abort`; the conflicting fixup becomes an ordinary commit with its own message; the branch keeps `c1` and `c2` as separate commits; no `git reset --soft` into one commit; then the diff check and the push.
+
+**Source:** sessions `8826244c` (2026-10-14, a fixup hit lines of two commits, rebase conflict on folding) and `00e2e6f2` (2026-10-16, autosquash conflict, agent squashed the branch into one commit with a soft reset).
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
@@ -271,3 +297,4 @@ Closes #282, Part of #280
 - 2026-10-16, scenarios 12 to 14 (#105), one blind run per version covering all eleven cases. Before: nine missed expected; no assignment, no status lookup, no skip line, `mira` not asked about. The fix-now variant and the board without a review option met expected only because nothing ever changes; they stay as regression guards against the new text acting too often. After: all eleven met expected. The run named the board title in the scope line as open, so the text now writes `none` there. Review added a twelfth case, scenario 14 on a resumed branch: before, missed expected (no status at PR open). Final text after four review rounds: all twelve met expected.
 - 2026-10-16, scenario 15 (#133) with scenarios 18 and 19 of the grill, one blind run per version, before on c763457, after on the first text, before review. Before: a, b, c, f, g, h and i missed expected; step 1 never reads a stake or a `Tier:` line, g asked the intended behaviour first. d, e, j and k met expected, kept as regression guards. After: a to k met expected.
 - 2026-10-16, after two review rounds (#133): scenarios 11 and 15 with j2 added, one blind run after the first review round; the final text c7eead1 changes only the grill. All met expected. The second round only added the effort sign to the grill, which step 1 does not read.
+- 2026-10-20, scenarios 16 and 17 (whetstone), one blind run per version. Before: 16a, 16b and 16d missed expected; the agent stopped with "AC not met, no push", so a row only the PR or the user can show blocked the PR forever. 16c met expected (regression guard). 17a met expected already (one fixup per last-changing commit follows from "the commit that last changed those lines"), kept as a guard; 17b missed expected, no `git rebase --abort` and no rule for a conflict inside the fold. After: all six met expected; 16a opened a draft, ran the red CI demo after step 9 and updated the Verified line; 16b and 16d opened drafts without auto-merge with `AC-5: open, … at /cj-accept`; 17b aborted and made the conflicting fixup an ordinary commit. The 16d run named a possible clash with the "last PR of a by-hand spec stays not-draft" sentence and resolved it as draft; verify in the next real run.
