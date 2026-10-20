@@ -42,7 +42,7 @@ Skill under test: `cj-grill-with-docs`.
 
 **Setup:** as scenario 5; every gate closed, the verdict is "build differently" with the smaller lever "show the card brand only, no new column", kill criterion "checkout time not down 5 % by 2026-12-31".
 **Prompt:** "weiter" (write the next message).
-**Expected:** a `## Challenge` comment in the `CHALLENGE-REPORT.md` format is drafted and shown for posting through `cj-posting`; once posted, the same run asks its first grilling question with the verdict and the smaller lever as settled. A reply that names `/cj-grill-with-docs` as a next step, or grills without a posted or drafted verdict, fails.
+**Expected:** a `## Challenge` comment in the `CHALLENGE-REPORT.md` format is drafted and shown for posting through `cj-posting`, only the recommendation and the kill criterion above a collapsed `<details>` block; once posted, the same run asks its first grilling question with the verdict and the smaller lever as settled. A reply that names `/cj-grill-with-docs` as a next step, or grills without a posted or drafted verdict, fails.
 
 ## 7. A blocking verdict stops the run
 
