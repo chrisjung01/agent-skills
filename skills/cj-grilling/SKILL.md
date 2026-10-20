@@ -38,7 +38,7 @@ Keep the project's language precise while plans are made. Reading the glossary f
 
 - An existing glossary wins, whatever its name (`GLOSSARY.md`, `CONTEXT.md`, a section in the domain docs). No glossary: create `GLOSSARY.md` at the repo root when the first term is resolved. Point the project's agent docs at it: replace a pointer to a glossary file that does not exist, otherwise add one line to their list of sources.
 - A `GLOSSARY-MAP.md` means several contexts; pick the one the topic belongs to, ask when unclear.
-- Existing ADRs set the folder, numbering and format. None yet: `docs/adr/` with [ADR-FORMAT.md](ADR-FORMAT.md).
+- Existing ADRs set the folder, numbering and format. None yet: `docs/adr/` with its index, as [ADR-FORMAT.md](ADR-FORMAT.md) says.
 - The project's authoritative spec defines terms too. A term the session relies on that the spec already defines is resolved: it goes into the glossary before the first question.
 
 ### During the session
