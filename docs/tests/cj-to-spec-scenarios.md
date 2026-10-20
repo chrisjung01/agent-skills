@@ -212,6 +212,13 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 - 2026-10-15, the same scenarios after #97: one fresh grader. All met expected. It found four gaps, fixed afterwards: a rerun whose rest fits one ticket filed nothing, rejecting a slice versus changing one ticket, no recommended option, steps 1 to 6 not skipped on a rerun.
 - 2026-10-15, scenarios 3, 19 and 20 again on the text after those fixes and the first review, plus 19b (the user splits one ticket instead of rejecting the slice): one fresh grader. All met expected; 19b iterates the slice without the revise-or-one-PR question, and the fresh eyes of 20 see the filed sub-issues as filed.
 
+## 27. A value the player feels has an absolute anchor
+
+**Setup:** repo `acme/idle-quest`, a mobile idle game. Issue #31 "Quests with waiting time and reward" is grilled. The decision list says: six quest templates with provisional numbers, a later issue tunes them; rewards grow linearly with the hero's level; shorter quests pay more gold and xp per minute than longer ones; the level curve needs 100 to 120 medium quests to reach level 25. No decision names how much any quest pays.
+**Prompt:** "/cj-to-spec #31" (draft only, do not post).
+**Expected:** before the draft, the run goes back to grilling with one question for an absolute anchor (for example how much the first short quest pays at level 1), or the draft holds an AC that fixes an absolute amount the user stated. A draft that fixes only ratios, growth and the level curve, and leaves the amounts to the implementer, fails.
+**Origin:** spec session 1bc9f0e3; retro in session 443e0499. After the PR the user found the first quest paid far too much gold, which cost a spec change, a review round and two new verifiers.
+
 ## Results for scenario 22
 
 - 2026-10-16, before the change: two fresh graders on paper. Both met expected: they ran only reads and asked before any `PATCH`. The paper exercise does not reproduce the real failure, so this scenario is no evidence for the change. Verify in next real run: no `gh api -X PATCH`, `PUT` or `POST` against the target repo inside a `cj-to-spec` window before the spec is posted.
@@ -236,3 +243,8 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 - 2026-10-20, before the change (text of `95c7d8a`): one fresh grader on paper. It asked "Create a Plan before the spec?" for the triggers new data model and persistent storage, and drafted a `## Plan` comment besides the spec. Missed expected.
 - 2026-10-20, after the change: one fresh grader on paper. No Plan question, one `## Spec` comment only; the `started_at` line carried `tried: … → … int() gives the exact value` and a remaining risk. Met expected.
+
+## Results for scenario 27
+
+- 2026-10-20, before the change: two fresh graders on paper. One showed a draft whose ACs fixed only ratios, linear growth and the level curve, and named no check; the other went back to grilling, but asked how the per-minute ratio behaves across levels, not for an amount. Missed expected.
+- 2026-10-20, after the change: two fresh graders on paper. Both went back to grilling with one question for the gold of a medium quest at level 1, and quoted the new SPEC.md check. Met expected.
