@@ -84,10 +84,6 @@ _Avoid_: Acceptance (the user's check of the whole spec)
 The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it, and `cj-implement` asks once for a stake on an issue without a spec. A confirmed tier stands on the issue as a `Tier: <tier>, confirmed` line; the latest one counts.
 _Avoid_: Lane, Size class, Track
 
-**Plan**:
-An optional record of technical decisions, risks and experiment results, approved as a `## Plan` comment on the issue before the spec is published. The spec links to it; it contains no implementation steps.
-_Avoid_: Implementation plan (prescribes implementation steps)
-
 **Coverage table**:
 The table `cj-grilling` shows before it closes a session: one row per category of a plan, each rated Clear, Partial, Missing or Out of scope.
 _Avoid_: Clarify gate (a mandatory step, which this is not), Checklist
