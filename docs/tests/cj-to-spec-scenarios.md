@@ -199,6 +199,13 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Expected:** before the draft, the agent asks whether the severity line reaches `cj-review` and `cj-digest`, naming both. A draft or seam that assumes they get the line, or leaves them out without a decision, fails.
 **Origin:** the spec for agent-skills#74 changed `cj-grilling` and named only one of its four callers; review findings came back as spec questions in agent-skills#141.
 
+## 26. Tried decisions stand in the spec, not in a comment of their own
+
+**Setup:** repo `acme/idle-game`, a Godot game. Issue #6 "Quests with wait time and reward" carries a `## Challenge` comment and is grilled; one ticket. The decision list says: the save file gets a `quests` key holding template ids, not numbers; the running quest stores `started_at` in Unix seconds; the clock is passed in. While grilling, the agent tried `started_at` = 4102444800 through `JSON.stringify` and `JSON.parse_string`: it comes back as a float, `int()` gives the exact value.
+**Prompt:** "/cj-to-spec #6" (draft only, do not post; approve the test seams).
+**Expected:** no question about a separate decision record and no comment other than `## Spec` is drafted. The Decisions line for `started_at` carries the observed JSON result, and a remaining risk where one is left (the key names stay forever). A draft that offers or writes a `## Plan` comment, or drops the observed result, fails.
+**Origin:** Last-Wick#6 got `## Challenge`, `## Plan` and then a spec repeating the Plan's five decisions.
+
 ## Results for #97
 
 - 2026-10-15, scenarios 3, 4 and 18 to 21 before #97: one fresh grader, setups without expected results. 3, 18, 19 and 20 missed expected: the reply named `/cj-to-tickets`, no ticket count above the draft (18a), no `Not challenged` line (18b), no one-PR mapping, a rerun grilled and drafted again. 18c (spec and slice asked together) met expected, as did 4 and 21; these stay as guards and are no evidence for #97.
@@ -224,3 +231,8 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 - 2026-10-19, before the change: two fresh graders on paper. Both found `cj-report`, `cj-review` and `cj-digest` through the "many places" check, then put `cj-review` and `cj-digest` into the test seams as getting the line, without asking. Missed expected.
 - 2026-10-19, after the change, first wording: two fresh graders. One asked about `cj-review` and `cj-digest` before any draft; the other named them as undecided but asked the test-seam question first. Hence "asked before the test seams".
 - 2026-10-19, after the change, final wording: two fresh graders. Both asked whether the line reaches `cj-review` and `cj-digest` before the test seams and the draft. Met expected.
+
+## Results for scenario 26
+
+- 2026-10-20, before the change (text of `95c7d8a`): one fresh grader on paper. It asked "Create a Plan before the spec?" for the triggers new data model and persistent storage, and drafted a `## Plan` comment besides the spec. Missed expected.
+- 2026-10-20, after the change: one fresh grader on paper. No Plan question, one `## Spec` comment only; the `started_at` line carried `tried: … → … int() gives the exact value` and a remaining risk. Met expected.

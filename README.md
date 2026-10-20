@@ -31,8 +31,6 @@ Pick the tier before the first command, from the stakes the issue describes; `/c
 - **Big or risky**: real effort, more than one ticket, money, data, security or an irreversible step. The whole chain: `/cj-grill-with-docs` runs the challenge first, `/cj-to-spec` with its slice into sub-issues, `/cj-accept` before the last merge when the spec's Acceptance line says by hand. An item a stakeholder already decided with a documented goal link gets the short challenge (steps 1, 3 and 5).
 - **Any tier**: `/cj-retro` after a session with friction.
 
-In the normal and big tiers, before publishing a spec, `cj-to-spec` offers an optional Plan for a hard-to-reverse change, a new data model, persistent storage, or untried tool behaviour. Any one trigger is enough; ticket count alone is not. The user chooses create or skip. A Plan records decisions, risks and observed experiment results, with no implementation steps. Its approved `## Plan` comment precedes the spec, which incorporates its findings and links to it; slicing follows the spec. Skipping keeps the existing experiment checks. Revisions offer the choice only for new or changed technical risks, so resuming unchanged decisions does not repeat it.
-
 The last `Acceptance:` line of every spec, `Acceptance: by hand` or `Acceptance: verified is enough`, decides acceptance in every tier; `cj-to-spec` proposes it from the triggers in [SPEC.md](skills/cj-to-spec/SPEC.md#acceptance-line). With verified is enough, `/cj-accept` only writes the kill issue and deviations, when there are any.
 
 ## Skills

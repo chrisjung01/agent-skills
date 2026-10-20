@@ -26,7 +26,7 @@ _Input for the agent that implements this issue. Nothing to review here; expand 
 
 **Non-functional requirements.** Measurable requirements such as speed, limits, security or accessibility, each with its measured value (within 2 s, up to 500 notes); `none` when empty. Every requirement that can be checked gets an AC.
 
-**Decisions.** One line each with its reason: modules and interfaces that change, data or schema changes, contracts, permissions. How the change reaches the default branch (branch, pull request, direct commit) is `cj-implement`'s, not a decision here. Module and entity names, no file paths, no code; a snippet only when a prototype pinned a decision more precisely than prose can.
+**Decisions.** One line each with its reason, plus the remaining risk when one is left and, for a decision tried against the hard case, `tried: <procedure> → <observed result>`: modules and interfaces that change, data or schema changes, contracts, permissions. How the change reaches the default branch (branch, pull request, direct commit) is `cj-implement`'s, not a decision here. Module and entity names, no file paths, no code; a snippet only when a prototype pinned a decision more precisely than prose can.
 
 **Test seams.** Per seam: what it observes, what it catches, what it misses.
 
@@ -61,7 +61,7 @@ The last line before `</details>` says whether the user checks the spec by hand 
 - [ ] A number in an AC (baseline, threshold, count) was computed with the spec's own definition, and the spec names the command or query that produced it.
 - [ ] The ACs hold together: a limit one AC sets (a line cap, a count, a size) still fits what the other ACs demand, worked out with the spec's own numbers.
 - [ ] A quantity, formula or growth rule in a decision or AC was checked against the limits the repo already states (design docs, decision lists, ADRs, load or performance tests), and the spec names the limit it keeps. A conflict goes back to grilling.
-- [ ] A decision that relies on how a tool, platform or check behaves (when a file is written, what a count catches) was tried once against the case it must handle, including the hard case (a leftover with a fixed name, a delayed write), read-only or on a scratch copy. A try that would change shared state (repo settings, labels, a remote) is not run; it is an open question. Not tried, failed, inconclusive or unavailable: back to grilling, like any open question. This check applies whether a Plan is created or skipped; a planned experiment is not observed evidence.
+- [ ] A decision that relies on how a tool, platform or check behaves (when a file is written, what a count catches) was tried once against the case it must handle, including the hard case (a leftover with a fixed name, a delayed write), read-only or on a scratch copy. A try that would change shared state (repo settings, labels, a remote) is not run; it is an open question. Not tried, failed, inconclusive or unavailable: back to grilling, like any open question. The observed result goes into the decision's `tried:` part; a planned try is not observed evidence.
 - [ ] Only `## Spec`, the note and the summary sit above `<details>`, and the blank lines around the block's content are there.
 - [ ] The last line before `</details>` is the Acceptance line with its value and its trigger, or `no trigger applies`; by hand comes from a trigger or the user's choice, never from effort, ticket count or tier.
 - [ ] No open question, no "TBD". Something still open goes back to grilling; it is not published.
