@@ -2,6 +2,7 @@
 
 This repo holds personal agent skills for Claude Code and Codex. Each skill is a folder under `skills/` with a `SKILL.md`. See [README.md](README.md) for installation and details.
 Domain terms (skill call, window, nested skill, …) are defined in [GLOSSARY.md](GLOSSARY.md).
+Decisions are recorded in [docs/adr/](docs/adr/README.md); check its index before changing a skill.
 
 ## Skills
 
