@@ -283,6 +283,40 @@ Closes #282, Part of #280
 
 **Source:** sessions `8826244c` (2026-10-14, a fixup hit lines of two commits, rebase conflict on folding) and `00e2e6f2` (2026-10-16, autosquash conflict, agent squashed the branch into one commit with a soft reset).
 
+## 18. A rebase in step 9 onto a base that gained a tool
+
+**Setup:** `per-ticket` run on ticket #7, base `main`, branch `agent/7-candle` branched at `f77244f`. The change adds a text line to the Quests screen. At step 1 the repo's `AGENTS.md` named no screenshot tool and no screenshot script existed, so the body's What block has no image. Review clean, both verifiers met every row, the body is checked. Now `git fetch` shows two PRs merged into `main` since step 2: #23 added `scripts/screenshot.sh` plus the line "Screen with a given save as PNG: `scripts/screenshot.sh <save.json> <out.png>`" to `AGENTS.md`, #24 changed `scripts/check.sh`. `git merge-tree --write-tree origin/main HEAD` exits 1 with a conflict in `scripts/check.sh`.
+
+**Prompt:** "Weiter mit Schritt 9. Name every command you run, in order, and what the PR body's What block holds when you open the PR."
+
+**Expected:** rebase onto `origin/main`, resolve the conflict, rerun the checks; then read `AGENTS.md` again at the new base, find the screenshot script, render the before/after pair and put it into the What block before `gh pr create`. A run that opens the PR with the body as checked before the rebase, without an image, missed expected.
+
+**Variant:** no conflict, `git merge-tree` exits 0, #23 merged all the same. Expected: no rebase, push and PR with the body as checked; the base gained the script, but step 9 rebased nothing, so the body stays (regression guard).
+
+**Source:** session `cd7562ce` (2026-10-20, Last-Wick #7): the screenshot script landed on `main` during the run; PR #25 opened without an image, the user asked twice where to see the change.
+
+## 19. The PR search when the tickets live in another repo
+
+**Setup:** spec issue `acme/tracker#40` with tickets `acme/tracker#41` and `#42`; the code and every PR live in `acme/app`, the repo the agent runs in. `#41` is closed by merged PR `acme/app#7`. `gh issue develop --list 42 --repo acme/tracker` prints `agent/42-export`. `gh pr list --repo acme/app --state open --json number,headRefName,closingIssuesReferences` prints PR #9 on `agent/42-export` closing `acme/tracker#42`; the same command with `--repo acme/tracker` prints `[]`.
+
+**Prompt:** "Weiter mit Schritt 2. Name every command you run with its arguments and the PR units of this run."
+
+**Expected:** the PR list runs against `acme/app`; #42 counts as done through PR #9, no unit, no second `gh issue develop 42`. A run that lists PRs in `acme/tracker`, finds none and calls #42 an interrupted run or a new unit missed expected.
+
+**Source:** retro of session `303cbaeb` (2026-10-16, #105): three blind runs of scenario 13 read `--repo <its repo>` as the tracker repo and found no PRs.
+
+## 20. A row first reported not met in the second verifier round
+
+**Setup:** as scenario 10: ticket #90, AC-1 and AC-2, plus the edge case "already assigned". Round 1: verifier B calls AC-2 not met (the README names the rule under Installation), the agent moves the line, review of the fix is clean. Round 2 on the new state: both call AC-1 and AC-2 met; verifier B now calls the edge case "already assigned" not met, verifier A calls it met.
+
+**Prompt:** "Weiter nach Runde 2. Name what you do next and whether the PR opens."
+
+**Expected:** the edge case counts as not met after the second round: report, no push, no third round. A run that fixes the edge case and dispatches a third verifier round, or pushes because the row was first reported in round 2, missed expected.
+
+**Variant:** round 2 calls every row met. Expected: Verified block and on to step 8 (regression guard).
+
+**Source:** retro of session `303cbaeb` (2026-10-16, #105): verifier B reported a new row in round 2 and the agent ran a third round; the text names no limit per unit or per row.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
