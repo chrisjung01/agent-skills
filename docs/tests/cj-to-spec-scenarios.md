@@ -248,3 +248,24 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 
 - 2026-10-20, before the change: two fresh graders on paper. One showed a draft whose ACs fixed only ratios, linear growth and the level curve, and named no check; the other went back to grilling, but asked how the per-minute ratio behaves across levels, not for an amount. Missed expected.
 - 2026-10-20, after the change: two fresh graders on paper. Both went back to grilling with one question for the gold of a medium quest at level 1, and quoted the new SPEC.md check. Met expected.
+
+## 28. An AC asks for recorded results, never for a result nobody has seen
+
+**Setup:** repo of agent skills, Markdown only. Issue #151 "cj-posting: text others read" is grilled. The decision list says: `cj-posting` step 2 gets a clause that skips the voice steps of the cleaning skill and adds a `Sources` block; the proof is two paper scenarios F (a PR body with two first-person asides and an outside fact with its link) and G (a review comment with one aside and an outside fact without a link), run by a fresh subagent on the commit before the change and on the commit after. Nobody has run them yet. The cleaning skill's own pattern list already cuts "honestly" and "I'm quite happy" sentences; the decision list does not say so.
+**Prompt:** "/cj-to-spec #151" (draft only, do not post); show the AC about the scenarios.
+**Expected:** the AC asks that scenarios F and G exist and that their Results lines record both runs with their commits, as met or missed. It does not prescribe which result the run before the change gives. A draft whose AC reads "missed expected on the commit before the change for AC-1 to AC-4" fails: it fixes an outcome before the run.
+**Origin:** spec session af6e6336 (#151). The RED run met two of the four expectations on the old text; a question to the user and a spec edit followed, see https://github.com/chrisjung01/agent-skills/issues/151#issuecomment-6322456088. Retro in session af6378c7.
+
+## 29. Each listed place is read for what it already fixes
+
+**Setup:** as in scenario 28. The decision list adds: a text with an outside fact ends with a `Sources` block, nothing after it; the four places that clean text before the gate are the PR body template, the issue body template, the spec template and the review comments, each of which gets a pointer to step 2. The repo holds these lines: PR body template, "**Links** (last): per-ticket: `Closes #<ticket>`"; spec template check list, "The last line before `</details>` is the Acceptance line with its value and its trigger".
+**Prompt:** "/cj-to-spec #151" (draft only, do not post); show the ACs about the `Sources` block and the four places.
+**Expected:** before or in the draft, the run reads the four places and names that two of them fix their own last line (the Links block, the Acceptance line); the `Sources` AC says where the block goes in those two, or the run goes back to grilling with that question. A draft with "nothing after it" and no word on the Links block or the Acceptance line fails.
+**Origin:** spec session af6e6336 (#151). Two deviation comments and three wordings of the clause followed in the implementing session, see https://github.com/chrisjung01/agent-skills/issues/151#issuecomment-6322411068 and https://github.com/chrisjung01/agent-skills/issues/151#issuecomment-6322635480. Retro in session af6378c7.
+
+## 30. Two steps on one value name their order; a cap no input reaches goes
+
+**Setup:** repo `acme/idle-quest`, a mobile idle game. Issue #9 "Loot from quests" is grilled. The decision list says: an item's rarity allows at most N properties (common 1, rare 2, epic 3); the loot roll draws properties one by one and may draw more than the rarity allows; a validation step rejects an item with more properties than its rarity allows; a cleanup step removes extra properties; a property's value is a roll of 1 to 60 plus a level bonus of at most 30, capped at 99.
+**Prompt:** "/cj-to-spec #9" (draft only, do not post); show the ACs about the property count and the property value.
+**Expected:** the AC about the property count says whether validation runs before or after cleanup (an item with four properties: rejected, or trimmed to three and accepted). The AC about the value carries no cap at 99, or the run goes back to grilling with the question what input reaches 99, since 60 plus 30 is 90. A draft with "more properties than the rarity allows" without the order, or with "capped at 99", fails.
+**Origin:** spec session 2a389393 (Last-Wick #9). Review round 2 of the implementing session found two readings of the count AC (finding F6) and a deviation comment dropped the dead cap. Retro in session 2b2ea7c3.
