@@ -45,6 +45,7 @@ The last `Acceptance:` line of every spec, `Acceptance: by hand` or `Acceptance:
 | [`cj-accept`](skills/cj-accept/SKILL.md) | **Flow 5.** The user checks every acceptance criterion and edge case of the spec by hand on its last open PR, before it merges. Failed rows become a fix in that PR or a follow-up issue; the result is an `## Acceptance` comment on the spec's issue. Once nothing is left to fix, it files the kill-criterion issue and turns deviations into ADRs or glossary terms. A spec that says verified is enough gets only these records. |
 | [`cj-retro`](skills/cj-retro/SKILL.md) | **Flow 6.** Turns a session's friction into checks, standards or agent-doc pointers in the worked-in repo; skill findings go to `cj-whetstone`. |
 | [`cj-whetstone`](skills/cj-whetstone/SKILL.md) | Improves a skill from the skill calls the whetstone metrics store, after reading their windows. |
+| [`cj-architecture-scan`](skills/cj-architecture-scan/SKILL.md) | You suspect the architecture of a repo hurts but cannot name a decision yet. Scans the hot spots (or the area you name), shows up to five refactoring candidates as cards on a page, and files the one you pick as an issue for `/cj-grill-with-docs`. |
 | [`cj-teach`](skills/cj-teach/SKILL.md) | Teaches a topic over several sessions: mission, sources, short HTML lessons with quizzes, reference sheets and learning records in the current directory. Copied from mattpocock/skills. |
 
 **Day to day** (the model picks them up from your words, or you type `/name`):
@@ -72,7 +73,7 @@ The last `Acceptance:` line of every spec, `Acceptance: by hand` or `Acceptance:
 | [`cj-project-context`](skills/cj-project-context/SKILL.md) | Finds project and organisation facts at runtime instead of hard-coding them. |
 | [`cj-html-report`](skills/cj-html-report/SKILL.md) | Renders a result as a visual page next to the chat summary. |
 
-Parked on 2026-10-07 (no use in 45 days; restore from git history when needed): `cj-feature-check`, `cj-documenting-knowledge`, `cj-architecture-review`.
+Parked on 2026-10-07 (no use in 45 days; restore from git history when needed): `cj-feature-check`, `cj-documenting-knowledge`, `cj-architecture-review` (succeeded by `cj-architecture-scan`, text not in history).
 
 Removed on 2026-10-16: `cj-challenge`. Its successor is `cj-grill-with-docs`, which runs the challenge with [`CHALLENGE.md`](skills/cj-grill-with-docs/CHALLENGE.md) in the big tier.
 
@@ -89,7 +90,7 @@ No skill contains facts about a specific organisation or repo. They ask `cj-proj
 
 Each skill that takes something from a source names the files and what it took in its own `CREDITS.md`.
 
-- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-teach` is copied unchanged apart from its name. `cj-design-options` takes the deletion test, the one-adapter rule, the dependency categories and parallel candidate designs from `codebase-design`.
+- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-teach` is copied unchanged apart from its name. `cj-design-options` takes the deletion test, the one-adapter rule, the dependency categories and parallel candidate designs from `codebase-design`. `cj-architecture-scan` is adapted from `improve-codebase-architecture`: the scan, the candidate cards and the closing recommendation; the pick becomes an issue instead of an inline grill.
 - [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills): single checks and review rules.
 - [superpowers](https://github.com/obra/superpowers): testing a skill change with scenarios that fail before the edit and pass after it (`docs/tests/`), and the `writing-skills` method `cj-whetstone` uses for its edits.
 - [unslop](https://github.com/backnotprop/pstack/tree/main/skills/unslop) from pstack: the writing rules every text for humans goes through. Install it separately.

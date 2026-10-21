@@ -1,6 +1,6 @@
 ---
 name: cj-design-options
-description: Use when a design decision is hard to reverse or crosses a module boundary, such as where new code or data belongs and who owns it, how two parts talk (call, event, queue, shared database), adopting a library, framework, database or external service, or adding an interface, layer, plugin mechanism or config "for later"; also on "wie würde man das schneiden?", "welches Pattern passt hier?", "brauchen wir dafür X?", "architecture decision". Not for choices inside one function, and not for UI or visual design.
+description: Use when a design decision is hard to reverse or crosses a module boundary, such as where new code or data belongs and who owns it, how two parts talk (call, event, queue, shared database), adopting a library, framework, database or external service, or adding an interface, layer, plugin mechanism or config "for later"; also on "wie würde man das schneiden?", "welches Pattern passt hier?", "brauchen wir dafür X?", "architecture decision"; "wo tut die Architektur weh?", "was sollten wir refactoren?", "where does the architecture hurt?". Not for choices inside one function, and not for UI or visual design.
 ---
 
 # Design options
@@ -12,6 +12,7 @@ Called inside another flow (grilling, a spec, an implementation): run the steps,
 ## 1. Frame the decision
 
 1. Write the decision as one open question that names the need, not a solution: "where does sending the order mail live?", not "should we add a queue?".
+   No decision to frame, the user asks where the architecture hurts or what to refactor: name `/cj-architecture-scan` (with the area, when they named one) as the next step and stop; it finds the candidates and files the pick as an issue.
 2. Read the code it touches. Call the Skill tool with "cj-project-context" for: glossary, decisions. A recorded decision (ADR, agreement) that already settles it: name it with its link and stop, unless the user wants to reopen it.
 3. Decide the reversibility yourself and say it in one line. **Hard to reverse**: a data model or persisted format, a contract other teams or apps call, technology with lock-in, a split into separately deployed parts. Everything else is **cheap**: steps 3 and 5 run short, no subagents, no page.
 

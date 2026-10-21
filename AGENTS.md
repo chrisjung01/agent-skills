@@ -24,6 +24,7 @@ Decisions are recorded in [docs/adr/](docs/adr/README.md); check its index befor
 | `cj-asking` | Ask the user as plain reply text: one question per message, numbered options for every question, `1) Yes` `2) No` for a confirm |
 | `cj-grilling` | Interview the user one question at a time until every decision is made; sharpen domain terms, write glossary and ADRs |
 | `cj-html-report` | Render a result as a visual page (cards, diagrams) next to the chat summary |
+| `cj-architecture-scan` | Scan a repo (hot spots, or the area the user names) for refactoring candidates, show up to five as cards on a page, file the picked one as an issue for the spec-driven flow |
 | `cj-design-options` | Help the user make an architecture decision: forces from the code, two or three checked candidates, a recommendation with its flip condition; the user decides |
 | `cj-filing-issues` | Find duplicates and dependencies, then create issues with good bodies and wire parent and blocked-by edges |
 | `cj-posting` | The one gate for anything others see or that changes shared state: draft, clean, show, ask, then act |
