@@ -71,3 +71,4 @@ $ git log -200 --name-only --format= | sort | uniq -c | sort -rn | head -10
 
 ## Runs
 
+- 2026-10-21, scenarios 1 to 9, one blind run per version by a fresh subagent. Before (no skill, prompt read as "scan this repo for refactoring candidates"): 1 to 8 missed expected (whole `src/` scanned, no commit window, a markdown list of all seven candidates, "deeper module" before the idea, "want me to start?" instead of numbered options, the refactor started on "1", no window named, scatter never noticed); 9 met expected, so it stays as a regression guard. After, first draft of the skill text: 2 and 6 missed expected (callers not in the scope, `BODY.md` task rules and label questions unsettled), the rest met. After the review fixes, skill text at 70dd943: 1, 2, 3, 8 and 9 met expected on the full run, 4, 5, 6 and 7 met expected on the rerun; nine of nine.
