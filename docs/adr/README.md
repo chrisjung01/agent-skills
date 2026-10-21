@@ -9,6 +9,7 @@ Check this index before changing a skill, debugging one or reviewing a change, a
 | ADR | Decision | Read when |
 | --- | --- | --- |
 | [0001](0001-text-others-read-carries-no-injected-voice.md) | Text others read carries no injected voice; `unslop` runs for its pattern work only, a `Sources` block ends the text | Changing `cj-posting` step 2, a body template, or how a skill calls `unslop` |
+| [0002](0002-architecture-scan-adapted-not-copied.md) | The codebase scan is adapted from upstream as `cj-architecture-scan`, not copied; its pick becomes an issue | Building or changing `cj-architecture-scan`, or weighing another upstream skill for adoption |
 
 ## Writing a new ADR
 
