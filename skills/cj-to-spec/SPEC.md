@@ -68,4 +68,4 @@ The last line before `</details>` says whether the user checks the spec by hand 
 - [ ] No open question, no "TBD". Something still open goes back to grilling; it is not published.
 - [ ] The spec is shorter than the code it describes would be. Over a screen and a half for a small feature means it holds implementation.
 - [ ] Every term is the glossary's.
-- [ ] Run the `unslop` skill over it.
+- [ ] Run the `unslop` skill over it as `cj-posting` step 2 says.

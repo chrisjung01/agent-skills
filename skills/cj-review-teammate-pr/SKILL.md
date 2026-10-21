@@ -69,7 +69,7 @@ Per finding: location, what goes wrong with the input that triggers it, suggesti
 
 ## Phase 4: output and posting
 
-Run the `unslop` skill over items 1 to 4. Items 1 to 3 in the user's language, item 4 in the review language from `conventions`, else the language of the PR title:
+Run the `unslop` skill over items 1 to 4, item 4 as `cj-posting` step 2 says. Items 1 to 3 in the user's language, item 4 in the review language from `conventions`, else the language of the PR title:
 
 1. What the PR does and whether it matches the issue, in one or two lines.
 2. Findings by section, each with severity and your one-line take, in plain words: a code name the user may not know gets half a sentence on what it is. A command you hand the user says what it does and what it changes.

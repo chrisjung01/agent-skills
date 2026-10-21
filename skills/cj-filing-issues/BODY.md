@@ -42,7 +42,7 @@ Read before drafting any issue. The repo's template sets the headings and their 
 - Lists only for things that are lists. No bold label at the start of every line, no headings for one line of text, no emojis.
 - Budgets: a bug body fits on one screen without its logs; a task's problem is at most three sentences; an epic body links to its plan instead of repeating it.
 - Nothing invented: no steps nobody ran or traced, no numbers without a source, no example identifiers that do not exist.
-- Then run the `unslop` skill over title and body (cj-posting does this at the gate; do it before showing).
+- Then run the `unslop` skill over title and body as `cj-posting` step 2 says (the gate does it too; do it before showing).
 
 ## Check before showing
 
