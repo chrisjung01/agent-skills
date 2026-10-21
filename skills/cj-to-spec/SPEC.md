@@ -64,8 +64,8 @@ The last line before `</details>` says whether the user checks the spec by hand 
 - [ ] A value the user feels (reward, price, duration, amount) has at least one absolute anchor the user stated, such as "the first quest pays about 30 silver"; ratios and growth rules alone leave the size to the implementer. No anchor: back to grilling.
 - [ ] A decision that relies on how a tool, platform or check behaves (when a file is written, what a count catches) was tried once against the case it must handle, including the hard case (a leftover with a fixed name, a delayed write), read-only or on a scratch copy. A try that would change shared state (repo settings, labels, a remote) is not run; it is an open question. Not tried, failed, inconclusive or unavailable: back to grilling, like any open question. The observed result goes into the decision's `tried:` part; a planned try is not observed evidence.
 - [ ] Only `## Spec`, the note and the summary sit above `<details>`, and the blank lines around the block's content are there.
-- [ ] The last line before `</details>` is the Acceptance line with its value and its trigger, or `no trigger applies`; by hand comes from a trigger or the user's choice, never from effort, ticket count or tier.
+- [ ] The last line before `</details>` is the Acceptance line with its value and its trigger, or `no trigger applies`; a `Sources` block from `cj-posting` step 2 stands right before it; by hand comes from a trigger or the user's choice, never from effort, ticket count or tier.
 - [ ] No open question, no "TBD". Something still open goes back to grilling; it is not published.
 - [ ] The spec is shorter than the code it describes would be. Over a screen and a half for a small feature means it holds implementation.
 - [ ] Every term is the glossary's.
-- [ ] Run the `unslop` skill over it.
+- [ ] Run the `unslop` skill over it as `cj-posting` step 2 says.

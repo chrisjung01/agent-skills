@@ -88,6 +88,10 @@ _Avoid_: Lane, Size class, Track
 The table `cj-grilling` shows before it closes a session: one row per category of a plan, each rated Clear, Partial, Missing or Out of scope.
 _Avoid_: Clarify gate (a mandatory step, which this is not), Checklist
 
+**Text others read**:
+Text a skill writes for someone who is not the user in this session: a PR body, an issue, a spec or review comment, a review reply, a team-chat message, a docs page. It leaves the session through the `cj-posting` gate. Its opposite is chat text, the reply the user reads in the terminal.
+_Avoid_: Outbound text, Text for others
+
 ## Review
 
 **Loosened check**:

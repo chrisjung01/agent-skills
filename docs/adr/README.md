@@ -8,8 +8,7 @@ Check this index before changing a skill, debugging one or reviewing a change, a
 
 | ADR | Decision | Read when |
 | --- | --- | --- |
-
-No ADRs yet.
+| [0001](0001-text-others-read-carries-no-injected-voice.md) | Text others read carries no injected voice; `unslop` runs for its pattern work only, a `Sources` block ends the text | Changing `cj-posting` step 2, a body template, or how a skill calls `unslop` |
 
 ## Writing a new ADR
 
