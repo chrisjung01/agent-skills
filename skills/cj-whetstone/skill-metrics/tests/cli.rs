@@ -2362,3 +2362,57 @@ fn a_malformed_codex_hooks_file_is_reported_and_left_untouched() {
         }
     }
 }
+
+#[test]
+fn filters_cut_what_open_closed_and_show_print() {
+    let dir = tempfile::tempdir().unwrap();
+    let (projects, db) = (
+        dir.path().join("projects"),
+        dir.path().join("metrics.sqlite"),
+    );
+    let repo = projects.join("-home-x-repo");
+    fs::create_dir_all(&repo).unwrap();
+    fs::write(repo.join("s1.jsonl"), SESSION).unwrap();
+    run(&projects, &db);
+
+    // `open --summary` puts the user texts under each call; plain `open` stays one line per call.
+    let plain = cli(&["open"], &db).1;
+    let summary = cli(&["open", "--summary"], &db).1;
+    assert!(summary.lines().count() > plain.lines().count());
+    assert!(summary.lines().any(|line| line.starts_with("  prompt: ")));
+
+    // `show --users-only` stops before the transcript.
+    let full = cli(
+        &["show", "u02", "--projects-dir", projects.to_str().unwrap()],
+        &db,
+    )
+    .1;
+    let users = cli(
+        &[
+            "show",
+            "u02",
+            "--users-only",
+            "--projects-dir",
+            projects.to_str().unwrap(),
+        ],
+        &db,
+    )
+    .1;
+    assert!(full.contains("transcript:") && !users.contains("transcript:"));
+    assert!(users.contains("user texts:"));
+
+    // `closed --since` and `--limit` keep the latest calls.
+    assert!(cli(&["status", "u02", "beobachtet", "a"], &db).0);
+    assert!(cli(&["status", "u12", "verworfen", "b"], &db).0);
+    assert_eq!(listed(&cli(&["closed"], &db).1), ["u02", "u12"]);
+    assert_eq!(listed(&cli(&["closed", "--limit", "1"], &db).1), ["u12"]);
+    assert_eq!(
+        listed(&cli(&["closed", "--since", "2026-10-01T10:05"], &db).1),
+        ["u12"]
+    );
+    assert_eq!(
+        listed(&cli(&["closed", "--since", "2026-11-01"], &db).1),
+        Vec::<&str>::new()
+    );
+    assert!(cli_error(&["open", "--limit", "1"], &db).contains("only with closed"));
+}

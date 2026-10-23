@@ -4,10 +4,11 @@
 //!
 //! Usage:
 //!   skill-metrics [extract] [--session <id>] [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>]
-//!   skill-metrics open [<skill>] [--db <file>]
-//!   skill-metrics closed [<skill>] [--db <file>]
+//!   skill-metrics open [<skill>] [--summary] [--db <file>]    (--summary: user texts under each call)
+//!   skill-metrics closed [<skill>] [--since <date>] [--limit <n>] [--db <file>]
+//!                                             (--since: started at or after the date; --limit: the n latest)
 //!   skill-metrics status [--db <file>] [--] <start uuid> <status> <finding>
-//!   skill-metrics show [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>] <start uuid>
+//!   skill-metrics show [--users-only] [--projects-dir <dir>] [--codex-dir <dir>] [--db <file>] <start uuid>
 //!   skill-metrics import-notes [<notes dir>] [--db <file>]
 //!   skill-metrics report [--out <file>] [--db <file>]
 //!   skill-metrics codex-hook [--db <file>]    (Codex SessionEnd hook: payload on stdin, collects
@@ -53,7 +54,8 @@ fn main() -> ExitCode {
 fn run() -> Result<(), Box<dyn Error>> {
     let (mut projects, mut codex_dir, mut db, mut session, mut out, mut positional) =
         (None, None, None, None, None, Vec::new());
-    let mut dry_run = false;
+    let (mut dry_run, mut summary, mut users_only) = (false, false, false);
+    let (mut since, mut limit) = (None::<String>, None::<usize>);
     let mut args = env::args().skip(1);
     while let Some(arg) = args.next() {
         // After `--` everything is positional, so a finding may start with `--`.
@@ -69,6 +71,14 @@ fn run() -> Result<(), Box<dyn Error>> {
             dry_run = true;
             continue;
         }
+        if arg == "--summary" {
+            summary = true;
+            continue;
+        }
+        if arg == "--users-only" {
+            users_only = true;
+            continue;
+        }
         let value = args.next().ok_or(format!("{arg} needs a value"))?;
         match arg.as_str() {
             "--projects-dir" => projects = Some(PathBuf::from(value)),
@@ -76,6 +86,8 @@ fn run() -> Result<(), Box<dyn Error>> {
             "--db" => db = Some(PathBuf::from(value)),
             "--session" => session = Some(value),
             "--out" => out = Some(PathBuf::from(value)),
+            "--since" => since = Some(value),
+            "--limit" => limit = Some(value.parse().map_err(|_| "--limit needs a number")?),
             _ => return Err(format!("unknown argument {arg}").into()),
         }
     }
@@ -113,14 +125,21 @@ fn run() -> Result<(), Box<dyn Error>> {
     if dry_run && positional.first() != Some(&"codex-hooks") {
         return Err("--dry-run works only with codex-hooks".into());
     }
+    let listing_flags = since.is_some() || limit.is_some();
+    if (listing_flags && positional.first() != Some(&"closed"))
+        || (summary && positional.first() != Some(&"open"))
+        || (users_only && positional.first() != Some(&"show"))
+    {
+        return Err("--since and --limit work only with closed, --summary with open, --users-only with show".into());
+    }
     match positional.as_slice() {
         [] | ["extract"] => extract(&projects()?, &codex_dir()?, &db, session.as_deref()),
-        ["open"] => open(&db, None),
-        ["open", skill] => open(&db, Some(skill)),
-        ["closed"] => closed(&db, None),
-        ["closed", skill] => closed(&db, Some(skill)),
+        ["open"] => open(&db, None, summary),
+        ["open", skill] => open(&db, Some(skill), summary),
+        ["closed"] => closed(&db, None, since.as_deref(), limit),
+        ["closed", skill] => closed(&db, Some(skill), since.as_deref(), limit),
         ["status", start_uuid, status, finding] => set_status(&db, start_uuid, status, finding),
-        ["show", start_uuid] => show(&db, &projects()?, &codex_dir()?, start_uuid),
+        ["show", start_uuid] => show(&db, &projects()?, &codex_dir()?, start_uuid, users_only),
         ["codex-hook"] => codex_hook(&db),
         ["codex-hooks", action @ ("install" | "uninstall"), command] => {
             codex_hooks(&codex_home()?, *action == "install", command, dry_run)
@@ -139,8 +158,9 @@ fn run() -> Result<(), Box<dyn Error>> {
 }
 
 /// One line per open call: status, start uuid, skill, session, start time, source, counters.
-fn open(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
-    for call in store::open_calls(&existing_db(db)?, skill)? {
+fn open(db: &Path, skill: Option<&str>, summary: bool) -> Result<(), Box<dyn Error>> {
+    let conn = existing_db(db)?;
+    for call in store::open_calls(&conn, skill)? {
         let counters: Vec<String> = call
             .counters
             .iter()
@@ -155,14 +175,31 @@ fn open(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
             call.source,
             counters.join(" ")
         );
+        if summary {
+            let shown = store::shown_call(&conn, &call.start_uuid)?;
+            for text in shown.iter().flat_map(|shown| &shown.user_texts) {
+                // ponytail: one line cut at 200 characters; `show` has the whole text.
+                let line: String = text.text.replace('\n', " ").chars().take(200).collect();
+                println!("  {}: {line}", text.kind);
+            }
+        }
     }
     Ok(())
 }
 
 /// One line per call with a status: status, start uuid, skill, session, start time, source,
 /// finding.
-fn closed(db: &Path, skill: Option<&str>) -> Result<(), Box<dyn Error>> {
-    for call in store::closed_calls(&existing_db(db)?, skill)? {
+fn closed(
+    db: &Path,
+    skill: Option<&str>,
+    since: Option<&str>,
+    limit: Option<usize>,
+) -> Result<(), Box<dyn Error>> {
+    let mut calls = store::closed_calls(&existing_db(db)?, skill)?;
+    // Start times are ISO strings, so a date prefix compares right.
+    calls.retain(|call| since.is_none_or(|since| call[4].as_str() >= since));
+    let skip = limit.map_or(0, |limit| calls.len().saturating_sub(limit));
+    for call in &calls[skip..] {
         println!("{}", call.join("\t"));
     }
     Ok(())
@@ -198,6 +235,7 @@ fn show(
     projects: &Path,
     codex_dir: &Path,
     start_uuid: &str,
+    users_only: bool,
 ) -> Result<(), Box<dyn Error>> {
     let call = store::shown_call(&existing_db(db)?, start_uuid)?
         .ok_or(format!("no skill call {start_uuid}"))?;
@@ -230,6 +268,9 @@ fn show(
             flags => format!(" [{}]", flags.join(", ")),
         };
         println!("  {}{flags}: {}", user_text.kind, indent(&user_text.text));
+    }
+    if users_only {
+        return Ok(());
     }
 
     let claude_code = session_files(projects)?
