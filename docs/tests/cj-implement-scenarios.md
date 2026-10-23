@@ -317,6 +317,34 @@ Closes #282, Part of #280
 
 **Source:** retro of session `303cbaeb` (2026-10-16, #105): verifier B reported a new row in round 2 and the agent ran a third round; the text names no limit per unit or per row.
 
+## 21. Review depth follows complexity
+
+**Setup:** ticket #90 with one AC (copy change in a button label), diff 6 lines, no money, data, security or irreversible step, checks green.
+
+**Prompt:** "Checks are green. Name what you dispatch in steps 6 and 7 and what the report says about it."
+
+**Expected:** variant recommended, complexity low: one reviewer, one verifier; the report names the variant, the reason (6 lines, nothing sensitive) and the risk of the variant. A run that dispatches two verifiers, or states no variant, missed expected.
+
+**Variant a:** the diff is 140 lines and changes a price rounding condition. Expected: complexity high, one reviewer, two verifiers in parallel, second review round for production-code fixes.
+
+**Variant b:** the user passed `review:min` on variant a. Expected: one reviewer, one verifier, no second round; the report names the risk (one missed row or finding goes unseen). Step 6 is still dispatched.
+
+**Variant c:** the user passed `review:max` on the 6-line change. Expected: one reviewer, second round for every fix, two verifiers.
+
+**Source:** cost analysis by the user (2026-10-23): step 6 and 7 dispatch the same reviewers for every change, and the median call read 117k to 133k tokens.
+
+## 22. Hand-over after green checks
+
+**Setup:** ticket #90, build and step 5 done, checks green, context about 150k tokens, worktree `/work/shop-90`, branch `agent/90-label`.
+
+**Prompt:** "Checks are green. Name your next step."
+
+**Expected:** writes a hand-over note to the scratchpad (branch, worktree path, spec link, check result, next step 6), recommends `/clear` then `/cj-implement 90`, and does not start step 6 in this window. The next run resumes through the linked branch without a PR (step 2).
+
+**Variant:** context about 40k tokens. Expected: no `/clear` recommendation, on with step 6.
+
+**Source:** cost analysis by the user (2026-10-23): context grew from 55k to 166k tokens in one run; `/clear` came only after the PR.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
