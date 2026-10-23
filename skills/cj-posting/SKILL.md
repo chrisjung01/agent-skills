@@ -25,7 +25,7 @@ Everything that leaves the session goes through one gate. An **outbound action**
    A question the harness blocked or that failed is no yes: post nothing and tell the user the question did not reach them.
    Exception: a calling skill that states in its own text that it carries the yes for named actions (for example a skill that ends in a draft PR) skips the question for exactly those. A user's request to a skill ("post the review", "antworte auf die Threads") is not such a statement; the question still comes.
 5. **Do only what got a yes**, in dependency order: a push before a reply that names its commit, an issue before the chat reply that links it.
-6. **Report** each action with its link. An action the tool cannot do (a reaction, a field in a form) goes to the user as a one-line instruction.
+6. **Report** each action with its link. After a push to a branch that has a pull request, read the pull request back (its state and its commits) and report both: a merged or closed pull request takes no new commits, so say that the pushed commits are not in it and ask whether to open a new one. An action the tool cannot do (a reaction, a field in a form) goes to the user as a one-line instruction.
 
 ## Always
 
