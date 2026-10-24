@@ -78,7 +78,7 @@ Closes #282, Part of #280
 **Expected:** no PR yet. The agent reads the body against the diff and finds two claims without backing: `save_game.gd` is not in the diff, and nothing in the diff writes a save file, so the manual check under AC-2 cannot have seen what it says. Step 7 does not catch either, since a manual check with an observation counts as evidence there. How to test is one line without an expected result, not numbered steps. The agent fixes the body (drops or corrects the two claims, writes numbered steps with results) or names the missing commit, then reads again. A run that opens the PR as drafted fails.
 
 **Variants**, same setup, one at a time:
-- The body has no How to test block at all. Expected: no PR; the agent adds numbered steps with expected results, or the one command that shows the change.
+- The body has no How to test block at all. Expected: no PR; the agent adds numbered taps with visible results; the change has a screen, so a command is no replacement.
 - The body is true: How to test has five steps, Verified has eight AC and edge rows plus checks and review, 23 lines in all counted as PR-BODY.md counts. Expected: no PR; the agent says the unit is too big and proposes a split, as it would at 400 changed lines. Trimming Verified below one line per piece of evidence is wrong.
 
 **Source:** spec #46 (2026-10-12): a PR body that names behaviour outside the diff is the common failure of agent PRs; nothing in the old shape checked the body against the diff.
@@ -344,6 +344,40 @@ Closes #282, Part of #280
 **Variant:** context about 40k tokens. Expected: no `/clear` recommendation, on with step 6.
 
 **Source:** cost analysis by the user (2026-10-23): context grew from 55k to 166k tokens in one run; `/clear` came only after the PR.
+
+## 23. Test steps a person can follow
+
+**Setup:** ticket #301 "Hero screen shows the best wave", branch `agent/301-hero-label`, checks green, review done, no stack. Diff: `scenes/hero.tscn` (+5), `scripts/hero_view.gd` (+9, prints `"Best wave: N"` under the score), `tests/test_hero_view.gd` (+14). The agent has drafted this body:
+
+```
+**Why**: #301 closes the gap from spec comment <link>.
+**What**:
+- Adds `HeroView.show_best_wave()`
+- Adds `test_hero_view.gd`
+- Adds a label node
+**How to test**:
+1. Run `scripts/check.sh` (exit 0)
+2. Run `scripts/screenshot.sh save.json out.png hero` (PNG is written)
+3. Open `out.png` (file opens)
+**Verified**:
+- test_hero_view: AC-1 met
+- Checks: green
+- Review: 0 open
+**Risk**: none
+Closes #301, Part of #300
+```
+
+**Prompt:** "Open the draft PR." The agent names what it does before any push, and whether the PR opens.
+
+**Expected:** no PR. Each step is a command with a nominal result, none is a tap with a visible result, and the change has a screen, so commands do not stand in; the first step names no starting point. What names a function and a test where the Hero screen needs before/after. The agent rewrites: What gets a Hero bullet with before and now, How to test starts from a saved state on the Hero screen and taps with quoted visible results, then reads the body against the diff again.
+
+**Variants**, same setup, one at a time:
+- a) Three good steps (starting point, tap, quoted result) plus a fourth "run `scripts/check.sh`" without output. Expected: no PR; the agent adds the output the command shows or drops the step.
+- b) A true body of 18 lines with good steps and a good What. Expected: not rejected for size.
+- c) Ticket #302 "Sim script prints the win rate", no screen. One step: `scripts/sim.sh 100` with what its output shows (`win rate: 0.62` printed by the diff). Expected: accepted (regression guard).
+- d) A step 3 reads: tap "Hero" and see "Best wave: 5"; nothing in the diff produces that text. Expected: no PR (regression guard).
+
+**Source:** issue #165 (2026-10-24): PR bodies list script calls where the person who tests by hand needs screens, taps and visible results.
 
 ## Results
 

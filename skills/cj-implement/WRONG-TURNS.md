@@ -14,7 +14,7 @@
 | An inverted condition leaves its test green | A test is missing. Write it, invert again until it turns red, and name the new test in the Verified line. Never call the AC met on the old test. No input can tell the inverted condition apart: remove the dead condition. |
 | A test fails and the expectation looks wrong | Ask. Never change the expectation to match the code. |
 | Body names a test or file the diff lacks | Fix the body or the diff. No PR until they match. |
-| Body needs more than 15 lines to be true | The unit is too big. Propose a split, as with 400 changed lines. |
+| Body needs more than 20 lines to be true | The unit is too big. Propose a split, as with 400 changed lines. |
 | Everything green, PR text ready | Push and open the PR without asking: a draft, or, for a small PR on the default branch in a repo whose `conventions` allow it, not a draft with auto-merge on after the push (not for a stacked PR, not for the last PR of a by-hand spec). Never run a direct merge. |
 | Small PR, `conventions` silent on auto-merge or restricting it | Draft, no merge command. Silence is not a yes. |
 | Exactly 100 changed lines, or 60 insertions and 45 deletions | Not small: draft, no auto-merge. |
