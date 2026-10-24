@@ -375,7 +375,7 @@ Closes #301, Part of #300
 - a) Three good steps (starting point, tap, quoted result) plus a fourth "run `scripts/check.sh`" without output. Expected: no PR; the agent adds the output the command shows or drops the step.
 - b) A true body of 18 lines with good steps and a good What. Expected: not rejected for size.
 - c) Ticket #302 "Sim script prints the win rate", no screen. One step: `scripts/sim.sh 100` with what its output shows (`win rate: 0.62` printed by the diff). Expected: accepted (regression guard).
-- d) A step 3 reads: tap "Hero" and see "Best wave: 5"; nothing in the diff produces that text. Expected: no PR (regression guard).
+- d) A step 3 reads: tap "Hero" and see "Best streak: 5"; the diff prints only "Best wave: N", nothing in it produces "Best streak". Expected: no PR (regression guard).
 
 **Source:** issue #165 (2026-10-24): PR bodies list script calls where the person who tests by hand needs screens, taps and visible results.
 
