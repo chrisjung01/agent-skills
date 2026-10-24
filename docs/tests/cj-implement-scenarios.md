@@ -78,7 +78,7 @@ Closes #282, Part of #280
 **Expected:** no PR yet. The agent reads the body against the diff and finds two claims without backing: `save_game.gd` is not in the diff, and nothing in the diff writes a save file, so the manual check under AC-2 cannot have seen what it says. Step 7 does not catch either, since a manual check with an observation counts as evidence there. How to test is one line without an expected result, not numbered steps. The agent fixes the body (drops or corrects the two claims, writes numbered steps with results) or names the missing commit, then reads again. A run that opens the PR as drafted fails.
 
 **Variants**, same setup, one at a time:
-- The body has no How to test block at all. Expected: no PR; the agent adds numbered steps with expected results, or the one command that shows the change.
+- The body has no How to test block at all. Expected: no PR; the agent adds numbered taps with visible results; the change has a screen, so a command is no replacement.
 - The body is true: How to test has five steps, Verified has eight AC and edge rows plus checks and review, 23 lines in all counted as PR-BODY.md counts. Expected: no PR; the agent says the unit is too big and proposes a split, as it would at 400 changed lines. Trimming Verified below one line per piece of evidence is wrong.
 
 **Source:** spec #46 (2026-10-12): a PR body that names behaviour outside the diff is the common failure of agent PRs; nothing in the old shape checked the body against the diff.
@@ -345,6 +345,40 @@ Closes #282, Part of #280
 
 **Source:** cost analysis by the user (2026-10-23): context grew from 55k to 166k tokens in one run; `/clear` came only after the PR.
 
+## 23. Test steps a person can follow
+
+**Setup:** ticket #301 "Hero screen shows the best wave", branch `agent/301-hero-label`, checks green, review done, no stack. Diff: `scenes/hero.tscn` (+5), `scripts/hero_view.gd` (+9, prints `"Best wave: N"` under the score), `tests/test_hero_view.gd` (+14). The agent has drafted this body:
+
+```
+**Why**: #301 closes the gap from spec comment <link>.
+**What**:
+- Adds `HeroView.show_best_wave()`
+- Adds `test_hero_view.gd`
+- Adds a label node
+**How to test**:
+1. Run `scripts/check.sh` (exit 0)
+2. Run `scripts/screenshot.sh save.json out.png hero` (PNG is written)
+3. Open `out.png` (file opens)
+**Verified**:
+- test_hero_view: AC-1 met
+- Checks: green
+- Review: 0 open
+**Risk**: none
+Closes #301, Part of #300
+```
+
+**Prompt:** "Open the draft PR." The agent names what it does before any push, and whether the PR opens.
+
+**Expected:** no PR. Each step is a command with a nominal result, none is a tap with a visible result, and the change has a screen, so commands do not stand in; the first step names no starting point. What names a function and a test where the Hero screen needs before/after. The agent rewrites: What gets a Hero bullet with before and now, How to test starts from a saved state on the Hero screen and taps with quoted visible results, then reads the body against the diff again.
+
+**Variants**, same setup, one at a time:
+- a) Three good steps (starting point, tap, quoted result) plus a fourth "run `scripts/check.sh`" without output. Expected: no PR; the agent adds the output the command shows or drops the step.
+- b) A true body of 18 lines with good steps and a good What. Expected: not rejected for size.
+- c) Ticket #302 "Sim script prints the win rate", no screen. One step: `scripts/sim.sh 100` with what its output shows (`win rate: 0.62` printed by the diff). Expected: accepted (regression guard).
+- d) A step 3 reads: tap "Hero" and see "Best streak: 5"; the diff prints only "Best wave: N", nothing in it produces "Best streak". Expected: no PR (regression guard).
+
+**Source:** issue #165 (2026-10-24): PR bodies list script calls where the person who tests by hand needs screens, taps and visible results.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
@@ -361,3 +395,4 @@ Closes #282, Part of #280
 - 2026-10-16, after two review rounds (#133): scenarios 11 and 15 with j2 added, one blind run after the first review round; the final text c7eead1 changes only the grill. All met expected. The second round only added the effort sign to the grill, which step 1 does not read.
 - 2026-10-20, scenarios 16 and 17 (whetstone), one blind run per version. Before: 16a, 16b and 16d missed expected; the agent stopped with "AC not met, no push", so a row only the PR or the user can show blocked the PR forever. 16c met expected (regression guard). 17a met expected already (one fixup per last-changing commit follows from "the commit that last changed those lines"), kept as a guard; 17b missed expected, no `git rebase --abort` and no rule for a conflict inside the fold. After: all six met expected; 16a opened a draft, ran the red CI demo after step 9 and updated the Verified line; 16b and 16d opened drafts without auto-merge with `AC-5: open, … at /cj-accept`; 17b aborted and made the conflicting fixup an ordinary commit. The 16d run named a possible clash with the "last PR of a by-hand spec stays not-draft" sentence and resolved it as draft; verify in the next real run.
 - 2026-10-20, scenarios 18 to 20 (whetstone), one blind run per version, before on e97e97e, after on 1394cab. Before: 18 missed expected (PR opened without the image, "no step re-opens step 8"); 18 variant met expected (guard); 19 met expected, but only by reading `<its repo>` as the code repo against the text and naming the ambiguity, as the three runs in the retro of `303cbaeb` did not; 20 missed expected (per-row reading, a third verifier round); 20 variant met expected (guard). After: all six met expected; 18 re-read `AGENTS.md` after the rebase and put the pair into What, the variant kept the body without an image because no rebase ran, 19 listed PRs in the code repo only, 20 reported without a push and without a third round.
+- 2026-10-24, scenarios 23 and 4 variants 1 and 2 (#165), one blind run per version, before on 1d5de12, after on dcfd046 (final, after one review round that changed only the scenario text). Before: 23 main met expected on the outcome (no PR) but as a judgment call, no hard stop in the text drove it; 23a met expected (regression guard, "each one action with its expected result" already catches it); 23b missed expected (rejected as over 15 lines); 23c met expected (regression guard); 23d met expected (regression guard, unbacked claim); 4 variant 1 missed expected (the text still offered "the one command that shows the change" for a change with a screen); 4 variant 2 met expected (regression guard, 23 lines is over both caps). After: all ten met expected; 23 main stopped on the named rejections (What names a function, commands replace taps, no starting point), 23b opened, 23c opened, 4 variant 1 asked for taps, 4 variant 2 still stopped and proposed a split.
