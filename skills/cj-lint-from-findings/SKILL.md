@@ -37,6 +37,6 @@ Call the Skill tool with "cj-project-context" for: commands, standards, conventi
    - **drop**.
 
    Rung 4 and unproven findings get two options, issue (recommended) and drop; this overrides the three-option rule above.
-7. **Do what got a yes.** Own PR: set up the new worktree as `commands` set up a fresh checkout, re-apply the rule there (by hand when the diff does not apply), and run the lint command again; a hit count other than the proof's goes to the user before the commit. Then branch, commit and open a draft PR by `conventions` (a normal PR where the repo has no drafts). Call the Skill tool with "cj-posting" before any push, PR or issue.
+7. **Do what got a yes.** Own PR: tell the user once `Worktree: <absolute path> (branch <branch>)`, then set up the new worktree as `commands` set up a fresh checkout, re-apply the rule there (by hand when the diff does not apply), and run the lint command again; a hit count other than the proof's goes to the user before the commit. Then branch, commit and open a draft PR by `conventions` (a normal PR where the repo has no drafts). Call the Skill tool with "cj-posting" before any push, PR or issue.
 
 Done when every mechanical finding has its rule applied, an issue, or a no, and the working tree holds only what got a yes, or a 4.2 stop named the saved copies.
