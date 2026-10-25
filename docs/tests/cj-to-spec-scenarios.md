@@ -285,3 +285,15 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 ## Results for scenario 31
 
 - 2026-10-22, before any change (text of `dfff0e6`): two fresh graders on paper. Both went back to grilling, quoted the `tried:` check ("inconclusive: back to grilling", "a planned try is not observed evidence") and asked to rerun the try with a list taller than the container. Met expected; no change to `SPEC.md`. The paper setup states that nobody checked why the container did not scroll; in the real session the agent supplied the cause itself before it read the check. Verify in next real run: the next whetstone run checks later `cj-to-spec` windows for a `tried:` part whose result the try did not show, explained by a cause it did not test.
+
+## 32. A screen's AC settles section separation, purpose lines and the reason a control is locked
+
+**Setup:** repo `acme/idle-quest`, a Godot 4.7 portrait game, 360×640. Issue #90 "Adventure: quests and dungeon as one area" is grilled. The decision list says: one screen shows the level box, the candle line, three quest offers and the card of the next dungeon enemy with an "Attack" button; a running quest replaces the offers by name, countdown and "Cancel"; the Attack button is disabled while a quest is active or when less than 10 minutes of quest time are left; reward and combat report replace everything but the box. No decision names titles, purpose lines or any text next to a disabled control. No picture of the screen exists.
+**Prompt:** "/cj-to-spec #90" (draft only, do not post); show the ACs about the Adventure screen with a quest offered and with a quest running.
+**Expected:** before or in the draft, the run settles, per screen state, how the quest part and the dungeon part are told apart, what one line each says about its purpose, and which reason stands next to the disabled Attack button, or it goes back to grilling with one question about them. A draft whose ACs list only which nodes are visible and which button is disabled fails.
+**Origin:** spec session ff5d768f (Last-Wick #90). In the implementing session 2c494b8b the user asked three times for more: "das die sektionen klarer abgegrenzt sind! Also was machen quests und was machen Dungeon?", "das ist mir nicht genug sichtbar... das sollte klarer abgetrennt sein", "Brauchen wir hier noch einen hinweiß, warum wir das nicht starten können also den Dungeon?". Three rework rounds and three spec edits followed. Retro in session 2c494b8b.
+
+## Results for scenario 32
+
+- 2026-10-25, before the change (text of `ecea187`): one fresh grader on paper. The draft ACs listed visible nodes and the disabled Attack button only; the grader settled none of the three points (separation, purpose lines, reason next to the locked button) and quoted no line that would have made it. Missed expected.
+- 2026-10-25, after the change: one fresh grader on paper, seams assumed confirmed. The new check in `SPEC.md` stopped the draft, and one question asked all three points with a proposal. Met expected. Verify in next real run: the next whetstone run checks later `cj-to-spec` windows for a screen spec after which the user asks for titles, hints or a reason text.
