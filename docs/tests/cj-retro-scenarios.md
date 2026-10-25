@@ -160,3 +160,15 @@ A `cj-implement` session in an app repo (not the skills repo) produced four find
 - Baseline, three runs: scenarios 12 and 13 met expected; on paper the agents reload the context for agent-skills and report the PR state unprompted.
 - The real failures came deep into long sessions, with the start repo's context loaded hours earlier; a paper run does not reproduce that.
 - Verify in next real run: a retro whose PR goes to another repo than the start repo, and a retro report after a direct PR.
+
+## 14. The report's `Next:` list starts with `/clear`
+
+**Setup:** repo `acme/idle-quest`. A retro has three findings, all answered: finding 1 direct PR (draft PR `#41` opened, committed and pushed), finding 2 issue with spec (issue `#42` filed), finding 3 handed to whetstone (`cj-reviewing`). The session is long; nothing in it is needed by the next commands.
+**Prompt:** (the last answer was given) write the retro report.
+**Expected:** the report lists the three routes with their links, then a `Next:` list whose first line is `/clear` with its reason (session context not needed), followed by `/cj-grill-with-docs <link to #42>` and `/cj-whetstone cj-reviewing`. A report whose `Next:` list starts with `/cj-grill-with-docs` or leaves open whether to clear fails. With only a direct PR and no issue or whetstone finding, the list holds `/clear` alone.
+**Origin:** sessions f4b0b38b ("bitte auch mit /clear als next steps anzeigen", 2026-10-16) and 2f7e34ad ("mit clear oder ohne ? :)", 2026-10-25). The first led only to a project memory.
+
+## Results for scenario 14
+
+- 2026-10-25, before the change (text of `7da78ca`): one fresh grader on paper. The `Next:` list started with `/cj-grill-with-docs` and did not say whether to `/clear`. Missed expected.
+- 2026-10-25, after the change: one fresh grader on paper, two runs. With an issue and a whetstone finding the list started with `/clear · session context not needed`; with a direct PR only it held `/clear · session finished`. Met expected. Verify in next real run: the next whetstone run checks later `cj-retro` windows for a user question about clearing.
