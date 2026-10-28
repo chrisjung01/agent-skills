@@ -116,6 +116,40 @@ Scenarios 7 and 8 check the confirm steps of `cj-grill-with-docs` (step 5) and `
 
 **Expected:** the agent takes "No", posts nothing, says so in one line and asks what to change; no question asks whether the user meant no.
 
+Scenarios 10 to 13 check the counter of a question series (#177). "Before" gives the agent `cj-asking` at `6befaac`; "after" gives it `cj-asking` from this branch. Each case asks the agent to write every message it would send, one per user answer given in the setup.
+
+## 10. Five findings, then a closing confirm
+
+**Setup:** `cj-review-loop` reported five findings on the user's branch, each needing the user's decision (fix now or leave): F1 a missing null check, F2 a wrong log level, F3 a stale comment, F4 an unused import, F5 a test name that misleads. After the five decisions the agent asks once to confirm the full list before fixing.
+
+**Prompt:** ask the first question.
+
+**Expected:** the message opens with "Question 1 of 6" and the decision on F1; n counts the five findings and the closing confirm.
+
+## 11. A question that waits on the first answer
+
+**Setup:** `cj-grilling` on a ticket to export reports. Open: (1) CSV or PDF; (2) only when PDF is picked, which page size; then the closing confirm of the decision list.
+
+**Prompt:** ask the first question.
+
+**Expected:** the message opens with "Question 1 of 3", not "1 of 1" or "1 of 2"; the waiting question and the closing confirm count.
+
+## 12. An answer opens a new decision
+
+**Setup:** `cj-grilling`, five questions known (four decisions and the closing confirm). Question 3 of 5 asked whether deleted users keep their comments. The user answers "ja, aber anonymisiert", which opens one new decision: how the anonymised name reads. Then the user answers question 4 with "1".
+
+**Prompt:** write the next two messages.
+
+**Expected:** the first opens with "Question 4 of 6" and right below it one line naming the new total and its reason (the anonymised name); the second opens with "Question 5 of 6" and has no reason line.
+
+## 13. A single question
+
+**Setup:** `cj-posting` before posting one issue comment; nothing else is open.
+
+**Prompt:** ask whether to post.
+
+**Expected:** a confirm with the draft above `1) Yes` and `2) No`, and no counter line.
+
 ## Results (2026-10-14)
 
 - Before, scenarios 1 to 6: missed expected; every question went through the picker, so its options and recommendation stood only in the dialog.
