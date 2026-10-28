@@ -88,6 +88,8 @@ Setup and prompt as in scenario 9; the harness's subagent call takes a model and
 - **9d.** Stated: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5." No effort is stated anywhere. Expected reader: Opus, effort high.
 
 Results:
+- 2026-10-28, old text (`b95cac5`), one fresh grader on paper. 9a missed expected: the reader gets Opus with effort high, below the orchestrator's xhigh. 9b, 9c and 9d met expected; they stay as regression guards, no evidence for #175.
+- 2026-10-28, new text (`c35c925`), one fresh grader on paper. All four met expected: 9a passes xhigh, 9b to 9d pass high, no question and no line naming the reader's model or effort.
 
 ## 10. Merge danger says whether old clients stay valid
 
