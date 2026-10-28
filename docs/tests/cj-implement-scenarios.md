@@ -379,6 +379,21 @@ Closes #301, Part of #300
 
 **Source:** issue #165 (2026-10-24): PR bodies list script calls where the person who tests by hand needs screens, taps and visible results.
 
+## 24. Cost answer given at the start
+
+**Setup:** repo `acme/app`, issue #210 "Fix typo on Settings screen", no spec, one ticket. The user starts `/cj-implement 210 low`. The orchestrator's effort is not stated anywhere. Build and checks are done; 4 changed lines, no money, data, security or irreversible step. The agent is right before step 6.
+
+**Prompt:** "Go on with step 6." The agent writes the reply it would show before dispatching the reviewer, and the arguments of the `Next:` line it would end with.
+
+**Expected:** no cost question. The reviewer and the verifier are dispatched cheap (model and effort of the orchestrator), because `low` is the carried answer. `Next:` lines that restart `/cj-implement` carry `low`.
+
+**Variants**, same setup, one at a time:
+- a) `/cj-implement 210 high`. Expected: no cost question; thorough, the reviewer on Opus with effort high.
+- b) `/cj-implement 210`. Expected: the cost question is asked as before (regression guard).
+- c) `/cj-implement 210 review:min low`. Expected: review depth `min` and cheap, no question; the two arguments do not mix.
+
+**Source:** whetstone run 2026-10-28: in 28 sessions the cost question waited a median 0.7 minutes, a mean 7.4, up to 74; the user answered "1" in 25 of them and asked to give the answer at the start.
+
 ## Results
 
 - 2026-10-08, scenario 1, two runs each. Without the change: both found no branch to pass to `gh pr list --head`, called #26 ready and named a second `gh issue develop 26`. With it: both found PR #28 through `closingIssuesReferences`, marked #26 done and took #22 as the unit, stacked on `feat/26-skill-metrics-skeleton`.
@@ -396,3 +411,4 @@ Closes #301, Part of #300
 - 2026-10-20, scenarios 16 and 17 (whetstone), one blind run per version. Before: 16a, 16b and 16d missed expected; the agent stopped with "AC not met, no push", so a row only the PR or the user can show blocked the PR forever. 16c met expected (regression guard). 17a met expected already (one fixup per last-changing commit follows from "the commit that last changed those lines"), kept as a guard; 17b missed expected, no `git rebase --abort` and no rule for a conflict inside the fold. After: all six met expected; 16a opened a draft, ran the red CI demo after step 9 and updated the Verified line; 16b and 16d opened drafts without auto-merge with `AC-5: open, … at /cj-accept`; 17b aborted and made the conflicting fixup an ordinary commit. The 16d run named a possible clash with the "last PR of a by-hand spec stays not-draft" sentence and resolved it as draft; verify in the next real run.
 - 2026-10-20, scenarios 18 to 20 (whetstone), one blind run per version, before on e97e97e, after on 1394cab. Before: 18 missed expected (PR opened without the image, "no step re-opens step 8"); 18 variant met expected (guard); 19 met expected, but only by reading `<its repo>` as the code repo against the text and naming the ambiguity, as the three runs in the retro of `303cbaeb` did not; 20 missed expected (per-row reading, a third verifier round); 20 variant met expected (guard). After: all six met expected; 18 re-read `AGENTS.md` after the rebase and put the pair into What, the variant kept the body without an image because no rebase ran, 19 listed PRs in the code repo only, 20 reported without a push and without a third round.
 - 2026-10-24, scenarios 23 and 4 variants 1 and 2 (#165), one blind run per version, before on 1d5de12, after on dcfd046 (final, after one review round that changed only the scenario text). Before: 23 main met expected on the outcome (no PR) but as a judgment call, no hard stop in the text drove it; 23a met expected (regression guard, "each one action with its expected result" already catches it); 23b missed expected (rejected as over 15 lines); 23c met expected (regression guard); 23d met expected (regression guard, unbacked claim); 4 variant 1 missed expected (the text still offered "the one command that shows the change" for a change with a screen); 4 variant 2 met expected (regression guard, 23 lines is over both caps). After: all ten met expected; 23 main stopped on the named rejections (What names a function, commands replace taps, no starting point), 23b opened, 23c opened, 4 variant 1 asked for taps, 4 variant 2 still stopped and proposed a split.
+- 2026-10-28, scenario 24 with variants a to c (whetstone), one blind run per version, before on origin/main, after on the first text. Before: main, a and c missed expected; `low`/`high` had no meaning in `cj-implement`, the effort was unknown, so `cj-reviewing` asked the cost question every time. b met expected (regression guard). After: all four met expected; `low` dispatched cheap, `high` Opus with effort high, b asked, c kept `review:min` apart from `low`. The run found the hand-over line in step 5 without `low`/`high`; added. No case restarts `/cj-implement` in a one-ticket spec, so the `Next:` part is verify in next real run.
