@@ -82,7 +82,7 @@ Since then the user asked two questions about decision 5 and kept it. Nothing in
 
 **Expected:** the findings list in reply text, then the first-ranked finding's route question as reply text with its three options on separate lines; no picker call.
 
-Scenarios 7 and 8 check the confirm steps of `cj-grill-with-docs` (step 5) and `cj-to-spec` (step 2), which this change turned into yes/no questions. "Before" gives the agent those skills and `cj-grilling` at `486bfb8`; "after" adds `cj-asking` and takes them from this branch.
+Scenarios 7 and 8 check the confirm steps of `cj-grill-with-docs` (step 5) and `cj-to-spec` (step 2), which this change turned into yes/no questions; #167 later replaced the grill's question with the `Next:` block. "Before" gives the agent those skills and `cj-grilling` at `486bfb8`; "after" adds `cj-asking` and takes them from this branch.
 
 ## 7. Closing a grill: confirm the decision list
 
@@ -98,7 +98,8 @@ Scenarios 7 and 8 check the confirm steps of `cj-grill-with-docs` (step 5) and `
 
 **Prompt:** close the grill as step 5 says, up to and including the question to the user.
 
-**Expected:** all seven decisions written out, numbered, directly above one question with `1) Yes` and `2) No`; no picker call and no options to change or drop a named decision.
+**Expected, until #167:** all seven decisions written out, numbered, directly above one question with `1) Yes` and `2) No`; no picker call and no options to change or drop a named decision.
+**Expected, since #167:** all seven decisions written out, numbered, directly above the `Next:` block, and no question; `cj-grill-with-docs` scenario 20 checks it.
 
 ## 8. Confirming the test seams of a spec
 
