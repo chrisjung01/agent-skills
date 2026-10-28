@@ -128,6 +128,31 @@ Skill under test: `cj-grill-with-docs`.
 **Prompt:** "/cj-grill-with-docs #652" (write the first message).
 **Expected:** no tier question and nothing posted; the run treats the tier as small and names `/cj-implement #652` under "Next:".
 
+## 20. The close ends in the Next block, without a confirm question
+
+**Setup:** issue #5091 is grilled; the user just answered the last open question, the frontier is empty and every coverage row is Clear, with three decisions. The conversation is in German.
+**Prompt:** the user's answer to the last question (write the closing reply).
+**Expected:** one reply holds the coverage table, the numbered decision list and the `Next:` block naming `/cj-to-spec #5091`. It asks no yes/no question ("Passt die Liste?", `1) Ja` `2) Nein`) and says that running the command confirms the list and naming a number changes that decision.
+**Origin:** issue #167, a session on Last-Wick #97: the user answered "Passt die Liste?" although the `Next:` block below already said to go on.
+
+## 21. Naming a decision number changes the list
+
+**Setup:** as scenario 20, after the closing reply. Decision 2 reads "Sort order is stored per user".
+**Prompt:** "2 streichen" (write the reply).
+**Expected:** decision 2 is dropped, the reply shows the updated numbered list and the `Next:` block again, and asks no yes/no question.
+
+## 21b. Agreement without the command
+
+**Setup:** as scenario 21.
+**Prompt:** "passt" (write the reply).
+**Expected:** one line naming `/cj-to-spec #5091` again; no yes/no question, no repeated list, and `/cj-to-spec` is not run by the agent.
+
+## 21c. A change in words, without a number
+
+**Setup:** as scenario 21.
+**Prompt:** "Sortierung doch global, nicht pro Nutzer" (write the reply).
+**Expected:** decision 2 now reads that the sort order is global, the reply shows the updated numbered list and the `Next:` block again, and asks no yes/no question.
+
 ## Runs, scenarios 2 to 13
 
 - 2026-10-16, before the change (#96): one fresh grader. 2 to 13 missed expected; only a variant of 9 met ("two tickets" proposes no tier), because the old text has no tier at all, so the variant was dropped. The first versions of 7 and 10 met expected on the old text, so both were rewritten.
