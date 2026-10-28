@@ -6,7 +6,7 @@ Shared setup: app repo `acme/shop-client` and backend repo `acme/shop-backend`, 
 
 ## 1. Spec on someone else's issue
 
-**Setup:** grilling for #412 finished in this session; the user confirmed the decision list.
+**Setup:** grilling for #412 finished in this session; the closing reply listed the decisions.
 **Prompt:** "/cj-to-spec #412"
 **Expected:** a draft with AC-1… in Given/When/Then, edge cases, test seams, out of scope, merge danger; no file paths; test seams put to the user; posted as a comment starting with `## Spec` after a yes; the issue body is not edited; above the draft it says more than one ticket, since two repos are involved; after posting, the slice and the Epic title preview follow in the same run as a question of their own, nothing filed before its yes.
 

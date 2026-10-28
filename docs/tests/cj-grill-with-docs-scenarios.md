@@ -4,7 +4,7 @@ Skill under test: `cj-grill-with-docs`.
 
 ## 1. The closing reply tells the user what to type next
 
-**Setup:** issue #5091 is grilled to the end; the user confirmed the decision list. The conversation is in German.
+**Setup:** issue #5091 is grilled to the end; the user answered the last open question. The conversation is in German.
 **Prompt:** "Passt so." (write the closing reply).
 **Expected:** the reply ends with an instruction the user can follow without interpreting it: run `/cj-to-spec <issue>` now, in this session, and do not `/clear` first. A line that only names the command with a reason ("Nächster Schritt in dieser Session, vor jedem /clear: /cj-to-spec …") fails: it reads as "do this, then clear" or "clear, then do this".
 **Origin:** session 8d055489, the user: "Was soll das? Das sind keine klaren Anweisungen."
@@ -53,7 +53,7 @@ Skill under test: `cj-grill-with-docs`.
 ## 8. The normal tier gets no challenge
 
 **Setup:** as scenario 4; the user confirmed the normal tier, the grill ran to the end.
-**Prompt:** "Passt so." (write the closing reply with the decision list).
+**Prompt:** the user's answer to the last question (write the closing reply with the decision list).
 **Expected:** no challenge question was asked, no line recommends a challenge, and the decision list holds no "Not challenged" line.
 
 ## 9. Security turning up while grilling reopens the tier
@@ -128,6 +128,31 @@ Skill under test: `cj-grill-with-docs`.
 **Prompt:** "/cj-grill-with-docs #652" (write the first message).
 **Expected:** no tier question and nothing posted; the run treats the tier as small and names `/cj-implement #652` under "Next:".
 
+## 20. The close ends in the Next block, without a confirm question
+
+**Setup:** issue #5091 is grilled; the user just answered the last open question, the frontier is empty and every coverage row is Clear, with three decisions. The conversation is in German.
+**Prompt:** the user's answer to the last question (write the closing reply).
+**Expected:** one reply holds the coverage table, the numbered decision list and the `Next:` block naming `/cj-to-spec #5091`. It asks no yes/no question ("Passt die Liste?", `1) Ja` `2) Nein`) and says that running the command confirms the list and naming a number changes that decision.
+**Origin:** issue #167, a session on Last-Wick #97: the user answered "Passt die Liste?" although the `Next:` block below already said to go on.
+
+## 21. Naming a decision number changes the list
+
+**Setup:** as scenario 20, after the closing reply. Decision 2 reads "Sort order is stored per user".
+**Prompt:** "2 streichen" (write the reply).
+**Expected:** decision 2 is dropped, the reply shows the updated numbered list and the `Next:` block again, and asks no yes/no question.
+
+## 21b. Agreement without the command
+
+**Setup:** as scenario 21.
+**Prompt:** "passt" (write the reply).
+**Expected:** one line naming `/cj-to-spec #5091` again; no yes/no question, no repeated list, and `/cj-to-spec` is not run by the agent.
+
+## 21c. A change in words, without a number
+
+**Setup:** as scenario 21.
+**Prompt:** "Sortierung doch global, nicht pro Nutzer" (write the reply).
+**Expected:** decision 2 now reads that the sort order is global, the reply shows the updated numbered list and the `Next:` block again, and asks no yes/no question.
+
 ## Runs, scenarios 2 to 13
 
 - 2026-10-16, before the change (#96): one fresh grader. 2 to 13 missed expected; only a variant of 9 met ("two tickets" proposes no tier), because the old text has no tier at all, so the variant was dropped. The first versions of 7 and 10 met expected on the old text, so both were rewritten.
@@ -146,3 +171,8 @@ Skill under test: `cj-grill-with-docs`.
 
 - 2026-10-16, one blind run per version (#133), before on c763457, after on the first text, before review. Before: 18a missed expected (nothing posted), 19 missed expected (tier question, the line was not in the grill's own comment); 18b and 18c met expected, kept as regression guards. After: 18a, 18b, 18c and 19 met expected.
 - 2026-10-16, after two review rounds: 2, 14 to 17, 18a to 18c and 19, one blind run after the first review round and one on the final text, c7eead1 (effort added to the Big sign). All met expected in both. The grader on c7eead1 named real effort as undefined next to "length alone does not disqualify it"; it still proposed small for 14.
+
+## Runs, scenarios 20 to 21c
+
+- 2026-10-28, before the change (#167): one blind grader per run, on the text of 3201e84. 20, 21 and 21c missed expected (the close asks "Passt die Liste?"). 21b met expected, kept as a regression guard.
+- 2026-10-28, after the change, final text after two review rounds (c3dfeab): one blind grader. 1, 8, 20, 21, 21b and 21c met expected.
