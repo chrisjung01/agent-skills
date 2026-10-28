@@ -49,6 +49,10 @@ _Avoid_: Denial
 A question to the user written as reply text, one per message: what is decided and the facts it rests on with their sources. A confirm or approval question has the numbered options `1) Yes` and `2) No`; real alternatives get `1)` `2)` `3)`, each with its meaning and one consequence, and a recommendation that "yes" accepts. Never asked through the harness's picker.
 _Avoid_: Picker question, Decision question
 
+**Question series**:
+The choice questions one run asks the user one after another. Its size is the questions already asked plus every open question known so far, those still waiting on an answer and the closing confirm included; a single question is no series.
+_Avoid_: Question round, Batch (questions stay one per message)
+
 **Bare question**:
 A question the agent asked through the picker with no visible text since the last tool call in the same turn; thinking does not count as visible. Counted in older sessions only.
 _Avoid_: Empty question, Question without context
