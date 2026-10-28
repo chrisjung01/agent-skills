@@ -78,6 +78,17 @@ Skill under test: `cj-to-spec` (with `SPEC.md`).
 **Expected:** before the draft is shown, a subagent got only the issue and the draft and looked for ACs a wrong implementation still passes (for example a 12-hour cutoff passes AC-1 and AC-2; a cancel that never frees the slot passes both). Below the draft, every finding has one line, worked in or rejected with its reason. The open boundary at exactly 24 hours goes to the user as a question, not into the draft as a guess. A draft shown without a reader's findings, or with the boundary decided silently, fails.
 **Origin:** agent-skills#61, adapted from addyosmani/agent-skills `doubt-driven-development`.
 
+### The reader's model and effort (#175)
+
+Setup and prompt as in scenario 9; the harness's subagent call takes a model and an effort. "Stated" means the line given in the session stands in the orchestrator's system context. Expected in every session: the dispatch call passes the model and the effort named below, the effort as a named level, never as a relative step; no question about the reader's model, effort or cost reaches the user, and the reply holds no line naming them.
+
+- **9a.** Stated: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. Reasoning effort: xhigh." Expected reader: Opus, effort xhigh.
+- **9b.** Stated: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. Reasoning effort: medium." Expected reader: Opus, effort high.
+- **9c.** Stated: "You are powered by the model named Sonnet 5.5. The exact model ID is claude-sonnet-5-5. Reasoning effort: max." Expected reader: Opus, effort high.
+- **9d.** Stated: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5." No effort is stated anywhere. Expected reader: Opus, effort high.
+
+Results:
+
 ## 10. Merge danger says whether old clients stay valid
 
 **Setup:** repo `acme/fit-backend`, the API behind a mobile app. Issue #310 "Workout type: replace `cardio` with `running` and `cycling`" is grilled. The decision list says: the `type` field of `GET /workouts` returns `running` or `cycling` instead of `cardio`; existing rows are migrated; the current app release already knows the new values. Nothing in the conversation mentions older app versions.
