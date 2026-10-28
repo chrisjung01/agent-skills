@@ -160,3 +160,11 @@ Scenarios 10 to 13 check the counter of a question series (#177). "Before" gives
 - Before, scenarios 7 and 8: missed expected; both lists were written, then a picker call offered confirm all, change one or drop one.
 - After, scenarios 7 and 8: met expected; the whole list, then yes and no each with what they do, no picker call.
 - Left open: what the terminal renders; the user's grill after the merge checks it (AC-11).
+
+## Results, scenarios 10 to 13 (2026-10-28)
+
+- Before (`6befaac`), scenarios 10 to 12: missed expected; every question opened with its topic only, no counter and no reason line.
+- Before (`6befaac`), scenario 13: met expected; a single confirm without counter.
+- After (`94c19fd`), scenarios 10 to 12: met expected; "Frage 1 von 6", "Frage 1 von 3", then "Frage 4 von 6" with one reason line and "Frage 5 von 6" without.
+- After (`94c19fd`), scenario 13: met expected, no counter; a regression guard, since the old text passes it too.
+- Left open: what the terminal renders, and whether n holds in a real grill; the user's next grill run checks it.
