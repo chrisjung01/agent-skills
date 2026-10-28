@@ -171,3 +171,8 @@ Skill under test: `cj-grill-with-docs`.
 
 - 2026-10-16, one blind run per version (#133), before on c763457, after on the first text, before review. Before: 18a missed expected (nothing posted), 19 missed expected (tier question, the line was not in the grill's own comment); 18b and 18c met expected, kept as regression guards. After: 18a, 18b, 18c and 19 met expected.
 - 2026-10-16, after two review rounds: 2, 14 to 17, 18a to 18c and 19, one blind run after the first review round and one on the final text, c7eead1 (effort added to the Big sign). All met expected in both. The grader on c7eead1 named real effort as undefined next to "length alone does not disqualify it"; it still proposed small for 14.
+
+## Runs, scenarios 20 to 21c
+
+- 2026-10-28, before the change (#167): one blind grader per run, on the text of 3201e84. 20, 21 and 21c missed expected (the close asks "Passt die Liste?"). 21b met expected, kept as a regression guard.
+- 2026-10-28, after the change, final text after two review rounds (c3dfeab): one blind grader. 1, 8, 20, 21, 21b and 21c met expected.
