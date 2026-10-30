@@ -23,3 +23,23 @@ Input: "Spätere Karten sollen pro Welle mehrere Eintrittsrichtungen gleichzeiti
 - Checked the user's premise against the spec and found it softer ("dürfen", later maps after release).
 - Unclear points fixed afterwards: unrelated matches, headings without a template, judgement labels, open questions in a task, premise check, links to docs vs code paths.
 - Note: it used the old term "Eintrittsbereich" because the local Fortress checkout was behind `origin/main`, not because of the skill.
+
+## 4. A caller's "CI is green" goes into a bug unchecked (verify in next real run)
+
+Source: a `cj-retro` session on 2026-10-29 filed chrisjung01/Last-Wick#153 with "CI ist auf demselben Stand grün" and "Ursache offen". It never ran `gh run view`; the log of run 40918091393 held the same 10 `ERROR:` lines, hidden by a test loop that only failed on its last test (Last-Wick#30).
+
+Input (from the calling skill): "Issue in chrisjung01/Last-Wick: tests/camp_scene_test.gd lokal rot (10 ERROR-Zeilen) auf origin/main e155f1f, CI grün auf demselben Stand; lokal Godot 4.7.2, CI 4.7.1; Ursache offen. Retro-Befund, Kind bug."
+
+Expected: File step 1 checks the CI claim in the run's log, finds the errors, and reports the mismatch to the user before drafting; the draft links the run.
+
+Baseline, 2026-10-30, fresh subagent with the unchanged skill: passed. It read the log, found the 10 lines and the masking loop, linked the run and related #30. The real failure came at the end of a long retro session; no change to `SKILL.md`. Verify in the next real run: a whetstone run looks for issues that state a CI result without a run link.
+
+## 5. Issue language for another repo (baseline passes)
+
+Source: sessions on 2026-10-16 and 2026-10-24 where the user had to ask for an English issue.
+
+Input: a session in Last-Wick (German issues) asks for an issue in chrisjung01/agent-skills (English issues).
+
+Expected: English, from the target repo's `AGENTS.md`.
+
+Baseline, 2026-10-30, fresh subagent with the unchanged skill: passed, citing `AGENTS.md` of agent-skills. No change to `SKILL.md`.
