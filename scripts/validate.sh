@@ -25,7 +25,7 @@ for dir in skills/*/; do
   (( ${#desc} > 1024 )) && { echo "✗ $skill: description has ${#desc} characters, max 1024"; errors=$((errors+1)); }
   body_lines="$(awk 'n>=2{c++} /^---$/{n++} END{print c+0}' "$file")"
   (( body_lines > 500 )) && { echo "✗ $skill: body has $body_lines lines, max 500; move detail into reference files"; errors=$((errors+1)); }
-  [[ "$skill" != example-skill ]] && desc_total=$((desc_total+${#desc}))
+  desc_total=$((desc_total+${#desc}))
   # Invocation: user-invoked skills have a one-line human description; model-invoked ones list triggers.
   plain="${desc#[\"\']}"
   if grep -qE '^disable-model-invocation:[[:space:]]*true' <<<"$fm"; then
@@ -37,7 +37,7 @@ for dir in skills/*/; do
   [[ $errors -eq $before ]] && echo "✓ $skill"
 done
 # Codex fits all skill descriptions into about 8,000 characters and shortens them first when over, shared with
-# every other installed skill. Warn early, do not fail. example-skill is never installed.
+# every other installed skill. Warn early, do not fail.
 (( desc_total > 6000 )) && echo "! descriptions total $desc_total characters, over 6000 of the 8000 Codex shares with all installed skills"
 # No skill calls a user-invoked skill through the Skill tool.
 for u in "${user_invoked[@]+"${user_invoked[@]}"}"; do

@@ -45,7 +45,6 @@ done
 for skill_path in "$SKILLS_DIR"/*/; do
   skill="$(basename "$skill_path")"
   [[ -n "$ONLY" && "$skill" != "$ONLY" ]] && continue
-  [[ "$skill" == "example-skill" ]] && continue  # template only
   [[ -f "$skill_path/SKILL.md" ]] || { echo "⚠ $skill: no SKILL.md, skipped"; continue; }
   src="${skill_path%/}"
 
