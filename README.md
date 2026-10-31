@@ -136,14 +136,14 @@ Moving from the old Python hook, once:
 | `--force` | If a folder or foreign symlink already sits at the target, moves it to `<dir>.bak-<timestamp>/` and links the repo version instead. Without `--force` the script only warns. |
 | `--uninstall` | Removes only symlinks that point into this repo. Anything else stays. |
 
-Each run also deletes dead symlinks that point into this repo, for example after a skill was renamed. `example-skill` is a template and never gets installed.
+Each run also deletes dead symlinks that point into this repo, for example after a skill was renamed.
 
 Backups go next to the skill folder, not inside it (`~/.claude/skills.bak-…/`), so the agent does not load a skill twice.
 
 ## Adding a skill
 
-1. Copy the template: `cp -r skills/example-skill skills/cj-my-skill`
-2. In `SKILL.md`, set `name: cj-my-skill`. It must match the folder name and may only contain lowercase letters, digits and hyphens.
+1. Create `skills/cj-my-skill/SKILL.md`: frontmatter with `name` and `description`, then the instructions.
+2. Set `name: cj-my-skill`. It must match the folder name and may only contain lowercase letters, digits and hyphens.
 3. Write the `description` as "Use when ..." and list only the triggers. If it summarises the workflow, agents tend to follow the description and skip the body.
 4. Put long reference material in `references/` and helper scripts in `scripts/`, and link them relative to `SKILL.md`. Call scripts through their interpreter (`bash scripts/x.sh`), because executable bits can get lost.
 5. Add the skill to the table above and to [`AGENTS.md`](AGENTS.md).

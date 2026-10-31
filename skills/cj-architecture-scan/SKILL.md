@@ -27,7 +27,7 @@ The argument or the user's words may name a direction: a module, a folder, a pai
 
 ## 2. Scan
 
-One subagent walks the scope; only its candidate list comes back to the main context. Its prompt holds the scope (the files, or the direction), the glossary terms and the ADR list when found (title, date, decision in one line), the friction questions, the deletion test, the return shape with its cap, the card text rule of step 3, and the path of the diagram patterns file beside `cj-html-report`'s `SKILL.md`. Never this conversation.
+One subagent, started with a fresh context window, never as a fork of this conversation, walks the scope; only its candidate list comes back to the main context. Its prompt holds the scope (the files, or the direction), the glossary terms and the ADR list when found (title, date, decision in one line), the friction questions, the deletion test, the return shape with its cap, the card text rule of step 3, and the path of the diagram patterns file beside `cj-html-report`'s `SKILL.md`. Never this conversation.
 
 Friction to look for:
 

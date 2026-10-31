@@ -18,7 +18,7 @@ An answer that hands the decision back ("whatever you think is best", "you decid
 
 ## Facts are your job, decisions are the user's
 
-Anything the code, the docs or a tool can answer, look up yourself; dispatch a subagent for a longer search and keep asking the questions that do not depend on it. Put only decisions to the user. When the user's wording conflicts with the project's glossary or a recorded decision (ADR, agreement), name the conflict in the question.
+Anything the code, the docs or a tool can answer, look up yourself; dispatch a subagent with a fresh context window, never a fork of this conversation, for a longer search and keep asking the questions that do not depend on it. Put only decisions to the user. When the user's wording conflicts with the project's glossary or a recorded decision (ADR, agreement), name the conflict in the question.
 
 ## Done when
 
