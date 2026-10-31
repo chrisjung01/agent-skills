@@ -6,7 +6,7 @@ user-invocable: false
 
 # Reviewing
 
-One brief for every review. A fresh reviewer gets the diff, the spec and the standards, never the session history, and reports in three **sections** that stay separate: CORRECTNESS, STANDARDS, SPEC. A change can meet the spec and break the standards, or follow every standard and build the wrong thing; merging the sections hides one behind the other.
+One brief for every review. A fresh reviewer, started with a fresh context window and never as a fork of this conversation, gets the diff, the spec and the standards, never the session history, and reports in three **sections** that stay separate: CORRECTNESS, STANDARDS, SPEC. A change can meet the spec and break the standards, or follow every standard and build the wrong thing; merging the sections hides one behind the other.
 
 ## Gather before dispatching
 

@@ -27,7 +27,7 @@ Call the Skill tool with "cj-project-context" for: product-docs, teams, analytic
    5. One small change in a shared place that fixes this and its siblings.
    6. Validate first: a fake-door test, a prototype, a manual run for a week.
 
-   Then dispatch one fresh subagent with only the issue link and the sources from steps 2 to 4, not this conversation, and ask for the strongest case against the proposal and the smallest change that would solve the core problem. A second view without this session's momentum catches what one pass confirms. Merge what holds up.
+   Then dispatch one fresh subagent, started with a fresh context window and never as a fork of this conversation, with only the issue link and the sources from steps 2 to 4, not this conversation, and ask for the strongest case against the proposal and the smallest change that would solve the core problem. A second view without this session's momentum catches what one pass confirms. Merge what holds up.
 6. **Pre-mortem.** It is six months after launch and this failed. Write the two most likely reasons, each tied to something found in steps 1 to 5. For each, ask whether the plan prevents it.
 7. **Gates.** Question the user, one gap at a time, the gap that blocks the most first:
    - The core problem is stated without the solution and has someone who has it.
