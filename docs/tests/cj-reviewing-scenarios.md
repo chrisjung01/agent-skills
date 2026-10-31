@@ -100,71 +100,71 @@ System contexts, each followed by "The most recent Claude models are the Claude 
 
 Every case ends with the reply line `Reviewer and verifiers: <model>, effort <effort>` holding the values the subagents got.
 
-### 1. No argument (AC-1, AC-2)
+### 11. No argument (AC-1, AC-2)
 
 **Setup:** C1, no argument.
 **Expected:** no question of any kind. Reviewer and both verifiers are dispatched on `claude-sonnet-5-5`, effort medium, both passed explicitly. The line reads `claude-sonnet-5-5, effort medium`.
 
-### 2. Explicit `low` (AC-5)
+### 12. Explicit `low` (AC-5)
 
 **Setup:** C1, argument `low`.
 **Expected:** identical to case 1.
 
-### 3. `high` on a weaker orchestrator (AC-3)
+### 13. `high` on a weaker orchestrator (AC-3)
 
 **Setup:** C1, argument `high`.
 **Expected:** no question. Reviewer and both verifiers on `claude-opus-5-5`, effort high. The line says so.
 
-### 4. `high` on Opus with effort high (AC-4)
+### 14. `high` on Opus with effort high (AC-4)
 
 **Setup:** C2, argument `high`.
 **Expected:** no question; every subagent on `claude-opus-5-5`, effort high.
 
-### 5. `high` on Opus with effort xhigh (AC-4)
+### 15. `high` on Opus with effort xhigh (AC-4)
 
 **Setup:** C3, argument `high`.
 **Expected:** no question; every subagent on `claude-opus-5-5`, effort xhigh, never high.
 
-### 6. `high` on Opus with effort max (AC-4)
+### 16. `high` on Opus with effort max (AC-4)
 
 **Setup:** C4, argument `high`.
 **Expected:** no question; every subagent on `claude-opus-5-5`, effort max, never high.
 
-### 7. `high`, Opus, effort stated nowhere (AC-3, AC-6)
+### 17. `high`, Opus, effort stated nowhere (AC-3, AC-6)
 
 **Setup:** C5, argument `high`.
 **Expected:** no question; Opus with effort high, since an unknown effort counts as not known. The line is `claude-opus-5-5, effort high`.
 
-### 8. `high` on an older Opus (AC-3)
+### 18. `high` on an older Opus (AC-3)
 
 **Setup:** C6, argument `high`.
 **Expected:** no question; the model counts as not known, so every subagent runs `claude-opus-5-5`, effort high, not `claude-opus-4-7`.
 
-### 9. `high` on Opus with effort medium (AC-3)
+### 19. `high` on Opus with effort medium (AC-3)
 
 **Setup:** C7, argument `high`.
 **Expected:** no question; every subagent on Opus, effort high.
 
-### 10. `high`, effort assumed from a default (AC-3)
+### 20. `high`, effort assumed from a default (AC-3)
 
 **Setup:** C8, argument `high`.
 **Expected:** no question; the assumed effort is unknown, so Opus with effort high.
 
-### 11. No argument, effort unknown (AC-6)
+### 21. No argument, effort unknown (AC-6)
 
 **Setup:** C5, no argument.
 **Expected:** no question; every subagent on the orchestrator's model. The line reads `claude-opus-5-5, effort unknown`, never a guessed effort.
 
-### 12. Risk touch alone (AC-1)
+### 22. Risk touch alone (AC-1)
 
 **Setup:** C1, no argument, and the diff changes the save format of the hero's silver.
 **Expected:** no question; the dispatch and the line are as in case 1. The risk touch is not a reason to ask.
 
-### 13. Harness takes no model or effort for subagents (edge case)
+### 23. Harness takes no model or effort for subagents (edge case)
 
 **Setup:** C1, argument `high`, and the harness's subagent tool has no model or effort parameter.
 **Expected:** no question; the subagents run on the harness default; the reply says so and names that default instead of claiming Opus.
 
 ## Results
 
-- 2026-10-31, cases 1 to 13 (#184), one blind run per version, before on e368766, after on 1c08c55. Before: 1, 11 and 12 missed expected (the cost question came; 12 named "touches data" as the reason for thorough). 2, 3, 7, 8, 9, 10 and 13 asked nothing through the old carried-answer rule but wrote no `Reviewer and verifiers:` line; 13 ran the subagents on the inherited Sonnet medium without saying `high` could not be applied. 4, 5 and 6 dispatched right and kept the old suffix `no cost question, thorough is not stronger` on the line. After: all thirteen met expected; no question anywhere, `high` on Sonnet gave Opus effort high, on Opus high/xhigh/max the orchestrator's own effort, an older Opus, effort medium, an assumed effort and an unstated effort gave Opus effort high, case 11 wrote `effort unknown`, case 13 named the harness default as unknown because the context does not name it.
+- 2026-10-31, cases 11 to 23 (#184), one blind run per version, before on e368766, after on 1c08c55. Before: 11, 21 and 22 missed expected (the cost question came; 22 named "touches data" as the reason for thorough). 12, 13, 17, 18, 19, 20 and 23 asked nothing through the old carried-answer rule but wrote no `Reviewer and verifiers:` line; 23 ran the subagents on the inherited Sonnet medium without saying `high` could not be applied. 14, 15 and 16 dispatched right and kept the old suffix `no cost question, thorough is not stronger` on the line. After: all thirteen met expected; no question anywhere, `high` on Sonnet gave Opus effort high, on Opus high/xhigh/max the orchestrator's own effort, an older Opus, effort medium, an assumed effort and an unstated effort gave Opus effort high, case 21 wrote `effort unknown`, case 23 named the harness default as unknown because the context does not name it.
