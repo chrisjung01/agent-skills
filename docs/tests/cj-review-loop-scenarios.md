@@ -34,3 +34,5 @@ Skill under test: `cj-review-loop` with `cj-reviewing` (issue #184). Fixture: a 
 **Expected:** `high` is read as the model argument; the base falls back to the default branch.
 
 ## Results
+
+- 2026-10-31, cases 1 to 6 (#184), one blind run per version, before on e368766, after on 1c08c55. Before: all missed expected except case 3. The skill had no model argument: `high` was read as the base or as the whole argument, a base fallback to `main` was guessed, the cost question came in every case (1, 2, 4, 5a, 5b, 6), and case 6 took the branch `high` as the base. Case 3 asked nothing (the old "not stronger" rule) but wrote the old skip line. After: all met expected. No question; `high` is the model argument in any position (5a, 5b, 6), the base stays `develop` or `main`; Opus effort high on Sonnet, the orchestrator's own xhigh on Opus; the final report holds `Reviewer and verifiers:` and, after a run without `high`, the sentence naming `/cj-review-loop high` (case 4 wrote `/cj-review-loop high develop`).

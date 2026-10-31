@@ -166,3 +166,5 @@ Every case ends with the reply line `Reviewer and verifiers: <model>, effort <ef
 **Expected:** no question; the subagents run on the harness default; the reply says so and names that default instead of claiming Opus.
 
 ## Results
+
+- 2026-10-31, cases 1 to 13 (#184), one blind run per version, before on e368766, after on 1c08c55. Before: 1, 11 and 12 missed expected (the cost question came; 12 named "touches data" as the reason for thorough). 2, 3, 7, 8, 9, 10 and 13 asked nothing through the old carried-answer rule but wrote no `Reviewer and verifiers:` line; 13 ran the subagents on the inherited Sonnet medium without saying `high` could not be applied. 4, 5 and 6 dispatched right and kept the old suffix `no cost question, thorough is not stronger` on the line. After: all thirteen met expected; no question anywhere, `high` on Sonnet gave Opus effort high, on Opus high/xhigh/max the orchestrator's own effort, an older Opus, effort medium, an assumed effort and an unstated effort gave Opus effort high, case 11 wrote `effort unknown`, case 13 named the harness default as unknown because the context does not name it.
