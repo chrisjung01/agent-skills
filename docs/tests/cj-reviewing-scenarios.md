@@ -108,7 +108,7 @@ Every case ends with the reply line `Reviewer and verifiers: <model>, effort <ef
 ### 12. Explicit `low` (AC-5)
 
 **Setup:** C1, argument `low`.
-**Expected:** identical to case 1.
+**Expected:** identical to case 11.
 
 ### 13. `high` on a weaker orchestrator (AC-3)
 
@@ -158,7 +158,7 @@ Every case ends with the reply line `Reviewer and verifiers: <model>, effort <ef
 ### 22. Risk touch alone (AC-1)
 
 **Setup:** C1, no argument, and the diff changes the save format of the hero's silver.
-**Expected:** no question; the dispatch and the line are as in case 1. The risk touch is not a reason to ask.
+**Expected:** no question; the dispatch and the line are as in case 11. The risk touch is not a reason to ask.
 
 ### 23. Harness takes no model or effort for subagents (edge case)
 
