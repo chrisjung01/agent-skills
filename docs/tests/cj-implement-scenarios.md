@@ -379,20 +379,23 @@ Closes #301, Part of #300
 
 **Source:** issue #165 (2026-10-24): PR bodies list script calls where the person who tests by hand needs screens, taps and visible results.
 
-## 24. Cost answer given at the start
+## 24. Model argument at the start (#184)
 
-**Setup:** repo `acme/app`, issue #210 "Fix typo on Settings screen", no spec, one ticket. The user starts `/cj-implement 210 low`. The orchestrator's effort is not stated anywhere. Build and checks are done; 4 changed lines, no money, data, security or irreversible step. The agent is right before step 6.
+**Setup:** repo `acme/app`, issue #210 "Fix typo on Settings screen", spec with two tickets #211 (this run) and #212 (ready, no PR, same repo), no open PR. The user starts `/cj-implement 210`. The orchestrator is Sonnet 5.5 with effort medium. Build and checks are done; 4 changed lines, no money, data, security or irreversible step. The agent is right before step 6.
 
-**Prompt:** "Go on with step 6." The agent writes the reply it would show before dispatching the reviewer, and the arguments of the `Next:` line it would end with.
+**Prompt:** "Go on with step 6." The agent writes the reply it would show before dispatching the reviewer, the report line for the review, and the `Next:` block it would end with.
 
-**Expected:** no cost question. The reviewer and the verifier are dispatched cheap (model and effort of the orchestrator), because `low` is the carried answer. `Next:` lines that restart `/cj-implement` carry `low`.
+**Expected:** no cost question anywhere in the run. Reviewer and verifier are dispatched on the orchestrator's model and effort (`low`). The report holds `Reviewer and verifiers: claude-sonnet-5-5, effort medium`. `Next:` holds `/clear` + `/cj-implement 210`, and below it `/cj-implement 210 high · more findings outside the diff, more tokens`.
 
 **Variants**, same setup, one at a time:
-- a) `/cj-implement 210 high`. Expected: no cost question; thorough, the reviewer on Opus with effort high.
-- b) `/cj-implement 210`. Expected: the cost question is asked as before (regression guard).
-- c) `/cj-implement 210 review:min low`. Expected: review depth `min` and cheap, no question; the two arguments do not mix.
+- a) `/cj-implement 210 high`. Expected: no question; reviewer and verifiers on Opus with effort high; `Next:` restarts carry `high` and hold no alternative line.
+- b) `/cj-implement 210 low`. Expected: identical to the main case.
+- c) `/cj-implement 210 review:min low`. Expected: review depth `min` and the orchestrator's model, no question; the two arguments do not mix.
+- d) The diff changes how the hero's silver is saved. Expected: no question, still `low`; the alternative line reads `/cj-implement 210 high · touches data`.
+- e) `/cj-implement 210 review:max high` and `/cj-implement 210 high review:max`. Expected: depth `max` and Opus with effort high in both; no question.
+- f) #212 already has an open PR. Expected: no alternative line, since a restart would not review again.
 
-**Source:** whetstone run 2026-10-28: in 28 sessions the cost question waited a median 0.7 minutes, a mean 7.4, up to 74; the user answered "1" in 25 of them and asked to give the answer at the start.
+**Source:** whetstone run 2026-10-28: in 28 sessions the cost question waited a median 0.7 minutes, a mean 7.4, up to 74; the user answered "1" in 25 of them and asked to give the answer at the start. Issue #184.
 
 ## Results
 

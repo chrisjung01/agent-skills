@@ -84,116 +84,85 @@ Results:
 
 The loop query of scenario 8 does not tell the versions apart by section: the old brief also reports it under CORRECTNESS, only as low where the new one says medium. A variant with the query hidden in a helper outside the diff gave the same picture, low and medium, so it was dropped.
 
-## Model and effort of subagents (whetstone, 2026-10-23)
+## Model argument instead of a cost question (#184)
 
-Setup for the three cases below: the orchestrating agent runs on Sonnet with medium effort. The caller is `cj-implement` step 6 and 7 for a PR of 279 changed lines in 9 files, touching no money, data or security path.
+Replaces the two cost-question sections of #174 and the whetstone run of 2026-10-23; their results are in git history (7f6447e). `cj-reviewing` asks no cost question in any case. The caller is `cj-implement` step 6 and 7 for a PR of 279 changed lines in 9 files touching no money, data or security path, unless a case says otherwise. The prompt is "Review the diff before the PR opens." and the caller passes the argument named in the case, or none. `high` dispatches Opus 5.5 (`claude-opus-5-5`), the Opus the harness picks for Opus.
 
-### 1. Model and effort of the subagents
+System contexts, each followed by "The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5)."
+- C1: "You are powered by the model named Sonnet 5.5. The exact model ID is claude-sonnet-5-5." Reasoning effort: medium.
+- C2: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5." Reasoning effort: high.
+- C3: as C2, reasoning effort: xhigh.
+- C4: as C2, reasoning effort: max.
+- C5: as C2, effort stated nowhere.
+- C6: "You are powered by the model named Opus 4.7. The exact model ID is claude-opus-4-7." Reasoning effort: high.
+- C7: as C2, reasoning effort: medium.
+- C8: as C2, effort stated nowhere, and the caller's brief adds "the harness default effort is probably high."
 
-**Setup:** `git diff origin/main...HEAD --shortstat` prints `9 files changed, 279 insertions(+), 29 deletions(-)`.
-**Prompt:** "Review the diff before the PR opens."
-**Expected:** before any dispatch it names the estimate (279 + 29 lines, 9 files, no risk touch) and asks one choice question with two numbered options: cheap (model and effort of the orchestrator) recommended, thorough (Opus, effort high) second, each with one pro and one con. It dispatches no subagent with a fixed model or effort until the user answers. After "1" (or "yes") the reviewer and both verifiers run with the orchestrator's model and effort. Before the change: the reviewer is dispatched on Opus with effort high and no question.
+Every case ends with the reply line `Reviewer and verifiers: <model>, effort <effort>` holding the values the subagents got.
 
-Results:
-- new text (7f6447e), one run: met expected; regression guard, the new text must leave the question unchanged.
+### 1. No argument (AC-1, AC-2)
 
-### 2. Risk touch
+**Setup:** C1, no argument.
+**Expected:** no question of any kind. Reviewer and both verifiers are dispatched on `claude-sonnet-5-5`, effort medium, both passed explicitly. The line reads `claude-sonnet-5-5, effort medium`.
 
-**Setup:** the diff changes the save format of the hero's silver.
-**Expected:** the question names "touches data" as the reason to take the thorough option, and still recommends the cheap one.
+### 2. Explicit `low` (AC-5)
 
-Results:
-- new text (7f6447e), one run: met expected; regression guard, the new text must leave the question unchanged.
+**Setup:** C1, argument `low`.
+**Expected:** identical to case 1.
 
-### 3. Answer already carried
+### 3. `high` on a weaker orchestrator (AC-3)
 
-**Setup:** the caller passes "subagents: orchestrator model and effort, settled by the user".
-**Expected:** no question; all subagents run with the orchestrator's model and effort.
+**Setup:** C1, argument `high`.
+**Expected:** no question. Reviewer and both verifiers on `claude-opus-5-5`, effort high. The line says so.
 
-Results:
-- new text (7f6447e), one run: met expected; regression guard, the new text must leave the question unchanged.
+### 4. `high` on Opus with effort high (AC-4)
 
-## Cost question when thorough is not stronger (#174)
+**Setup:** C2, argument `high`.
+**Expected:** no question; every subagent on `claude-opus-5-5`, effort high.
 
-Setup for the cases below, unless a case says otherwise: the caller is `cj-implement` step 6 and 7 for the same PR of 279 changed lines in 9 files, touching no money, data or security path. The prompt is "Review the diff before the PR opens." Thorough dispatches Opus 5.5 (`claude-opus-5-5`), the Opus the harness picks for Opus. The Opus cases quote the model lines of Claude Code's system context, which name the model and list the most recent model family. "Stated" means the line given in the case stands in the orchestrator's system context.
+### 5. `high` on Opus with effort xhigh (AC-4)
 
-### 11. Opus with effort high (AC-1)
+**Setup:** C3, argument `high`.
+**Expected:** no question; every subagent on `claude-opus-5-5`, effort xhigh, never high.
 
-**Setup:** system context: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5). Reasoning effort: high."
-**Expected:** no cost question. The reply holds `Reviewer and verifiers: claude-opus-5-5, effort high; no cost question, thorough is not stronger`, with no line count or file count. The reviewer and both verifiers are dispatched with model Opus and effort high, both passed explicitly.
+### 6. `high` on Opus with effort max (AC-4)
 
-Results:
-- old text (e2fd206), one run: missed expected. The question comes with both options; no skip line.
-- new text (7f6447e), one run: met expected. No question, the skip line with `claude-opus-5-5, effort high`, every subagent on Opus 5.5, effort high.
+**Setup:** C4, argument `high`.
+**Expected:** no question; every subagent on `claude-opus-5-5`, effort max, never high.
 
-### 12. Opus with effort xhigh (AC-2)
+### 7. `high`, Opus, effort stated nowhere (AC-3, AC-6)
 
-**Setup:** system context: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5). Reasoning effort: xhigh."
-**Expected:** no cost question; the skip line names effort xhigh; all subagents are dispatched with model Opus and effort xhigh, never high.
+**Setup:** C5, argument `high`.
+**Expected:** no question; Opus with effort high, since an unknown effort counts as not known. The line is `claude-opus-5-5, effort high`.
 
-Results:
-- old text (e2fd206), one run: missed expected. The question comes; thorough would run the reviewer at effort high.
-- new text (7f6447e), one run: met expected. No question, the skip line names effort xhigh, every subagent on xhigh.
+### 8. `high` on an older Opus (AC-3)
 
-### 13. Opus named, effort stated nowhere (AC-4)
+**Setup:** C6, argument `high`.
+**Expected:** no question; the model counts as not known, so every subagent runs `claude-opus-5-5`, effort high, not `claude-opus-4-7`.
 
-**Setup:** system context: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5)." No effort in the context or from the user.
-**Expected:** the cost question comes with both options, as in case 1 of "Model and effort of subagents".
+### 9. `high` on Opus with effort medium (AC-3)
 
-Results:
-- old text (e2fd206), one run: met expected; regression guard.
-- new text (7f6447e), one run: met expected; the effort is unknown, so the question comes.
+**Setup:** C7, argument `high`.
+**Expected:** no question; every subagent on Opus, effort high.
 
-### 14. Sonnet with effort high (AC-5)
+### 10. `high`, effort assumed from a default (AC-3)
 
-**Setup:** system context: "You are powered by the model named Sonnet 5.5. The exact model ID is claude-sonnet-5-5. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5). Reasoning effort: high."
-**Expected:** the cost question comes with both options, as in case 1 of "Model and effort of subagents".
+**Setup:** C8, argument `high`.
+**Expected:** no question; the assumed effort is unknown, so Opus with effort high.
 
-Results:
-- old text (e2fd206), one run: met expected; regression guard.
-- new text (7f6447e), one run: met expected; another model asks.
+### 11. No argument, effort unknown (AC-6)
 
-### 15. Carried thorough on Opus with effort max (AC-6)
+**Setup:** C5, no argument.
+**Expected:** no question; every subagent on the orchestrator's model. The line reads `claude-opus-5-5, effort unknown`, never a guessed effort.
 
-**Setup:** system context: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5). Reasoning effort: max." The caller passes "subagents: thorough, settled by the user".
-**Expected:** no question; all subagents run with model Opus and effort max, never effort high.
+### 12. Risk touch alone (AC-1)
 
-Results:
-- old text (e2fd206), one run: missed expected. No question, but the reviewer runs at effort high and the verifiers at max.
-- new text (7f6447e), one run: met expected. No question, the skip line, every subagent on effort max.
+**Setup:** C1, no argument, and the diff changes the save format of the hero's silver.
+**Expected:** no question; the dispatch and the line are as in case 1. The risk touch is not a reason to ask.
 
-### 16. Opus with effort medium (edge case)
+### 13. Harness takes no model or effort for subagents (edge case)
 
-**Setup:** system context: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5). Reasoning effort: medium."
-**Expected:** the cost question comes with both options; thorough is stronger.
+**Setup:** C1, argument `high`, and the harness's subagent tool has no model or effort parameter.
+**Expected:** no question; the subagents run on the harness default; the reply says so and names that default instead of claiming Opus.
 
-Results:
-- old text (e2fd206), one run: met expected; regression guard.
-- new text (7f6447e), one run: met expected; medium is below high, so the question comes.
-
-### 17. Opus, effort assumed from a default (edge case)
-
-**Setup:** system context: "You are powered by the model named Opus 5.5. The exact model ID is claude-opus-5-5. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5)." The caller's brief adds: "the harness default effort is probably high."
-**Expected:** the effort counts as unknown; the cost question comes with both options.
-
-Results:
-- old text (e2fd206), one run: met expected; regression guard, it asks in every case.
-- new text (7f6447e), one run: met expected; an effort assumed from a default is unknown.
-
-### 18. Risk touch on Opus with effort high (edge case)
-
-**Setup:** case 11, and the diff changes the save format of the hero's silver.
-**Expected:** no cost question; the skip line and the dispatch are as in case 11. The risk touch alone does not bring the question back.
-
-Results:
-- old text (e2fd206), one run: missed expected. The question comes and names "touches data" as the reason for thorough.
-- new text (7f6447e), one run: met expected. No question, same line and dispatch as case 11.
-
-### 19. Older Opus with effort high (AC-5)
-
-**Setup:** system context: "You are powered by the model named Opus 4.7. The exact model ID is claude-opus-4-7. The most recent Claude models are the Claude 5 family: Opus 5.5 (claude-opus-5-5), Sonnet 5.5 (claude-sonnet-5-5), Haiku 5.5 (claude-haiku-5-5). Reasoning effort: high."
-**Expected:** the model counts as unknown; the cost question comes with both options.
-
-Results:
-- old text (e2fd206), one run: met expected; regression guard.
-- new text (7f6447e), one run: met expected; Opus 4.7 is not named as the newest Opus, so the question comes.
+## Results
