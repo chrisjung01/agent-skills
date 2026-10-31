@@ -24,7 +24,7 @@ No skill named: show `open` grouped by skill and ask which skills or sessions to
 
 ## 1. Build the ledger
 
-Work **by session**, not by call: group the `open` lines by their session column. One session that called several skills (a workflow skill and the `unslop` it called) is read once, with `show` for each of its calls, and each row is filed under the skill it is about. Read **every** open call, including calls without a flagged user text. More than five sessions: dispatch read-only subagents, a batch of sessions each, with this table and the verdict rules; they return rows and never run `status`. Patterns, proposals and approval stay with you. Per call, one row:
+Work **by session**, not by call: group the `open` lines by their session column. One session that called several skills (a workflow skill and the `unslop` it called) is read once, with `show` for each of its calls, and each row is filed under the skill it is about. Read **every** open call, including calls without a flagged user text. More than five sessions: dispatch read-only subagents, a batch of sessions each, with this table and the verdict rules; they return rows and never run `status`. Each starts with a fresh context window, never as a fork of this conversation. Patterns, proposals and approval stay with you. Per call, one row:
 
 | Column | Content |
 |---|---|

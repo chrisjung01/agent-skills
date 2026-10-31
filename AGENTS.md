@@ -31,7 +31,6 @@ Decisions are recorded in [docs/adr/](docs/adr/README.md); check its index befor
 | `cj-lint-from-findings` | Turn a mechanical review finding into a lint rule, pattern rule or grep check, proven to fire, placed where the user picks |
 | `cj-static-analysis` | Who calls a symbol, which symbols a diff orphans, which findings the linter already blocks; code index, then analyzer, then `grep`, each answer naming its source |
 | `cj-project-context` | Find project and organisation facts at runtime (commands, labels, channels, goals) instead of hard-coding them |
-| `example-skill` | Template for new skills, never installed |
 
 ## When something becomes a skill
 
@@ -55,6 +54,7 @@ Decisions are recorded in [docs/adr/](docs/adr/README.md); check its index befor
 - A model-invoked skill's `description` starts with "Use when ..." and lists only triggers. It decides whether the skill fires; a workflow summary there makes agents skip the body.
 - Text meant for humans goes through the `unslop` skill.
 - A skill that writes text a person reads in chat (summary, report, question, `Next:` block) carries this rule block inline at that step, word for word, because `AGENTS.md` is not loaded when the skill runs in another repo: "Write it scannable: the first line is the result or the decision needed. Be extremely concise. Sacrifice grammar for the sake of concision. Text others read keeps full sentences. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says." `validate.sh` fails when a copy drifts, when a skill asks a choice question, writes a `Next:` block or a chat summary without the block, or when a skill other than `cj-asking` names the picker; `cj-teach`, an upstream copy kept unchanged, is exempt.
+- A skill that dispatches a subagent says, at that step, to start it with a fresh context window, never as a fork of the conversation. Some harnesses (Codex) fork by default, and a fork carries the history the subagent exists to escape.
 - Write instructions tool-neutrally and reference files relative to `SKILL.md`. Call scripts via `bash scripts/x.sh`.
 - Write skills in English.
 - No secrets, tokens or absolute paths (`/Users/...`).

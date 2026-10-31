@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Implement
 
-Step 4 of the spec-driven flow, in every tier; a small change starts here with its issue as spec. Small PRs reach main faster and get better reviews, so the default is **one ticket, one branch, one draft PR**. Never merge. The one exception is a small PR in a repo whose `conventions` allow it: it opens not as a draft and the agent only switches auto-merge on; see "Small PRs and auto-merge".
+Step 4 of the spec-driven flow, in every tier; a small change starts here with its issue as spec. Small PRs reach main faster and get better reviews, so the default is **one ticket, one branch, one draft PR**. Never merge. The one exception is a small PR in a repo whose `conventions` allow it: it opens not as a draft and the agent only switches auto-merge on; see "Small PRs and auto-merge". Every subagent this skill dispatches starts with a fresh context window, never as a fork of this conversation.
 
 ## Mode
 

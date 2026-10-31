@@ -33,7 +33,7 @@ A force you cannot back with a source is marked "assumed". A force only the user
 Two or three, always including the simplest thing that holds: often no new structure, a change in place.
 
 - **Cheap:** you write them.
-- **Hard to reverse:** dispatch three subagents in parallel. Each gets the decision, the forces with sources and the file paths, not this conversation, and one constraint: (1) the smallest change that holds; (2) make the change the forces predict most often a change in one place; (3) put a seam where the forces say something varies, with its adapters. Each returns the shape in a few lines, the forces it serves, what it costs and what it hides. Keep the two or three most different; drop near-duplicates.
+- **Hard to reverse:** dispatch three subagents in parallel, each started with a fresh context window, never as a fork of this conversation. Each gets the decision, the forces with sources and the file paths, not this conversation, and one constraint: (1) the smallest change that holds; (2) make the change the forces predict most often a change in one place; (3) put a seam where the forces say something varies, with its adapters. Each returns the shape in a few lines, the forces it serves, what it costs and what it hides. Keep the two or three most different; drop near-duplicates.
 
 ## 4. Check every candidate
 
