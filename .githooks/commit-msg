@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Blocks a commit whose message breaks the AGENTS.md commit conventions.
+exec bash scripts/check-commit-msg.sh "$1"
