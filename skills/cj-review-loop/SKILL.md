@@ -14,18 +14,18 @@ The review runs even when the change "is simple".
 
 ## Setup
 
-1. Base: user argument, otherwise the default branch. `BASE=$(git merge-base <base> HEAD)`. Empty `git diff $BASE`: stop and say so.
+1. Arguments: a bare `low` or `high` anywhere among them is the model argument (none is `low`); any other word is the base, otherwise the default branch. `BASE=$(git merge-base <base> HEAD)`. Empty `git diff $BASE`: stop and say so.
 2. Requirements: the plan, the issue with its acceptance criteria verbatim, or a one-paragraph description of what the change should do.
 3. Checks (loop mode): Call the Skill tool with "cj-project-context" for: commands. None found: tell the user once that you work without checks.
 4. Ledger, in the todo list or your head: per finding `id, section, severity, location, title, status, attempts`.
-5. Call the Skill tool with "cj-reviewing" for the reviewer brief and the severity scale. Each round gets a new reviewer that sees only the ledger, never your history.
+5. Call the Skill tool with "cj-reviewing" for the reviewer brief and the severity scale, and pass it the model argument as it came; no cost question is asked. Each round gets a new reviewer that sees only the ledger, never your history.
 
 Done when base, requirements, checks (or their absence) and the reviewer brief are in hand.
 
 ## once
 
 1. Dispatch the reviewer.
-2. Show all findings unchanged, by section, with your one-line take per high and medium: agree, disagree with reason, or unsure.
+2. Show all findings unchanged, by section, with your one-line take per high and medium: agree, disagree with reason, or unsure. Add the `Reviewer and verifiers: <model>, effort <effort>` line from `cj-reviewing`, and after a run without `high` one sentence naming `/cj-review-loop high` (plus the base when one was given).
 3. Ask one choice question: fix all high and medium, decide per finding (then one finding per question: fix, ignore, or something else), or switch to loop mode. Change and commit nothing before the answers.
 
 Done when the user has decided per finding.

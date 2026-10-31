@@ -379,20 +379,23 @@ Closes #301, Part of #300
 
 **Source:** issue #165 (2026-10-24): PR bodies list script calls where the person who tests by hand needs screens, taps and visible results.
 
-## 24. Cost answer given at the start
+## 24. Model argument at the start (#184)
 
-**Setup:** repo `acme/app`, issue #210 "Fix typo on Settings screen", no spec, one ticket. The user starts `/cj-implement 210 low`. The orchestrator's effort is not stated anywhere. Build and checks are done; 4 changed lines, no money, data, security or irreversible step. The agent is right before step 6.
+**Setup:** repo `acme/app`, issue #210 "Fix typo on Settings screen", spec with two tickets #211 (this run) and #212 (ready, no PR, same repo), no open PR. The user starts `/cj-implement 210`. The orchestrator is Sonnet 5.5 with effort medium. Build and checks are done; 4 changed lines, no money, data, security or irreversible step. The agent is right before step 6.
 
-**Prompt:** "Go on with step 6." The agent writes the reply it would show before dispatching the reviewer, and the arguments of the `Next:` line it would end with.
+**Prompt:** "Go on with step 6." The agent writes the reply it would show before dispatching the reviewer, the report line for the review, and the `Next:` block it would end with.
 
-**Expected:** no cost question. The reviewer and the verifier are dispatched cheap (model and effort of the orchestrator), because `low` is the carried answer. `Next:` lines that restart `/cj-implement` carry `low`.
+**Expected:** no cost question anywhere in the run. Reviewer and verifier are dispatched on the orchestrator's model and effort (`low`). The report holds `Reviewer and verifiers: claude-sonnet-5-5, effort medium`. `Next:` holds `/clear` + `/cj-implement 210`, and below it `/cj-implement 210 high · more findings outside the diff, more tokens`.
 
 **Variants**, same setup, one at a time:
-- a) `/cj-implement 210 high`. Expected: no cost question; thorough, the reviewer on Opus with effort high.
-- b) `/cj-implement 210`. Expected: the cost question is asked as before (regression guard).
-- c) `/cj-implement 210 review:min low`. Expected: review depth `min` and cheap, no question; the two arguments do not mix.
+- a) `/cj-implement 210 high`. Expected: no question; reviewer and verifiers on Opus with effort high; `Next:` restarts carry `high` and hold no alternative line.
+- b) `/cj-implement 210 low`. Expected: identical to the main case.
+- c) `/cj-implement 210 review:min low`. Expected: review depth `min` and the orchestrator's model, no question; the two arguments do not mix.
+- d) The diff changes how the hero's silver is saved. Expected: no question, still `low`; the alternative line reads `/cj-implement 210 high · touches data`.
+- e) `/cj-implement 210 review:max high` and `/cj-implement 210 high review:max`. Expected: depth `max` and Opus with effort high in both; no question.
+- f) #212 already has an open PR. Expected: no alternative line, since a restart would not review again.
 
-**Source:** whetstone run 2026-10-28: in 28 sessions the cost question waited a median 0.7 minutes, a mean 7.4, up to 74; the user answered "1" in 25 of them and asked to give the answer at the start.
+**Source:** whetstone run 2026-10-28: in 28 sessions the cost question waited a median 0.7 minutes, a mean 7.4, up to 74; the user answered "1" in 25 of them and asked to give the answer at the start. Issue #184.
 
 ## Results
 
@@ -412,3 +415,4 @@ Closes #301, Part of #300
 - 2026-10-20, scenarios 18 to 20 (whetstone), one blind run per version, before on e97e97e, after on 1394cab. Before: 18 missed expected (PR opened without the image, "no step re-opens step 8"); 18 variant met expected (guard); 19 met expected, but only by reading `<its repo>` as the code repo against the text and naming the ambiguity, as the three runs in the retro of `303cbaeb` did not; 20 missed expected (per-row reading, a third verifier round); 20 variant met expected (guard). After: all six met expected; 18 re-read `AGENTS.md` after the rebase and put the pair into What, the variant kept the body without an image because no rebase ran, 19 listed PRs in the code repo only, 20 reported without a push and without a third round.
 - 2026-10-24, scenarios 23 and 4 variants 1 and 2 (#165), one blind run per version, before on 1d5de12, after on dcfd046 (final, after one review round that changed only the scenario text). Before: 23 main met expected on the outcome (no PR) but as a judgment call, no hard stop in the text drove it; 23a met expected (regression guard, "each one action with its expected result" already catches it); 23b missed expected (rejected as over 15 lines); 23c met expected (regression guard); 23d met expected (regression guard, unbacked claim); 4 variant 1 missed expected (the text still offered "the one command that shows the change" for a change with a screen); 4 variant 2 met expected (regression guard, 23 lines is over both caps). After: all ten met expected; 23 main stopped on the named rejections (What names a function, commands replace taps, no starting point), 23b opened, 23c opened, 4 variant 1 asked for taps, 4 variant 2 still stopped and proposed a split.
 - 2026-10-28, scenario 24 with variants a to c (whetstone), one blind run per version, before on origin/main, after on the first text. Before: main, a and c missed expected; `low`/`high` had no meaning in `cj-implement`, the effort was unknown, so `cj-reviewing` asked the cost question every time. b met expected (regression guard). After: all four met expected; `low` dispatched cheap, `high` Opus with effort high, b asked, c kept `review:min` apart from `low`. The run found the hand-over line in step 5 without `low`/`high`; added. No case restarts `/cj-implement` in a one-ticket spec, so the `Next:` part is verify in next real run.
+- 2026-10-31, scenario 24 with variants a to f (#184), one blind run per version, before on e368766, after on 1c08c55. Before: main, d and f missed expected (the cost question stopped the run, `Next:` restarts carried `low`); b missed expected (no alternative line). a, c, e1 and e2 met expected on depth and model (regression guards, the old carried-answer rule), but no case held a `Reviewer and verifiers:` line or an alternative line. After on 1c08c55: main and d missed expected (the alternative line named #212, the ticket, instead of #210); the other seven met expected; no question, `low` on Sonnet medium, `high` on Opus effort high, the alternative line after a run without `high`, `· data` in d, no alternative line after `high` or when #212 has a PR, `review:max high` in both orders gave depth `max` on Opus high. Review round: the skill text now says the same `<issue>` as the step above it. Rerun of the main case and d on 8a1215b: both met expected (the d run named the reason as data, not the words "touches data"), `/cj-implement 210 high · more findings outside the diff, more tokens` and `· data`. No case restarts in another repo, so the `high` on that `Next:` line is verify in next real run.
