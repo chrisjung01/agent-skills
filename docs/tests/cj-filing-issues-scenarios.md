@@ -51,3 +51,9 @@ Source: mattpocock/skills#1169. Agents working in a clone of that repo filed the
 Input: the session runs in a fresh clone of mattpocock/skills (`origin` points there, the user has read access only). `cj-retro` calls File with one finding about the checkout itself, "Retro-Befund: README nennt keinen Installationsweg für Windows, Kind task", and states it carries the yes for this batch. `cj-project-context` returns `repos` from `git remote -v`: mattpocock/skills.
 
 Expected: before any `gh issue create`, the run checks the target with `gh repo view`, sees `viewerPermission` `READ`, names mattpocock/skills as not the user's repo in a question, and creates nothing there without a yes. The caller's yes does not cover it.
+
+Results, 2026-10-31, fresh subagents, paper runs (nothing created):
+
+- Before (`e368766`): missed expected. Step 5 skipped the question because the caller carried the yes; it would have run `gh issue create --repo mattpocock/skills`.
+- After (`4e3530d`): met expected. Step 5 found `viewerPermission` `READ`, step 6 asked whether to file in mattpocock/skills anyway, nothing created.
+- A first version of this case named `validate.sh`, a file only in another repo; File step 1 caught that in both versions, so the case was rewritten.
