@@ -109,3 +109,13 @@ _Avoid_: Linting (one source only), Code search (`grep` only)
 **Orphaned symbol**:
 A symbol a diff adds outside test code, or whose last caller outside tests it removes, that still exists afterwards and that nothing outside tests calls or imports afterwards. A symbol that existed before the diff without such a caller is not one. Reported as a low finding from a checked source, as a question from an unchecked one, unless the review already reports it as an unwired entry point.
 _Avoid_: Dead code (also covers code unused before the diff), Unused export (one kind only)
+
+## Scenarios
+
+**Scenario**:
+A paper exercise for one skill, built from a real session: setup, prompt and expected behaviour, run by a fresh agent against the skill text before and after a change. A skill's scenarios sit in `docs/tests/<skill>-scenarios.md`, one per heading; the rules are in `docs/tests/README.md`.
+_Avoid_: Test case (nothing runs it automatically), Eval, Scenario file (the file holds several)
+
+**Results line**:
+The record of a scenario's runs under Results: "met expected" or "missed expected" for the skill text before and after the change, each naming the commit the run read. A regression guard's line calls it one.
+_Avoid_: Outcome (one half only), Result section (one line can cover several cases)
