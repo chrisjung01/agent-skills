@@ -77,6 +77,7 @@ cargo test -- --ignored      # manual, not in CI, after a report layout change: 
 
 Skills are installed as symlinks. Edits here take effect immediately, no reinstall needed.
 A skill change is tried with the scenarios in `docs/tests/` (rules in its README): a fresh agent runs `<skill>-scenarios.md` against the text before and after the change.
+A branch that adds or changes a scenario records its before and after outcomes under Results before the PR opens, each naming the commit the run read.
 
 ## Conventions
 
