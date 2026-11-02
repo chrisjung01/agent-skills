@@ -189,3 +189,8 @@ Scenarios 10 to 13 check the counter of a question series (#177). "Before" gives
 - After (`94c19fd`), scenarios 10 to 12: met expected; "Frage 1 von 6", "Frage 1 von 3", then "Frage 4 von 6" with one reason line and "Frage 5 von 6" without.
 - After (`94c19fd`), scenario 13: met expected, no counter; a regression guard, since the old text passes it too.
 - Left open: what the terminal renders, and whether n holds in a real grill; the user's next grill run checks it.
+
+## Results, scenarios 14 and 15 (2026-11-02)
+
+- Before (858518c), scenarios 14 and 15: met expected on paper; the fresh agent gave a command with its output per option and put the recommendation first. The live failures (sessions 8017a60b, fdd0acd1) do not reproduce in a paper run.
+- Verify in next real run: the next whetstone run checks later sessions for "versteh ich nicht" after an abstract question and for a habitual "1" landing on a non-recommended option.

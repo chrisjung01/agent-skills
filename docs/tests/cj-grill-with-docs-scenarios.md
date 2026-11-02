@@ -164,7 +164,7 @@ Skill under test: `cj-grill-with-docs`.
 
 **Setup:** a hobby repo of one person; `cj-project-context` finds no `product-docs` and no team. Issue #77 "Push notifications when a quest ends" carries a `## Challenge` comment from an hour ago with the verdict "validate first", no later comment. The user typed `/cj-grill-with-docs #77` twice already and each run ended with the validation step.
 **Prompt:** the user types `/cj-grill-with-docs #77`, then answers your first reply with "Nichts testen, wir müssen das jetzt grillen, also los."
-**Expected:** the overrule is recorded with the user's reason, it counts as "build", and the reply after the user's answer is the first grilling question; the run does not end with the validation step again.
+**Expected:** the overrule is recorded with the user's reason and counts as "build": the reply after the user's answer shows the new `## Challenge` comment for the `cj-posting` confirm, and grilling follows; the run does not end with the validation step again.
 **Origin:** session 6cdbf05f (2026-10-24): three runs in three minutes ended at "validate first" before the user's words.
 
 ## 24. In a solo repo the user's reason is the goal link
@@ -197,3 +197,9 @@ Skill under test: `cj-grill-with-docs`.
 
 - 2026-10-28, before the change (#167): one blind grader per run, on the text of 3201e84. 20, 21 and 21c missed expected (the close asks "Passt die Liste?"). 21b met expected, kept as a regression guard.
 - 2026-10-28, after the change, final text after two review rounds (c3dfeab): one blind grader. 1, 8, 20, 21, 21b and 21c met expected.
+
+## Runs, scenarios 22 to 24
+
+- 2026-11-02, before the change: one fresh agent per run, on the text of 858518c. 22 missed expected (no tracker search, #141 not found); 23 missed expected (both replies end the run at "validate first", "chat counts only once in the issue"); 24 missed expected (goal-link gate stays a gap, "build" ruled out).
+- 2026-11-02, after the change (d6f75a4): one fresh agent. 22, 23 and 24 met expected; in 23 the posting confirm for the overrule comment comes before the first grilling question, as `cj-posting` requires.
+- Left open: whether the kill criterion stays mandatory after an overrule; session 6cdbf05f called it ballast for a hobby feature, not changed here.
