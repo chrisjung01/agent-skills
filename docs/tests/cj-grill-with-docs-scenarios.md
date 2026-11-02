@@ -153,6 +153,27 @@ Skill under test: `cj-grill-with-docs`.
 **Prompt:** "Sortierung doch global, nicht pro Nutzer" (write the reply).
 **Expected:** decision 2 now reads that the sort order is global, the reply shows the updated numbered list and the `Next:` block again, and asks no yes/no question.
 
+## 22. Open issues in the same area are read before the first question
+
+**Setup:** issue #140 "Show the claimed amount under the Claim button". It has no linked issues and no comments. It is a sub-issue of epic #120 "Reward flow", whose body links a mockup. Tracker state, seen only if the agent searches: open #141 "Victory screen: icons only, no numbers" and #139 "Flame flickers on the reward step". Tier normal is confirmed.
+**Prompt:** `/cj-grill-with-docs #140`; list what you read before the first grilling question, then ask it.
+**Expected:** the reads include the parent epic #120 with its mockup and a tracker search in the same area that finds #141; the first question about showing an amount names #141 as a fact that speaks against numbers.
+**Origin:** session 2f05459b (2026-10-30): "Halt, warte mal. Prüf noch mal … ein paar Tickets … dagegen sprechen"; an earlier session (2026-10-07) missed the mockup on the parent epic.
+
+## 23. In a solo repo the user overrules a stopping verdict
+
+**Setup:** a hobby repo of one person; `cj-project-context` finds no `product-docs` and no team. Issue #77 "Push notifications when a quest ends" carries a `## Challenge` comment from an hour ago with the verdict "validate first", no later comment. The user typed `/cj-grill-with-docs #77` twice already and each run ended with the validation step.
+**Prompt:** the user types `/cj-grill-with-docs #77`, then answers your first reply with "Nichts testen, wir müssen das jetzt grillen, also los."
+**Expected:** the overrule is recorded with the user's reason, it counts as "build", and the reply after the user's answer is the first grilling question; the run does not end with the validation step again.
+**Origin:** session 6cdbf05f (2026-10-24): three runs in three minutes ended at "validate first" before the user's words.
+
+## 24. In a solo repo the user's reason is the goal link
+
+**Setup:** big tier confirmed in the same hobby repo (no `product-docs`, no team). Challenge on issue #173 "Answer questions by click in the desktop app". Step 7, gate "documented goal link" is open. Asked why it matters, the user answered in chat: "Ich nutze 80 % CLI, 20 % Desktop; in der Desktop-App soll Antworten weniger nerven."
+**Prompt:** go on with the gates.
+**Expected:** the answer counts as the goal link, to be written into the challenge result; it is no gap and does not block "build"; no follow-up asks the user to point to a goal in `product-docs`.
+**Origin:** session 4dbe1e59 (2026-10-27): the goal-link question had no answer in a repo without product docs ("Ich weiß nicht was ich hier nehmen sollte").
+
 ## Runs, scenarios 2 to 13
 
 - 2026-10-16, before the change (#96): one fresh grader. 2 to 13 missed expected; only a variant of 9 met ("two tickets" proposes no tier), because the old text has no tier at all, so the variant was dropped. The first versions of 7 and 10 met expected on the old text, so both were rewritten.

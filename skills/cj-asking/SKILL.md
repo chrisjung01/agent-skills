@@ -12,7 +12,7 @@ A **choice question** is a question to the user, written as reply text. The user
 
 1. **Plain reply text, never the picker.** No choice or question tool, whatever the harness offers (in Claude Code, `AskUserQuestion`).
 2. **One question per message.** The next question comes only after the user answered this one. No follow-up question in the same message, not even as a last line.
-3. **Everything needed to decide stands in the question.** What is decided and why now; the facts it rests on, each with its source (file, issue, command, session) when it was looked up; every domain term explained in plain words. A list the question refers to is written out in full, numbered, directly above it, never left in thinking and never only on a page; a list over 7 items splits under headings in the reply.
+3. **Everything needed to decide stands in the question.** What is decided and why now; the facts it rests on, each with its source (file, issue, command, session) when it was looked up; every domain term explained in plain words. A list the question refers to is written out in full, numbered, directly above it, never left in thinking and never only on a page; a list over 7 items splits under headings in the reply. Concision never shortens this part: an option whose effect is abstract names what it changes in this case, with one concrete example (a screen, a file, a command and its output).
 4. **A confirm or approval question has two numbered options.** "Post this?", "Does the list fit?", "Go ahead?": `1) Yes` and `2) No`, each with one line on what happens. The user answers with the number.
 5. **Real alternatives are numbered too.** Each gets `1)` `2)` `3)`, a meaning line and a consequence line. The recommended one comes first, and a recommendation line names it with one sentence why.
 6. **Yes takes the recommendation.** "yes", "ja", "ok" or the like after numbered options picks the recommended option. Do not ask again.
@@ -63,6 +63,8 @@ Write it scannable: the first line is the result or the decision needed. Be extr
 
 | Mistake | Instead |
 |---|---|
+| Short question with jargon or abstract options; the user replies "versteh ich nicht" | One sentence on the problem, a concrete example from this case per option. |
+| Recommended option listed second or third, e.g. in the issue's order; the user answers "1" out of habit and gets the other one | Reorder: the recommendation is always option 1. |
 | The list exists only in thinking; the reply says "Does the list fit?" | Write the whole numbered list in the reply, then ask. |
 | Three questions in one message, to save turns | One question; the rest after the answer. |
 | A confirm question as options 1) Post 2) Edit 3) Cancel | Exactly `1) Yes` and `2) No`, each with what it does. |
