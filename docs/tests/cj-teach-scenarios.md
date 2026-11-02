@@ -42,11 +42,11 @@ Built from two real workspaces: a Go workspace where the user called lesson 0001
 
 ## Results
 
-Before: `main` at 858518c. After: branch `fix/teach-walkthrough`, uncommitted working tree, second run after the review fixes of the first. Both runs by a fresh paper-exercise agent.
+Before: `main` at 858518c. After: commit 2307217 on `fix/teach-walkthrough`, after two review rounds. Each run by a fresh paper-exercise agent.
 
 1. Concrete task, walkthrough: before missed expected (mission interview), after met expected.
 2. Worked example matches the exercise: before missed expected, after met expected.
 3. One concept in full: before missed expected ("short, completable very quickly"), after met expected.
-4. Recall and why-question: before missed expected, after met expected (first after-run missed: no required why-question in chat; fixed with "Running a lesson").
+4. Recall, prediction and why-question: before missed expected, after met expected. Earlier after-runs missed twice: no required why-question in chat, then prediction only preferred; both now required.
 5. Session close asks what was missing: before missed expected, after met expected.
 6. Topic starts with the mission: before met expected, after met expected; regression guard.
