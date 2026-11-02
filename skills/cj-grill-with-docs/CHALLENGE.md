@@ -8,7 +8,8 @@ Call the Skill tool with "cj-project-context" for: product-docs, teams, analytic
 
 ## Rules
 
-- **Documented or it did not happen.** Only what is written down counts: the issue and its thread, linked issues and PRs, the docs tool (`product-docs`), analytics. A claim the user makes in chat counts once it is written into the issue or a docs page; the challenge result (step 8) is that record for answers given in this session. A goal link the user cannot point to in `product-docs` counts as "none".
+- **Documented or it did not happen.** Only what is written down counts: the issue and its thread, linked issues and PRs, the docs tool (`product-docs`), analytics. A claim the user makes in chat counts once it is written into the issue or a docs page; the challenge result (step 8) is that record for answers given in this session. A goal link the user cannot point to in `product-docs` counts as "none", except in a solo repo.
+- **Solo repo.** `cj-project-context` finds no `product-docs` and no team: the user is the product owner. Their answer in this session counts as documented once the challenge result records it, and their reason why it matters is the goal link. A stopping verdict they overrule in chat ("grill anyway") becomes "build", recorded in the challenge result as overruled with their reason.
 - **One question per turn**, as a choice question with the recommended answer first. Typical options: a source that settles it, "no source: counts as a gap", and when it fits, the smaller alternative. Facts you can look up yourself never go to the user.
 - **A gap is a block.** Any gate in step 7 still open after its question means the verdict cannot be "build". The block is not final: it reopens when the gap is documented.
 - **A decided item gets a short check.** A product owner or stakeholder already decided it with a documented goal link: run steps 1, 3 and 5 only.

@@ -151,6 +151,26 @@ Scenarios 10 to 13 check the counter of a question series (#177). "Before" gives
 
 **Expected:** a confirm with the draft above `1) Yes` and `2) No`, and no counter line.
 
+## 14. An abstract choice gets a concrete example per option
+
+**Setup:** `cj-grilling` on a ticket that says every "How to test" step in a PR body is a visible action with a visible result ("open the screen, tap, see the result"). The repo holds only skill texts and scripts, no screen. Open decision: what a test step is for a change without a screen. The user answered the last three questions with "1". The conversation is in German.
+
+**Prompt:** ask the question.
+
+**Expected:** each option names what it changes in this case with one concrete example (for example a command such as `bash scripts/validate.sh` and the output it prints); no term like "unit" or "result" stays unexplained; the question stays short.
+
+**Origin:** session 8017a60b (2026-10-24): the user answered "Die Frage verstehe ich nicht"; the same question with a command and its output as example was answered at once.
+
+## 15. The recommendation is option 1
+
+**Setup:** `cj-grilling` on a game ticket. The issue lists two ways to show loot after a fight, in this order: "A: inside the fight report", "B: on its own reward screen". Facts found: the fight report is already full, and a planned ticket adds animations to the reward step. Your recommendation is B. The user answers almost every question with "1".
+
+**Prompt:** ask the question.
+
+**Expected:** the own reward screen is option `1)`, and the recommendation line names 1; the issue's order does not decide the numbering.
+
+**Origin:** session fdd0acd1 (2026-10-23): the recommendation stood second, the user's habitual "1" was taken as the other option, and the user had to correct it ("Wir nehmen das doch!").
+
 ## Results (2026-10-14)
 
 - Before, scenarios 1 to 6: missed expected; every question went through the picker, so its options and recommendation stood only in the dialog.
@@ -169,3 +189,8 @@ Scenarios 10 to 13 check the counter of a question series (#177). "Before" gives
 - After (`94c19fd`), scenarios 10 to 12: met expected; "Frage 1 von 6", "Frage 1 von 3", then "Frage 4 von 6" with one reason line and "Frage 5 von 6" without.
 - After (`94c19fd`), scenario 13: met expected, no counter; a regression guard, since the old text passes it too.
 - Left open: what the terminal renders, and whether n holds in a real grill; the user's next grill run checks it.
+
+## Results, scenarios 14 and 15 (2026-11-02)
+
+- Before (858518c), scenarios 14 and 15: met expected on paper; the fresh agent gave a command with its output per option and put the recommendation first. The live failures (sessions 8017a60b, fdd0acd1) do not reproduce in a paper run.
+- Verify in next real run: the next whetstone run checks later sessions for "versteh ich nicht" after an abstract question and for a habitual "1" landing on a non-recommended option.
