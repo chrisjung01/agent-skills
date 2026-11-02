@@ -81,18 +81,17 @@ else
   hits="$(grep -vF -e "$sentence" <<<"$hits")"
   [[ -n "$hits" ]] && { echo "✗ scannable sentence drifted from AGENTS.md:"; cut -d: -f1,2 <<<"$hits"; errors=$((errors+1)); }
   # A skill that asks a choice question, writes a Next: block or a chat summary carries the block (#47).
-  # cj-teach is an upstream copy kept unchanged (README), so it is exempt.
-  files="$(git grep --cached -liE 'choice question|Next:|in chat|reply text|chat summary|ask the user|question the user' -- 'skills/*/SKILL.md' ':!skills/cj-teach/SKILL.md')"; rc=$?
+  files="$(git grep --cached -liE 'choice question|Next:|in chat|reply text|chat summary|ask the user|question the user' -- 'skills/*/SKILL.md')"; rc=$?
   (( rc > 1 )) && { echo "✗ rule block coverage scan failed (git grep exit $rc)"; errors=$((errors+1)); }
   for f in $files; do
     git show ":$f" | grep -qF -e "$sentence" || { echo "✗ $f: writes chat text without the scannable rule block"; errors=$((errors+1)); }
   done
 fi
 # Picker: questions are reply text (#109), so no skill and no copy of the rule block names the picker. cj-asking
-# names it to forbid it; cj-teach is exempt as above. "as a choice question" is plain text, "as a choice" alone is not.
+# names it to forbid it. "as a choice question" is plain text, "as a choice" alone is not.
 picker='choice tool|askuserquestion|picker|question tool|as a choice([^ ]| [^q]|$)'
 grep -qiE "$picker" <<<"$sentence" && { echo "✗ AGENTS.md: the scannable sentence names the picker"; errors=$((errors+1)); }
-hits="$(git grep --cached -niE "$picker" -- 'skills/*/*.md' ':!skills/cj-asking/*' ':!skills/cj-teach/*')"; rc=$?
+hits="$(git grep --cached -niE "$picker" -- 'skills/*/*.md' ':!skills/cj-asking/*')"; rc=$?
 (( rc > 1 )) && { echo "✗ picker scan failed (git grep exit $rc)"; errors=$((errors+1)); }
 [[ -n "$hits" ]] && { echo "✗ skills name the picker; ask as cj-asking says:"; cut -d: -f1,2 <<<"$hits"; errors=$((errors+1)); }
 # Sources: every upstream repo a CREDITS.md links is listed in the README's Sources. The lines there name only the

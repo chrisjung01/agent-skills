@@ -46,7 +46,7 @@ The last `Acceptance:` line of every spec, `Acceptance: by hand` or `Acceptance:
 | [`cj-retro`](skills/cj-retro/SKILL.md) | **Flow 6.** Turns a session's friction into checks, standards or agent-doc pointers in the worked-in repo; skill findings go to `cj-whetstone`. |
 | [`cj-whetstone`](skills/cj-whetstone/SKILL.md) | Improves a skill from the skill calls the whetstone metrics store, after reading their windows. |
 | [`cj-architecture-scan`](skills/cj-architecture-scan/SKILL.md) | You suspect the architecture of a repo hurts but cannot name a decision yet. Scans the hot spots (or the area you name), shows up to five refactoring candidates as cards on a page, and files the one you pick as an issue for `/cj-grill-with-docs`. |
-| [`cj-teach`](skills/cj-teach/SKILL.md) | Teaches a topic over several sessions: mission, sources, short HTML lessons with quizzes, reference sheets and learning records in the current directory. Copied from mattpocock/skills. |
+| [`cj-teach`](skills/cj-teach/SKILL.md) | Teaches a topic over several sessions (mission, sources, HTML lessons from worked example to exercise, reference sheets, learning records), or walks the user through a real task with the why behind every step. Adapted from mattpocock/skills. |
 
 **Day to day** (the model picks them up from your words, or you type `/name`):
 
@@ -90,7 +90,7 @@ No skill contains facts about a specific organisation or repo. They ask `cj-proj
 
 Each skill that takes something from a source names the files and what it took in its own `CREDITS.md`.
 
-- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-teach` is copied unchanged apart from its name. `cj-design-options` takes the deletion test, the one-adapter rule, the dependency categories and parallel candidate designs from `codebase-design`. `cj-architecture-scan` is adapted from `improve-codebase-architecture`: the scan, the candidate cards and the closing recommendation; the pick becomes an issue instead of an inline grill.
+- [mattpocock/skills](https://github.com/mattpocock/skills): the spec-driven flow (grill, spec, tickets, implement, retro), the split into user- and model-invoked skills, and shared building blocks called through the Skill tool. `cj-teach` is adapted from `teach`: walkthroughs for real tasks, deeper lessons, pages grounded in sources read in the session. `cj-design-options` takes the deletion test, the one-adapter rule, the dependency categories and parallel candidate designs from `codebase-design`. `cj-architecture-scan` is adapted from `improve-codebase-architecture`: the scan, the candidate cards and the closing recommendation; the pick becomes an issue instead of an inline grill.
 - [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills): single checks and review rules.
 - [superpowers](https://github.com/obra/superpowers): testing a skill change with scenarios that fail before the edit and pass after it (`docs/tests/`), and the `writing-skills` method `cj-whetstone` uses for its edits.
 - [unslop](https://github.com/backnotprop/pstack/tree/main/skills/unslop) from pstack: the writing rules every text for humans goes through. Install it separately.
