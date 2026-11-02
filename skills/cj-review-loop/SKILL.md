@@ -1,14 +1,14 @@
 ---
 name: cj-review-loop
-description: Use when the user's own branch should get an independent review, either one pass after finishing a feature or before merging ("review my branch", "einmal reviewen"), or reviewed and fixed in rounds until no high or medium findings remain ("/cj-review-loop", "review loop", "review and fix", "review until green"). Not for someone else's PR; that is cj-review-teammate-pr.
+description: Use when the user's own branch should get an independent review, either one pass after finishing a feature or before merging ("review my branch", "einmal reviewen"), or reviewed and fixed in rounds until no high or medium findings remain ("review loop", "review and fix", "review until green"). Not for someone else's PR; that is cj-review-teammate-pr.
 ---
 
 # Review loop
 
 A fresh reviewer judges the branch diff; you assess each finding and the user sees every one before you touch code. Two modes:
 
-- **once**: one review, nothing fixed, the user decides. Default when the user asks for a review or one pass.
-- **loop**: fix high and medium, run the checks, review again until nothing high or medium is open. Default when the user asks to fix, and when another skill calls this one.
+- **once**: one review, nothing fixed, the user decides. Default when the user asks for a review or one pass, and on a call with no words besides a base, `low` or `high`.
+- **loop**: fix high and medium, run the checks, review again until nothing high or medium is open. Default when the user asks to fix or for rounds, and when another skill calls this one.
 
 The review runs even when the change "is simple".
 

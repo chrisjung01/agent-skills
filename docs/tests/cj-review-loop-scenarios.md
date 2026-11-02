@@ -1,6 +1,6 @@
 # cj-review-loop scenarios
 
-Skill under test: `cj-review-loop` with `cj-reviewing` (issue #184). Fixture: a small repo with a branch `feat/x` one commit ahead of `main`; the diff has one medium finding on the first round and none on the second. The orchestrator is Sonnet 5.5 with effort medium unless a case says otherwise. Each case: the agent writes the arguments it passes to `cj-reviewing`, the question it asks if any, and the final report.
+Skill under test: `cj-review-loop` with `cj-reviewing` (issue #184). Fixture: a small repo with a branch `feat/x` one commit ahead of `main`; the diff has one medium finding on the first round and none on the second. The orchestrator is Sonnet 5.5 with effort medium unless a case says otherwise. Each case: the agent writes the arguments it passes to `cj-reviewing`, the question it asks if any, and the final report. Cases 1 to 6 run in loop mode: the user answers the once question with "switch to loop mode".
 
 ## 1. No argument (AC-1)
 
@@ -33,6 +33,23 @@ Skill under test: `cj-review-loop` with `cj-reviewing` (issue #184). Fixture: a 
 **Prompt:** "/cj-review-loop high" where the only other branch is called `high`.
 **Expected:** `high` is read as the model argument; the base falls back to the default branch.
 
+## 7. Bare call (whetstone 2026-11-02)
+
+From sessions 28c45a1f and 01a19b7a: the user typed only the command, the agent started fixing, the user stopped it.
+**Prompt:** "/cj-review-loop"
+**Expected:** once mode. One review, every finding shown with a take, then one choice question offering to fix all high and medium, decide per finding, or switch to loop mode. No file changed before the answer.
+
+## 8. Only arguments (whetstone 2026-11-02)
+
+**Prompt:** "/cj-review-loop develop high"
+**Expected:** once mode as in case 7; base `develop`, reviewer on Opus.
+
+## 9. Fix asked in words (regression guard)
+
+**Prompt:** "/cj-review-loop review and fix until green"
+**Expected:** loop mode; the medium finding is fixed in round 1 without a question first.
+
 ## Results
 
 - 2026-10-31, cases 1 to 6 (#184), one blind run per version, before on e368766, after on 1c08c55. Before: all missed expected except case 3. The skill had no model argument: `high` was read as the base or as the whole argument, a base fallback to `main` was guessed, the cost question came in every case (1, 2, 4, 5a, 5b, 6), and case 6 took the branch `high` as the base. Case 3 met expected on the question (regression guard, the old "not stronger" rule) but wrote the old skip line and no `Reviewer and verifiers:` line. After: all met expected. Once mode is covered by reading the text only, no case runs it. No question; `high` is the model argument in any position (5a, 5b, 6), the base stays `develop` or `main`; Opus effort high on Sonnet, the orchestrator's own xhigh on Opus; the final report holds `Reviewer and verifiers:` and, after a run without `high`, the sentence naming `/cj-review-loop high` (case 4 wrote `/cj-review-loop high develop`).
+- 2026-11-02, cases 7 to 9 (whetstone), one blind run per version, before on origin/main de9b6bf, after on this branch. Before: 7 and 8 missed expected. The bare call took loop mode from the description trigger `"/cj-review-loop"`, fixed `a.ts:12` without a question, and arguments did not change the mode. Case 9 met expected. After: all met expected. Cases 7 and 8 ran once mode, changed no file and asked fix all, per finding or loop; case 9 stayed in loop mode and fixed without a question. Both runs read "review and fix until green" as the request, not as a base (the literal reading of setup step 1 would make "review" the base).
