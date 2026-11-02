@@ -98,8 +98,9 @@ The lesson shows the skill on the same kind of task the user will practise, so n
 
 1. **Recall**: from the second lesson on, the page opens with two or three questions on earlier lessons, answered from memory before a click reveals the answer.
 2. **Worked example**: a complete solution to a task of the same shape as the exercise, with the reasoning written beside each line ("why `strings.Cut` and not `Split`: we need exactly one split and the found flag").
-3. **Partly worked example**: the same kind of task with the key step left for the user to complete.
-4. **Exercise**: the user's own task. When exercises live in files, the hints live there too: each one names the function or tool to use and shows one input with its output.
+3. **Predict, then reveal**: at least one check where the user predicts what code or a situation does before a click reveals it.
+4. **Partly worked example**: the same kind of task with the key step left for the user to complete.
+5. **Exercise**: the user's own task. When exercises live in files, the hints live there too: each one names the function or tool to use and shows one input with its output.
 
 The more the learning records show the user already knows, the shorter the worked example's reasoning gets; the partly worked example always stays.
 
