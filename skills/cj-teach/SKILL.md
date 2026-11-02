@@ -17,11 +17,13 @@ When a request could be both, ask which one the user means.
 Treat the current directory as a teaching workspace. Workspace paths (`./lessons/` and the rest) resolve from the directory `/cj-teach` was run in; only the `*-FORMAT.md` links resolve from this skill's folder. The state of their learning is captured in this directory in several files, each created lazily, when it is first needed:
 
 - `MISSION.md`: A document capturing the _reason_ the user is interested in the topic. This should be used to ground all teaching. Use the format in [MISSION-FORMAT.md](./MISSION-FORMAT.md).
-- `./reference/*.html`: A directory of reference materials. These are the compressed learnings from the lessons - cheat sheets, reference algorithms, syntax, yoga poses, glossaries. They are the raw units of learning. They should be beautiful documents which print out well, and are designed for quick reference.
+- `./reference/*.html`: A directory of reference materials. These are the compressed learnings from the lessons - cheat sheets, reference algorithms, syntax, yoga poses. They are the raw units of learning. They should be beautiful documents which print out well, and are designed for quick reference.
+- `GLOSSARY.md`: The canonical terms of the topic, once the user can use them. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md).
 - `RESOURCES.md`: A list of resources which can be explored to ground your teaching in contextual knowledge, or to acquire knowledge and wisdom. Use the format in [RESOURCES-FORMAT.md](./RESOURCES-FORMAT.md).
 - `./learning-records/*.md`: A directory of learning records, which capture what the user has learned. These are loosely equivalent to architectural decision records in software development - they capture non-obvious lessons and key insights that may need to be revised later, or drive future sessions. These should be used to calculate the zone of proximal development. They are titled `0001-<dash-case-name>.md`, where the number increments each time. Use the format in [LEARNING-RECORD-FORMAT.md](./LEARNING-RECORD-FORMAT.md).
 - `./lessons/*.html`: A directory of lessons. A **lesson** is a single, self-contained HTML output that teaches one tightly-scoped concept tied to the mission. This is the primary unit of teaching a topic.
 - `./walkthroughs/*.html`: A directory of walkthroughs. A **walkthrough** is a single HTML page that leads the user through one real task, step by step, with the reason behind every step. Titled `0001-<dash-case-name>.html`. Use the format in [WALKTHROUGH-FORMAT.md](./WALKTHROUGH-FORMAT.md).
+- Exercises: the files the user works in, checked by a test or a command. They live where `NOTES.md` or the workspace's own instructions say; otherwise in `./exercises/0001-<dash-case-name>/`, numbered like the lesson they belong to.
 - `./assets/*`: Reusable **components** shared across lessons and walkthroughs. See [Assets](#assets).
 - `NOTES.md`: A scratchpad for you to jot down user preferences, or working notes.
 
@@ -120,6 +122,8 @@ Each lesson should contain a reminder to ask followup questions to the agent. Th
 
 A walkthrough teaches a task the user is about to do in a real system. The user does every step themselves; that is what makes it stick. You may read the system's state to check a step when a tool allows it, but you change nothing in it.
 
+Before writing any file, check the current directory. When it is a project repository rather than a teaching workspace (no `MISSION.md`, no `./walkthroughs/`, but code of its own), ask the user where the workspace should live, a separate directory recommended, so no teaching files land in a shared repository.
+
 1. Name the outcome in one sentence and the facts the task depends on (which product and version, accounts, plan or permission level, which project, which channel). Get the organisation's facts as [Grounding In Sources](#grounding-in-sources) says.
 2. Read the official docs for every part of the chain, as [Grounding In Sources](#grounding-in-sources) says.
 3. Write the page in the format of [WALKTHROUGH-FORMAT.md](./WALKTHROUGH-FORMAT.md), save it to `./walkthroughs/` and open it.
@@ -213,7 +217,7 @@ Some learning topics lend themselves to reference:
 - Exercises and routines for fitness
 - Glossaries for any topic with its own nomenclature
 
-Glossaries, in particular, are an essential reference. Once one is created, it should be adhered to in every lesson. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md).
+The glossary, `GLOSSARY.md`, in particular, is an essential reference. Once it is created, it should be adhered to in every lesson.
 
 ## Talking To The User
 
@@ -221,7 +225,7 @@ Status lines, summaries and questions in the chat follow this rule block:
 
 Write it scannable: the first line is the result or the decision needed. Be extremely concise. Sacrifice grammar for the sake of concision. Text others read keeps full sentences. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
 
-A why-question in the chat is one question per message, like any other. To open a file for the user, run a CLI command when one is available. Explaining the subject itself, on a page or in the chat, and feedback on the user's answers keep full sentences and the depth [Scope and depth](#scope-and-depth) asks for.
+A why-question in the chat is one question per message, like any other, and it stays open: no numbered options, and no explanation in the question that gives the answer away. To open a file for the user, run a CLI command when one is available. Explaining the subject itself, on a page or in the chat, and feedback on the user's answers keep full sentences and the depth [Scope and depth](#scope-and-depth) asks for.
 
 ## `NOTES.md`
 
