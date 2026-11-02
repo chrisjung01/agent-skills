@@ -1,10 +1,17 @@
 # Credits
 
-This skill is copied from [mattpocock/skills](https://github.com/mattpocock/skills) at commit [`49dd158`](https://github.com/mattpocock/skills/tree/49dd158d1076134a641b33efb035946536778336), MIT licence:
+This skill is adapted from [mattpocock/skills](https://github.com/mattpocock/skills) at commit [`49dd158`](https://github.com/mattpocock/skills/tree/49dd158d1076134a641b33efb035946536778336), MIT licence:
 
 - [`teach`](https://github.com/mattpocock/skills/tree/49dd158d1076134a641b33efb035946536778336/skills/productivity/teach)
 
-Unchanged except the `name` in the frontmatter (`teach` → `cj-teach`), which follows this repo's prefix rule.
+Changed here (see [ADR 0003](../../docs/adr/0003-teach-adapted-for-tasks-and-depth.md)):
+
+- `name` and description follow this repo's prefix and description rules.
+- A task request gets a walkthrough (`WALKTHROUGH-FORMAT.md`) instead of a mission interview.
+- Lessons explain one concept in full and move from a worked example of the exercise's kind to the exercise; "short, completable very quickly" is gone.
+- Pages are written from sources read in the session, with the read date; organisation facts come through `cj-project-context`.
+- Checks favour predict-then-reveal and why-questions; a session closes by asking what was missing.
+- Chat text follows this repo's rule block and `cj-asking`.
 
 ## Upstream licence
 

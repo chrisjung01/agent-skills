@@ -20,7 +20,7 @@ A new user-invoked skill `cj-architecture-scan`, adapted from the upstream skill
 
 ## Alternatives considered
 
-- Copy unchanged like `cj-teach`: calls `codebase-design`, `grilling` and `domain-modeling`, which are not installed here.
+- Copy unchanged, as `cj-teach` was until [ADR 0003](0003-teach-adapted-for-tasks-and-depth.md): calls `codebase-design`, `grilling` and `domain-modeling`, which are not installed here.
 - Leave out: rejected because the parked skill failed on visibility, not on content.
 - A shared vocabulary building block `cj-codebase-design`: two users would justify it, but #86 chose idea-before-name.
 
