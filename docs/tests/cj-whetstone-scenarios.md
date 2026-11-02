@@ -76,3 +76,8 @@ Run on the real notes, read-only, by a fresh subagent: 8 in-scope sessions (16 o
 **Real runs:** Session `1790bbf6` never ran `open cj-retro`, reported "kein Muster, keine Änderung an cj-reviewing", and the user declined the statuses ("2"). Session `8ef1c1d9` said the findings "stehen in einer früheren Analyse, die ich nicht sehe", and the user pasted the approved retro finding in by hand.
 
 **Expected with skill:** Step 1 runs `open cj-retro` and `closed cj-retro`, gives Fund 2 its own ledger row before step 1 counts as done, and step 2 counts it as an approved retro finding: one pattern with a proposed change to `cj-reviewing`.
+
+**Results (2026-11-02):**
+- Before (`021d5f5`): met expected on paper. The agent ran `open cj-retro` after reading every call and found Fund 2. A paper run does not reproduce the real failure, which came in long, loaded sessions.
+- After (`e123485`): met expected. `open cj-retro` and `closed cj-retro` now run inside step 1, and the retro row is part of the ledger before step 1 counts as done.
+- Verify in next real run: the next whetstone run started from a retro `Next:` block must list the retro finding in its ledger without the user pasting it.
