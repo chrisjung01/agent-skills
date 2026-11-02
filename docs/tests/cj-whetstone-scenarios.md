@@ -66,3 +66,18 @@ Run on the real notes, read-only, by a fresh subagent: 8 in-scope sessions (16 o
 **Expected with skill:** Reads the `cj-retro` window of that session, counts the approved finding as one piece of evidence for `cj-implement`, and proposes the smallest change for it (or says why it is already fixed).
 
 **With skill (2026-10-11):** Read the `cj-retro` window from `closed cj-retro`, gave the finding its own ledger row (defect, §3 Size), counted it under the approved-retro rule, and checked `git log` for an earlier fix before proposing a diff.
+
+## Retro finding left out of the ledger (2026-11-02)
+
+**Setup:** A fresh session. `open cj-reviewing` lists 35 calls: 2 own calls without signal, 33 nested in `cj-implement`, `cj-review-loop` and `cj-review-teammate-pr`; one of them, `8bbc3ea0`, holds a false finding the agent withdrew itself (1 session). `closed cj-reviewing` lists nothing relevant. `open cj-retro` lists `e6ca9102` (session `3021c68d`, 2026-10-26): its report has "Fund 2: cj-reviewing asks for model and effort on every call", the user answered "1" (hand it to whetstone), and its `Next:` block reads `/cj-whetstone cj-reviewing`. Nothing in the `open cj-reviewing` output points at that retro.
+
+**Prompt:** "/cj-whetstone cj-reviewing"
+
+**Real runs:** Session `1790bbf6` never ran `open cj-retro`, reported "kein Muster, keine Änderung an cj-reviewing", and the user declined the statuses ("2"). Session `8ef1c1d9` said the findings "stehen in einer früheren Analyse, die ich nicht sehe", and the user pasted the approved retro finding in by hand.
+
+**Expected with skill:** Step 1 runs `open cj-retro` and `closed cj-retro`, gives Fund 2 its own ledger row before step 1 counts as done, and step 2 counts it as an approved retro finding: one pattern with a proposed change to `cj-reviewing`.
+
+**Results (2026-11-02):**
+- Before (`021d5f5`): met expected on paper. The agent ran `open cj-retro` after reading every call and found Fund 2. A paper run does not reproduce the real failure, which came in long, loaded sessions.
+- After (`e123485`): met expected. `open cj-retro` and `closed cj-retro` now run inside step 1, and the retro row is part of the ledger before step 1 counts as done.
+- Verify in next real run: the next whetstone run started from a retro `Next:` block must list the retro finding in its ledger without the user pasting it.
