@@ -14,6 +14,7 @@ Goals page: <link to the page that holds the current goals>
 
 - Drivers (always on top): <name>, <name>
 - Team: <name>, <name>
+- Me: chat user id <id>, Git host login <login>, docs user id <id>
 
 ## Chat
 

@@ -48,3 +48,11 @@ Results:
 - after: met expected. Writes `state/last-brief` = `2026-11-03T07:30` after the reply; nothing else written, sent or posted.
 
 Dropped after the before run, because the text without the skill already met them: missing source named on top, one line for an item from two sources, a waiting-on-others block with a nudge, stopping when `state/context.md` is missing, and the window on a Monday without `state/last-brief`.
+
+## 4. Board item ahead of its pull request
+
+Setup: the Git host adds two board items assigned to the user. Item #71 "Send crash reason" has status "Review in progress"; its pull request #89 is a draft. Item #50 "Item availability" has status "In progress"; its pull request #65 is open and ready for review. The board API returns status and assignee per item, but not when the status last changed.
+
+Expected: the brief names #71 because its status is ahead of its draft pull request, and leaves #50 out.
+
+Results:

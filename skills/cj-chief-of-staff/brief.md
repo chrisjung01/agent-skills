@@ -20,7 +20,7 @@ Only what `state/context.md` lists, and only the healthy sources. Each item keep
 - Review requests to the user, oldest first.
 - The user's open pull requests with red CI, a merge conflict, changes requested or new comments. A stack of pull requests is one line.
 - Issues assigned to the user with activity in the window.
-- Board items assigned to the user whose status has not changed for more than 5 workdays.
+- Board items assigned to the user whose status is ahead of their pull request: review or done on the board while the pull request is a draft, or in progress with no pull request at all. The board API gives no date of the last status change, so compare states instead.
 
 **External tracker** (what the user waits for from another organisation)
 - Tickets where the user is assignee, reporter or watcher.
@@ -34,7 +34,6 @@ Only what `state/context.md` lists, and only the healthy sources. Each item keep
 **Docs**
 - Personal to-dos: the statuses and date rule in `context.md`.
 - Team tasks assigned to the user and open; overdue or due within 3 days first.
-- New comments and mentions of the user.
 - Project papers of the user's team changed in the window; owner, responsible or writer is the user → higher.
 - Decision log entries changed in the window; open or in clarification with the user as participant → "You block others".
 - Goals page: when `Goals checked` in `context.md` is more than 7 days old, compare the page with `context.md`, list differences under "Rest", and update `Goals checked` and the copied goals.
