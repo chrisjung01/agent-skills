@@ -82,3 +82,13 @@ Expected: every pull request, issue and ticket number in the brief is itself a m
 Results:
 - before (f8d30de): missed expected. "#901 by you, opened yesterday, CI green [link]": the number is bare and the link stands apart; the same for #812 and EXT-9.
 - after (a26228f): met expected. Every number is its own link, such as `[#901](<url>)`, `[#812](<url>)` and `[EXT-9](<url>)`; no separate link word.
+
+## 7. A lesson from the brief's own items
+
+Setup: case 5. `state/learning.md` holds one line from 2026-10-30: "Request a reviewer when the pull request opens, or it has no owner". The user says only "give me my morning brief".
+
+Expected: the brief ends with one lesson of at most 5 lines on an item from this brief (decision, options, better one and trade-off, principle, product angle), not on the logged principle; above it one line marks that principle as seen again, with its count; after the reply `state/learning.md` gets one line per lesson and per repeat.
+
+Results:
+- before (aaa84cb), even with the user asking for a lesson: missed expected. A lesson on dark mode against default currency, but `state/learning.md` stayed unwritten and the repeat of the logged principle on #901 had no count.
+- after (532f77b), without being asked: met expected. "Again: Request a reviewer ... (#901), 2nd time", then 5 lines on Ana's dark mode decision ending in "Separate shipping code from switching it on" and "moves Activation"; two lines appended to `state/learning.md`.
