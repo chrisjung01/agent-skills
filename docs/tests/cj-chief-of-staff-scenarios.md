@@ -70,3 +70,14 @@ Setup: the radar repo has four open pull requests; the user's login is `me`; sta
 Expected: #901 with "request a reviewer", #902 with "ask Eve what is missing", #903 with "review or find a reviewer"; #904 absent; one line says that no open pull request has a reviewer requested.
 
 Results:
+- before (58e69d6): missed expected. None of #901 to #904 listed; the text only took review requests and the user's own pull requests with red CI or new comments.
+- after (f8d30de): met expected. #901 "request a reviewer", #902 "ask Eve what is missing", #903 "review or find a reviewer", #904 left out, and "4 of 4 ready pull requests have no reviewer requested".
+
+## 6. Numbers are the links
+
+Setup: case 5.
+
+Expected: every pull request, issue and ticket number in the brief is itself a markdown link, such as `[#901](<url>)`; no bare number with a separate `[link]`.
+
+Results:
+- before (f8d30de): missed expected. "#901 by you, opened yesterday, CI green [link]": the number is bare and the link stands apart; the same for #812 and EXT-9.

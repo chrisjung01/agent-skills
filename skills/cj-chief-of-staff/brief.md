@@ -80,7 +80,7 @@ Missing: <source> (<reason>)
 **You block others**
 - <item> <link>
 **Pull requests**
-- #<number> <title> <link>, idle <days> days: <next move>
+- [#<number>](<url>) <title>, idle <days> days: <next move>
 **Waiting on others**
 - <item> <link>
 **Errors**
@@ -90,6 +90,8 @@ Missing: <source> (<reason>)
 **Side projects**
 - <item> <link>
 ```
+
+Every pull request, issue, ticket and error number is itself a markdown link to its page, such as `[#812](<url>)` or `[EXT-9](<url>)`; never a bare number, never a separate link word.
 
 A section with more than 7 items keeps the 7 highest and ends with `+<n> more`.
 
