@@ -84,6 +84,10 @@ _Avoid_: Acceptance level, Sign-off flag
 The agent's evidence per PR that each acceptance criterion and edge-case row of its ticket is met, from a test, a check or a manual observation; it becomes the Verified block of the PR body.
 _Avoid_: Acceptance (the user's check of the whole spec)
 
+**Ticket part**:
+One PR-sized piece of a ticket that spans several layers, cut by `cj-implement` before any branch and confirmed by the user. Parts stack in dependency order, each green on its own; only the last part's PR closes the ticket, the others say `Part of`.
+_Avoid_: Building block (a skill only other skills call), Slice (a ticket cut from a spec)
+
 **Tier**:
 The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it, and `cj-implement` asks once for a stake on an issue without a spec. A confirmed tier stands on the issue as a `Tier: <tier>, confirmed` line; the latest one counts.
 _Avoid_: Lane, Size class, Track

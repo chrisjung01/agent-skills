@@ -5,6 +5,8 @@
 | No spec, issue looks clear, time pressure | Only a typo, copy change, fix or refactor as step 1 names uses the issue as its spec. Money, data, security or an irreversible step beats small unless the user confirmed small: ask once, unless the latest `Tier:` line or a `## Challenge` comment settles it. A feature, also one called a fix, goes back to `/cj-grill-with-docs` and `/cj-to-spec`; a fix without its intended behaviour, or an open decision: ask first. |
 | No mode given, several tickets | Ask once with the two options. Never pick `one-pr` yourself. Fix-now rows from acceptance: no question, the last PR's mode. |
 | A ticket grows past about 400 lines | Stop and propose a split. A big PR is the problem this skill avoids. |
+| A ticket spans several layers but stays under 400 lines | Still propose the part cut before any branch (step 2). The 400-line stop is the last net, not the trigger. |
+| The whole ticket is already built on one branch, no PR yet | Before step 6, propose the part cut and re-cut the commits: order them by part, fold fixups, give parts 1 to n-1 their own linked branches (`gh issue develop`, part n on n-1) at their last commit, keep the old branch as the last part. `git diff <old tip> HEAD` is empty, each part's checks are green on its own. Then steps 6 to 9 per part. Never one big PR. |
 | Two blockers still open | The ticket waits. Never stack on a local merge of two branches. |
 | Stacked base was squash-merged | `rebase --onto` the default branch, `--force-with-lease` on this ticket's branch only. |
 | Tempted to run the full suite after each commit | Targeted tests while working, full checks once per PR. |
