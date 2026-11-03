@@ -81,3 +81,4 @@ Expected: every pull request, issue and ticket number in the brief is itself a m
 
 Results:
 - before (f8d30de): missed expected. "#901 by you, opened yesterday, CI green [link]": the number is bare and the link stands apart; the same for #812 and EXT-9.
+- after (a26228f): met expected. Every number is its own link, such as `[#901](<url>)`, `[#812](<url>)` and `[EXT-9](<url>)`; no separate link word.
