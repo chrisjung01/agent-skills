@@ -1,6 +1,6 @@
 # cj-chief-of-staff scenarios
 
-Paper exercises for the `brief` mode. Runs on 2026-11-03, one per version, on the Sonnet tier, with the fixture's topics renamed afterwards (same structure, neutral wording); the after runs read the uncommitted skill text of branch `fix/chief-of-staff`. A fresh agent gets the fixture below as if the tools had returned it, plus the case's extra setup, and writes the brief. The before run has no skill text, only the user's words "give me my morning brief" and the fixture's `context.md`; the after run follows `skills/cj-chief-of-staff/SKILL.md`.
+Paper exercises for the `brief` mode. Runs on 2026-11-03, one per version, on the Sonnet tier, with the fixture's topics renamed afterwards (same structure, neutral wording); the after runs read the skill text of caab1bc. A fresh agent gets the fixture below as if the tools had returned it, plus the case's extra setup, and writes the brief. The before run has no skill text, only the user's words "give me my morning brief" and the fixture's `context.md`; the after run follows `skills/cj-chief-of-staff/SKILL.md`.
 
 ## Fixture
 
