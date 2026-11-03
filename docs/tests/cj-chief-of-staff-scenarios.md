@@ -56,3 +56,5 @@ Setup: the Git host adds two board items assigned to the user. Item #71 "Send cr
 Expected: the brief names #71 because its status is ahead of its draft pull request, and leaves #50 out.
 
 Results:
+- before (1997bd2): missed expected. No board item listed: the rule needs the date of the last status change, which the board API does not return.
+- after (f7e861e): met expected. #71 listed under Rest, status ahead of its draft pull request; #50 left out.
