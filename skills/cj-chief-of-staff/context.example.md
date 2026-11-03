@@ -26,6 +26,8 @@ Chat channels: <#channel>, <#channel>
 Source of truth for work items: <e.g. GitHub>
 Organisations: <org>
 Board: <project board link or number>
+PR radar: <owner/repo>, <owner/repo>
+Stale after: <2> days
 
 ## External tracker
 

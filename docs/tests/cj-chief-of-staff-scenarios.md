@@ -58,3 +58,15 @@ Expected: the brief names #71 because its status is ahead of its draft pull requ
 Results:
 - before (1997bd2): missed expected. No board item listed: the rule needs the date of the last status change, which the board API does not return.
 - after (f7e861e): met expected. #71 listed under Rest, status ahead of its draft pull request; #50 left out.
+
+## 5. Pull requests that sit
+
+Setup: the radar repo has four open pull requests; the user's login is `me`; stale after 2 days. No pull request has a reviewer requested.
+- #901 by `me`, opened yesterday, CI green, no review.
+- #902 by Eve; `me` approved 5 days ago; nothing since; not merged.
+- #903 by Finn, not a draft; last commit 4 days ago; no review.
+- #904 by Gus; last commit this morning.
+
+Expected: #901 with "request a reviewer", #902 with "ask Eve what is missing", #903 with "review or find a reviewer"; #904 absent; one line says that no open pull request has a reviewer requested.
+
+Results:

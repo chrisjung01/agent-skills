@@ -17,10 +17,24 @@ Only what `state/context.md` lists, and only the healthy sources. Each item keep
 - Bot messages are skipped; the Git host is read directly.
 
 **Git host** (organisations under `Git host`)
-- Review requests to the user, oldest first.
-- The user's open pull requests with red CI, a merge conflict, changes requested or new comments. A stack of pull requests is one line.
+- Review requests to the user outside the radar repos, oldest first.
 - Issues assigned to the user with activity in the window.
 - Board items assigned to the user whose status is ahead of their pull request: review or done on the board while the pull request is a draft, or in progress with no pull request at all. The board API gives no date of the last status change, so compare states instead.
+
+**Pull request radar** (repos under `PR radar` in `context.md`)
+- Run `python3 scripts/pr-radar.py <owner/repo> <login>` per repo, with the Git host login from `Me`. Idle means days since the last commit, review or comment by a person; bots never count.
+- Listed: every ready pull request of the user; the user's drafts idle longer than `Stale after`; pull requests the user is requested on, reviewed or commented on, idle longer than `Stale after`; every other ready pull request idle longer than `Stale after` without an approval.
+- Each line ends with the first next move that fits:
+  - CI red: "fix CI" on the user's own, "ask <author> about CI" on others'.
+  - Changes requested, last action by the reviewer: "you are up" on the user's own, "<author> is up" on others'.
+  - The user's own, no reviewer requested and none reviewed: "request a reviewer".
+  - The user's own, open threads with the last word from someone else: "answer threads".
+  - The user's own, last action by the user, idle longer than `Stale after`: "nudge <reviewers>".
+  - Approved by the user, not merged: "ask <author> what is missing".
+  - The user's draft: "finish or park".
+  - Someone else's, no review: "review or find a reviewer".
+- A stack of pull requests with the same move is one line.
+- When ready pull requests have no reviewer requested, one line: `<n> of <m> ready pull requests have no reviewer requested`.
 
 **External tracker** (what the user waits for from another organisation)
 - Tickets where the user is assignee, reporter or watcher.
@@ -46,10 +60,11 @@ One item from two sources (a bot message and the Git host, say) is one line, lin
 
 1. **Focus today**, at most 3: waits on the user AND (a driver is involved OR it moves a goal). Each line ends with its reason: the driver's name or the goal's short name. An item with neither reason is never here, however urgent it sounds.
 2. **You block others**: review requests, open decisions with the user, questions to the user in chat.
-3. **Waiting on others**: the external tracker.
-4. **Errors**: the error tracker.
-5. **Rest**: one line each.
-6. **Side projects.**
+3. **Pull requests**: the radar, longest idle first; the user's own first, then the ones the user is involved in, then the team's.
+4. **Waiting on others**: the external tracker.
+5. **Errors**: the error tracker.
+6. **Rest**: one line each.
+7. **Side projects.**
 
 An item that fits several sections stands only in the highest one. An empty section is left out. Chat messages that match nothing above are not mentioned at all, not even as "skipped".
 
@@ -64,6 +79,8 @@ Missing: <source> (<reason>)
 1. <item> <link> (<driver or goal>)
 **You block others**
 - <item> <link>
+**Pull requests**
+- #<number> <title> <link>, idle <days> days: <next move>
 **Waiting on others**
 - <item> <link>
 **Errors**
