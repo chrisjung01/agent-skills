@@ -48,3 +48,47 @@ Results:
 - after: met expected. Writes `state/last-brief` = `2026-11-03T07:30` after the reply; nothing else written, sent or posted.
 
 Dropped after the before run, because the text without the skill already met them: missing source named on top, one line for an item from two sources, a waiting-on-others block with a nudge, stopping when `state/context.md` is missing, and the window on a Monday without `state/last-brief`.
+
+## 4. Board item ahead of its pull request
+
+Setup: the Git host adds two board items assigned to the user. Item #71 "Send crash reason" has status "Review in progress"; its pull request #89 is a draft. Item #50 "Item availability" has status "In progress"; its pull request #65 is open and ready for review. The board API returns status and assignee per item, but not when the status last changed.
+
+Expected: the brief names #71 because its status is ahead of its draft pull request, and leaves #50 out.
+
+Results:
+- before (1997bd2): missed expected. No board item listed: the rule needs the date of the last status change, which the board API does not return.
+- after (f7e861e): met expected. #71 listed under Rest, status ahead of its draft pull request; #50 left out.
+
+## 5. Pull requests that sit
+
+Setup: the radar repo has four open pull requests; the user's login is `me`; stale after 2 days. No pull request has a reviewer requested.
+- #901 by `me`, opened yesterday, CI green, no review.
+- #902 by Eve; `me` approved 5 days ago; nothing since; not merged.
+- #903 by Finn, not a draft; last commit 4 days ago; no review.
+- #904 by Gus; last commit this morning.
+
+Expected: #901 with "request a reviewer", #902 with "ask Eve what is missing", #903 with "review or find a reviewer"; #904 absent; one line says that no open pull request has a reviewer requested.
+
+Results:
+- before (58e69d6): missed expected. None of #901 to #904 listed; the text only took review requests and the user's own pull requests with red CI or new comments.
+- after (f8d30de): met expected. #901 "request a reviewer", #902 "ask Eve what is missing", #903 "review or find a reviewer", #904 left out, and "4 of 4 ready pull requests have no reviewer requested".
+
+## 6. Numbers are the links
+
+Setup: case 5.
+
+Expected: every pull request, issue and ticket number in the brief is itself a markdown link, such as `[#901](<url>)`; no bare number with a separate `[link]`.
+
+Results:
+- before (f8d30de): missed expected. "#901 by you, opened yesterday, CI green [link]": the number is bare and the link stands apart; the same for #812 and EXT-9.
+- after (a26228f): met expected. Every number is its own link, such as `[#901](<url>)`, `[#812](<url>)` and `[EXT-9](<url>)`; no separate link word.
+
+## 7. A lesson from the brief's own items
+
+Setup: case 5. `state/learning.md` holds one line from 2026-10-30: "Request a reviewer when the pull request opens, or it has no owner". The user says only "give me my morning brief".
+
+Expected: the brief ends with one lesson of at most 5 lines on an item from this brief (decision, options, better one and trade-off, principle, product angle), not on the logged principle; above it one line marks that principle as seen again, with its count; after the reply `state/learning.md` gets one line per lesson and per repeat.
+
+Results:
+- before (aaa84cb), even with the user asking for a lesson: missed expected. A lesson on dark mode against default currency, but `state/learning.md` stayed unwritten and the repeat of the logged principle on #901 had no count.
+- after (532f77b), without being asked: met expected. "Again: Request a reviewer ... (#901), 2nd time", then 5 lines on Ana's dark mode decision ending in "Separate shipping code from switching it on" and "moves Activation"; two lines appended to `state/learning.md`.
