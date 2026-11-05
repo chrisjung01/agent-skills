@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# cj-run <issue URL> [--dry-run] [--report]
+# Starts /cj-implement headless for one issue, from the right folder, with the
+# permission lists and limits in ~/.config/cj-run/ (CJ_RUN_CONFIG_DIR overrides it).
+set -euo pipefail
+
+CFG="${CJ_RUN_CONFIG_DIR:-$HOME/.config/cj-run}"
+DRY=0; REPORT=0; URL=""
+
+die() { echo "cj-run: $*" >&2; exit 2; }
+# single-quote one argument so the printed command can be pasted
+q() { local s="'"; printf "'%s'" "${1//$s/$s\\$s$s}"; }
+# rules of one list file: no comments, no blanks, trimmed
+rules() { [[ -f "$1" ]] && sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$1" | grep -v -e '^#' -e '^$' || true; }
+# value of key $1 in the config file, else default $2
+cfg() {
+  local v; v="$(sed -n "s/^$1=//p" "$CFG/config" 2>/dev/null | tail -n 1 | tr -d '[:space:]')"
+  v="${v:-$2}"
+  [[ "$v" =~ ^[0-9]+(\.[0-9]+)?$ ]] || die "$1 in $CFG/config is not a number: $v"
+  echo "$v"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY=1 ;;
+    --report)  REPORT=1 ;;
+    -*)        die "unknown option: $1" ;;
+    *)         [[ -z "$URL" ]] || die "more than one issue URL"; URL="$1" ;;
+  esac
+  shift
+done
+
+[[ "$URL" =~ ^https://github\.com/([^/]+)/([^/]+)/issues/([0-9]+)/?$ ]] || die "not an issue URL: ${URL:-<none>}"
+OWNER="${BASH_REMATCH[1]}"; REPO="${BASH_REMATCH[2]}"; N="${BASH_REMATCH[3]}"
+
+# repos file: owner/repo=/path/to/main/checkout [auto]
+# string compare in awk: no regex is built from the URL
+MAIN="$(awk -F= -v k="$OWNER/$REPO" '$1 == k { sub(/^[^=]*=/, ""); sub(/[ \t]+auto[ \t]*$/, ""); sub(/[ \t]+$/, ""); print; exit }' "$CFG/repos" 2>/dev/null || true)"
+[[ -n "$MAIN" ]] || die "$OWNER/$REPO is not in $CFG/repos"
+git -C "$MAIN" rev-parse --git-dir >/dev/null 2>&1 || die "$MAIN is not a git checkout"
+
+# an existing worktree on agent/<n>-* wins over the main checkout
+MATCHES="$(git -C "$MAIN" worktree list --porcelain | awk -v p="refs/heads/agent/$N-" '
+  /^worktree /{w=substr($0,10)} /^branch /{if (index(substr($0,8),p)==1) print w}' | while IFS= read -r d; do if [[ -d "$d" ]]; then echo "$d"; fi; done)"
+case "$(printf '%s' "$MATCHES" | grep -c .)" in
+  0) WORKDIR="$MAIN" ;;
+  1) WORKDIR="$MATCHES" ;;
+  *) die "more than one worktree on a branch agent/$N-*: $(echo "$MATCHES" | tr '\n' ' ')" ;;
+esac
+
+[[ -f "$CFG/base.allow" ]] || die "$CFG/base.allow is missing (copy config/cj-run/ from the repo)"
+[[ -f "$CFG/base.deny" ]]  || die "$CFG/base.deny is missing (copy config/cj-run/ from the repo)"
+PARENT="$(dirname "$MAIN")"
+BUDGET="$(cfg budget_usd 20)"; MINUTES="$(cfg minutes 45)"
+
+# both allow files, each rule once, plus the write rule for this repo's worktrees
+ALLOW="$( { rules "$CFG/base.allow"; rules "$CFG/$REPO.allow"; echo "Edit(/$PARENT/$REPO-*/**)"; } | awk '!seen[$0]++')"
+DENY="$(rules "$CFG/base.deny")"
+
+CMD=(claude -p "/cj-implement $URL" --output-format json --max-budget-usd "$BUDGET" --add-dir "$PARENT")
+[[ -z "$ALLOW" ]] || { CMD+=(--allowedTools); while IFS= read -r r; do CMD+=("$r"); done <<<"$ALLOW"; }
+[[ -z "$DENY" ]]  || { CMD+=(--disallowedTools); while IFS= read -r r; do CMD+=("$r"); done <<<"$DENY"; }
+
+if [[ $DRY -eq 1 ]]; then
+  echo "Issue: $OWNER/$REPO#$N"
+  echo "Working directory: $WORKDIR"
+  echo "Budget: $BUDGET USD, time limit: $MINUTES minutes"
+  printf 'Command:'; for a in "${CMD[@]}"; do printf ' %s' "$(q "$a")"; done; echo
+  exit 0
+fi
+
+die "starting a run is not built yet (part 2 of #198)"

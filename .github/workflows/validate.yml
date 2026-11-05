@@ -6,3 +6,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash scripts/validate.sh
+      - run: bash scripts/test-cj-run.sh

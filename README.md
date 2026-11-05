@@ -167,9 +167,26 @@ skills/
 AGENTS.md               # skill overview and editing rules for agents
 LICENSE                 # MIT
 install.sh              # links skills for Claude Code and Codex
+bin/cj-run              # starts /cj-implement headless for one issue (see "Unattended runs")
+config/cj-run/          # templates for ~/.config/cj-run/: allow and deny lists, limits, repos
 scripts/validate.sh     # format check, also runs in GitHub Actions
 .githooks/pre-commit    # runs validate.sh before each commit
 ```
+
+## Unattended runs
+
+`bin/cj-run <issue URL>` starts `/cj-implement` headless for one issue, from an existing worktree on a branch `agent/<n>-*`, else from the repo's main checkout.
+
+Setup: copy `config/cj-run/*` to `~/.config/cj-run/`, then edit `repos` (`owner/repo=/absolute/path/to/main/checkout [auto]`). Add `<repo name>.allow` for repo-specific permission rules. The lists live there, never in a repo, so ordinary sessions keep asking before `git push`.
+
+```bash
+bin/cj-run --dry-run https://github.com/<owner>/<repo>/issues/<n>   # prints folder, command and limits, starts nothing
+bash scripts/test-cj-run.sh                                          # tests against a temporary config, no claude, no network
+```
+
+- `CJ_RUN_CONFIG_DIR` points `cj-run` at another config folder, for tests.
+- `base.deny` blocks merge, force-push and delete; deny wins over allow.
+- Limits default to 20 USD and 45 minutes (`config`).
 
 ## Validation
 

@@ -1,0 +1,28 @@
+# Rules every cj-run may use without asking. One rule per line, # for comments.
+# Copy to ~/.config/cj-run/base.allow; repo-specific rules go in <repo name>.allow.
+Read
+# Edit rules cover all editing tools; cj-run adds the rule for the repo's worktrees.
+Edit(./**)
+Bash(gh issue *)
+Bash(gh pr *)
+Bash(gh api *)
+Bash(gh repo view*)
+Bash(git status*)
+Bash(git diff*)
+Bash(git log*)
+Bash(git show*)
+Bash(git fetch*)
+Bash(git add*)
+Bash(git commit*)
+Bash(git push*)
+Bash(git checkout*)
+Bash(git switch*)
+Bash(git branch --list*)
+Bash(git branch --show-current*)
+Bash(git worktree*)
+Bash(git rebase*)
+Bash(git reset*)
+Bash(git merge-base*)
+Bash(git merge-tree*)
+Bash(git rev-parse*)
+Bash(git rev-list*)
