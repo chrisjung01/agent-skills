@@ -69,4 +69,71 @@ if [[ $DRY -eq 1 ]]; then
   exit 0
 fi
 
-die "starting a run is not built yet (part 2 of #198)"
+[[ $REPORT -eq 0 ]] || die "--report is not built yet (part 3 of #198)"
+
+# --- a real run: marker, log, time limit, outcome, cleanup, notification ---
+STATE="${CJ_RUN_STATE_DIR:-$HOME/.local/state/cj-run}"
+KEY="${OWNER}__${REPO}__${N}"
+MARKER="$STATE/running/$KEY"
+LOG="$STATE/logs/$KEY-$(date +%Y%m%d-%H%M%S)-$$.log"
+mkdir -p "$STATE/running" "$STATE/logs"
+touch "$MARKER"
+PID=""
+trap 'rm -f "$MARKER"; [[ -z "$PID" ]] || kill -TERM -- "-$PID" 2>/dev/null || true' EXIT
+
+START_ISO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"; T0=$SECONDS
+LIMIT_S="$(awk -v m="$MINUTES" 'BEGIN { printf "%d", m * 60 }')"
+# job control gives claude its own process group, so the limit can end it and its children
+set -m
+( cd "$WORKDIR" && exec "${CMD[@]}" </dev/null >"$LOG" 2>&1 ) &
+PID=$!
+set +m
+TIMED_OUT=0
+while kill -0 "$PID" 2>/dev/null; do
+  if (( SECONDS - T0 >= LIMIT_S )); then
+    TIMED_OUT=1
+    kill -TERM -- "-$PID" 2>/dev/null || true
+    sleep 2
+    kill -KILL -- "-$PID" 2>/dev/null || true
+    break
+  fi
+  sleep 0.5
+done
+RC=0; wait "$PID" 2>/dev/null || RC=$?
+DUR=$((SECONDS - T0))
+
+COST="$(sed -n 's/.*"total_cost_usd": *\([0-9][0-9.eE+-]*\).*/\1/p' "$LOG" | tail -n 1)"
+[[ $TIMED_OUT -eq 0 && -n "$COST" ]] || COST=unknown
+
+# claude -p exits 0 even when the skill stops at a question: success needs a fresh PR as well
+# ponytail: local clock vs GitHub's updatedAt, second resolution, at most 500 open PRs listed
+RESULT=failed; REASON=""; PRLINK=""
+if (( TIMED_OUT )); then
+  RESULT=timeout; REASON="stopped after $MINUTES minutes"
+elif (( RC != 0 )); then
+  REASON="claude exited $RC"
+elif ! LIST="$(gh pr list --repo "$OWNER/$REPO" --state open --limit 500 --json headRefName,url,updatedAt \
+    --jq '.[] | [.headRefName, .url, .updatedAt] | @tsv' 2>&1)"; then
+  REASON="gh pr list failed: $(head -n 1 <<<"$LIST")"
+else
+  PRLINK="$(awk -F'\t' -v p="agent/$N-" -v s="$START_ISO" 'index($1, p) == 1 && $3 >= s { print $2; exit }' <<<"$LIST")"
+  if [[ -n "$PRLINK" ]]; then RESULT=done; else REASON="no open PR from agent/$N-* created or updated during the run"; fi
+fi
+
+# the issue's verify worktrees go, also with uncommitted files; <repo>-<n>-verify exactly
+git -C "$MAIN" worktree list --porcelain | sed -n 's/^worktree //p' | while IFS= read -r d; do
+  if [[ "$(basename "$d")" == "$REPO-$N-verify" ]]; then git -C "$MAIN" worktree remove --force "$d" >/dev/null 2>&1 || true; fi
+done || true
+
+{
+  echo; echo "--- cj-run ---"; echo "result: $RESULT"
+  [[ -z "$REASON" ]] || echo "reason: $REASON"
+  [[ -z "$PRLINK" ]] || echo "pr: $PRLINK"
+  echo "cost_usd: $COST"; echo "duration_s: $DUR"
+} >>"$LOG"
+
+SUMMARY="$OWNER/$REPO#$N: $RESULT${PRLINK:+ $PRLINK}${REASON:+ ($REASON)}"
+# arguments, not script text: quotes in the reason stay harmless
+osascript -e 'on run argv' -e 'display notification (item 1 of argv) with title "cj-run"' -e 'end run' -- "$SUMMARY" >/dev/null 2>&1 || true
+echo "$SUMMARY"; echo "Log: $LOG"
+[[ "$RESULT" == done ]]

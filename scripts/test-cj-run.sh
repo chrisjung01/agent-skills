@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tests for bin/cj-run against a temporary config folder and throwaway git repos. No claude, no network.
+# Tests for bin/cj-run against a temporary config folder, throwaway git repos and stubs of claude, gh and osascript. No network.
 set -uo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 CJ="$HERE/bin/cj-run"
@@ -100,5 +100,104 @@ printf 'acme/Widget=%s\n' "$MAIN" > "$T/cfg/repos"; rm "$T/cfg/config"
 git -C "$MAIN" worktree add -q "$T/code/Widget-197" -b agent/197-x && rm -rf "$T/code/Widget-197"
 out="$("$CJ" --dry-run https://github.com/acme/Widget/issues/197)"
 check "gone worktree ignored" line "$out" "Working directory: $MAIN"
+
+# --- real runs against stubs of claude, gh and osascript on the PATH ---
+export CJ_RUN_STATE_DIR="$T/state" STUB="$T/stub"
+mkdir -p "$T/bin" "$STUB"
+cat > "$T/bin/claude" <<'EOS'
+#!/usr/bin/env bash
+pwd > "$STUB/claude-cwd"
+ls "$CJ_RUN_STATE_DIR/running" > "$STUB/markers-during"
+[[ -z "${STUB_CHILD:-}" ]] || { sleep 300 & echo $! > "$STUB/child.pid"; }
+[[ -z "${STUB_COST:-}" ]] || echo "{\"type\":\"result\",\"total_cost_usd\":$STUB_COST}"
+[[ -z "${STUB_SLEEP:-}" ]] || sleep "$STUB_SLEEP"
+exit "${STUB_RC:-0}"
+EOS
+cat > "$T/bin/gh" <<'EOS'
+#!/usr/bin/env bash
+echo "$*" >> "$STUB/gh.log"
+[[ "$1 $2" == "pr list" ]] || exit 0
+[[ -z "${STUB_GH_FAIL:-}" ]] || { echo "$STUB_GH_FAIL" >&2; exit 1; }
+limit="$(sed -n 's/.*--limit \([0-9]*\).*/\1/p' <<<"$*")"
+head -n "${limit:-30}" "$STUB/prs"
+EOS
+cat > "$T/bin/osascript" <<'EOS'
+#!/usr/bin/env bash
+printf '%s\n' "$@" >> "$STUB/osa.log"
+EOS
+chmod +x "$T/bin"/*
+OLD_PATH="$PATH"; PATH="$T/bin:$PATH"
+FRESH=2999-01-01T00:00:00Z; STALE=2000-01-01T00:00:00Z
+PR196="https://github.com/acme/Widget/pull/9"
+prs() { printf 'agent/196-fix\t%s\t%s\n' "$PR196" "$1" > "$STUB/prs"; }
+run() { # run [env...]: one cj-run for issue 196, fresh logs
+  rm -rf "$T/state/logs" "$STUB/gh.log" "$STUB/osa.log" "$STUB/child.pid"
+  OUT="$(env "$@" "$CJ" $URL 2>&1)"; RC=$?
+  LOGF="$(ls "$T/state/logs"/* 2>/dev/null | head -n 1)"; LOGT="$(cat "$LOGF" 2>/dev/null)"
+}
+
+# AC-6: success needs claude exit 0 and an open agent/196-* PR updated after the start
+prs $FRESH; run STUB_COST=0.5
+check "AC-6 done exits 0" test $RC -eq 0
+check "AC-6 log names the PR" has "$LOGT" "pr: $PR196"
+check "AC-6 log says done" has "$LOGT" "result: done"
+check "AC-6 claude ran in the worktree" eq "$(cat "$STUB/claude-cwd")" "$T/code/Widget-a"
+prs $STALE; run
+check "AC-6 PR not updated since start fails" test $RC -ne 0
+check "AC-6 stale: failed in log" has "$LOGT" "result: failed"
+check "AC-6 stale: no PR link in log" eq "$(count "$LOGT" "$PR196")" 0
+printf 'agent/1960-x\t%s\t%s\n' "$PR196" $FRESH > "$STUB/prs"; run
+check "AC-6 other branch prefix fails" test $RC -ne 0
+prs $FRESH; run STUB_RC=3
+check "AC-6 claude non-zero fails" test $RC -ne 0
+check "AC-6 claude non-zero: no PR link" eq "$(count "$LOGT" "$PR196")" 0
+for i in $(seq 1 40); do printf 'agent/5-x\thttps://x/%s\t%s\n' $i $FRESH; done > "$STUB/prs"; printf 'agent/196-fix\t%s\t%s\n' "$PR196" $FRESH >> "$STUB/prs"; run
+check "AC-6 PR beyond the 30th is found" test $RC -eq 0
+
+# AC-7: cost and duration in the log
+prs $FRESH; run STUB_COST=0.0123
+check "AC-7 cost in log" has "$LOGT" "cost_usd: 0.0123"
+check "AC-7 duration in log" grep -qE '^duration_s: [0-9]+$' <<<"$LOGT"
+check "AC-7 one log per run" eq "$(ls "$T/state/logs" | wc -l | tr -d ' ')" 1
+"$CJ" $URL >/dev/null 2>&1
+check "AC-7 second run, second log" eq "$(ls "$T/state/logs" | wc -l | tr -d ' ')" 2
+
+# AC-8: time limit ends the stub and its child; AC-7: cost unknown after a timeout
+printf 'minutes=0.03\n' > "$T/cfg/config"
+run STUB_COST=1.5 STUB_CHILD=1 STUB_SLEEP=300
+check "AC-8 timeout exits non-zero" test $RC -ne 0
+check "AC-8 log says timeout" has "$LOGT" "result: timeout"
+check "AC-7 cost unknown after timeout" has "$LOGT" "cost_usd: unknown"
+check "AC-10 marker gone after timeout" eq "$(ls "$T/state/running" | wc -l | tr -d ' ')" 0
+sleep 0.3
+check "AC-8 child is gone" bash -c '! kill -0 "$(cat "$1")" 2>/dev/null' _ "$STUB/child.pid"
+rm "$T/cfg/config"
+
+# AC-9: only <repo>-196-verify goes, also with uncommitted files
+for w in 196-verify 1960-verify 197-verify; do git -C "$MAIN" worktree add -q --detach "$T/code/Widget-$w" HEAD; done
+echo dirty > "$T/code/Widget-196-verify/untracked"
+prs $FRESH; run
+wl="$(git -C "$MAIN" worktree list)"
+check "AC-9 own verify worktree removed" bash -c '! grep -q "Widget-196-verify" <<<"$1"' _ "$wl"
+check "AC-9 other verify worktrees stay" has "$wl" "Widget-1960-verify"
+check "AC-9 issue 197 verify stays" has "$wl" "Widget-197-verify"
+check "AC-9 issue worktree stays" has "$wl" "Widget-a"
+
+# AC-10: marker while running, gone after done, failed and timeout
+prs $FRESH; run
+check "AC-10 marker during run" eq "$(cat "$STUB/markers-during")" "acme__Widget__196"
+check "AC-10 marker gone after done" eq "$(ls "$T/state/running" | wc -l | tr -d ' ')" 0
+run STUB_RC=1
+check "AC-10 marker gone after failed" eq "$(ls "$T/state/running" | wc -l | tr -d ' ')" 0
+
+# AC-11: notification on every end; a double quote in the reason stays intact
+prs $FRESH; run
+check "AC-11 done: repo, issue and PR link" has "$(cat "$STUB/osa.log")" "acme/Widget#196: done $PR196"
+run STUB_GH_FAIL='HTTP 500: "boom"'
+check "AC-11 failed: reason with quote" has "$(cat "$STUB/osa.log")" 'gh pr list failed: HTTP 500: "boom"'
+printf 'minutes=0.03\n' > "$T/cfg/config"; run STUB_SLEEP=300
+check "AC-11 timeout notified" has "$(cat "$STUB/osa.log")" "acme/Widget#196: timeout"
+rm "$T/cfg/config"
+PATH="$OLD_PATH"
 
 exit $FAIL

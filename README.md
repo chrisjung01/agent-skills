@@ -187,6 +187,10 @@ bash scripts/test-cj-run.sh                                          # tests aga
 - `CJ_RUN_CONFIG_DIR` points `cj-run` at another config folder, for tests.
 - `base.deny` blocks merge, force-push and delete; deny wins over allow.
 - Limits default to 20 USD and 45 minutes (`config`).
+- A run keeps a marker in `~/.local/state/cj-run/running/` and one log per run in `.../logs/` (`CJ_RUN_STATE_DIR` moves both). The log ends with result, cost and duration.
+- A run is `done` only when `claude` exits 0 and an open PR from `agent/<n>-*` was updated after the start; the time limit ends `claude` and its child processes.
+- The issue's `<repo>-<n>-verify` worktrees are removed at the end, and every end sends a macOS notification through `osascript`.
+- `--report` (label and comment on failure) is not built yet.
 
 ## Validation
 
