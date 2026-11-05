@@ -195,7 +195,7 @@ bash scripts/test-cj-run.sh                                          # tests aga
 
 `bin/cj-poll [--dry-run]` starts `cj-run --report` in the background for issues labelled `ready-for-agent` in the repos that `repos` marks `auto`, and returns. It runs once per call; the timer comes with the install step.
 
-- Guards per issue: the repo is private, a comment starts with `## Spec`, and open `agent/` PRs plus fresh run markers across all repos stay below 2. A skipped issue keeps its label and the output names the reason.
+- Guards per issue: the repo is private, a comment starts with `## Spec`, and open `agent/` PRs of the auto repos plus fresh run markers stay below 2. A skipped issue keeps its label and the output names the reason.
 - Before a start it removes `ready-for-agent` (and `agent-failed`) and posts a one-line comment with the log folder; if the label removal fails, nothing starts.
 - Fresh means the marker is younger than `minutes` in `config`; an older marker is a dead run and is ignored.
 - `--dry-run` prints `startable <owner>/<repo>#<n>` and changes nothing. `CJ_POLL_RUN` points it at another `cj-run`, for tests (`bash scripts/test-cj-poll.sh`, needs `jq`).

@@ -53,6 +53,9 @@ issue() { # issue <n> <created> <comment json> [extra label]
   local lab='{"name":"ready-for-agent"}'; [[ -z "${4:-}" ]] || lab="$lab,{\"name\":\"$4\"}"
   printf '{"number":%s,"createdAt":"%s","labels":[%s],"comments":[%s]}' "$1" "$2" "$lab" "$3"
 }
+# the started cj-run stubs write their log lines after poll returned: wait for them, up to 5 seconds
+wait_runs() { local i; for i in $(seq 1 50); do [[ "$(grep -c '^cj-run' "$STUB/log")" -ge "$1" ]] && return; sleep 0.1; done; }
+wait_pid() { local i; for i in $(seq 1 50); do [[ -s "$STUB/run.pid" ]] && return; sleep 0.1; done; }
 reset() { rm -f "$STUB/log" "$T/state/running"/*; : > "$STUB/log"; }
 A=acme/a
 fresh_setup() { repos "$A=/x auto"; vis $A PRIVATE; prs $A; reset; }
@@ -96,7 +99,7 @@ check "AC-16 two different issues fill the cap" eq "$(n_of "$out" startable)" 0
 
 # AC-17: 3 startable, room for 2 -> exactly 2 started, oldest first
 fresh_setup; issues $A "[$(issue 9 2026-01-03T00:00:00Z "$spec"),$(issue 5 2026-01-01T00:00:00Z "$spec"),$(issue 6 2026-01-02T00:00:00Z "$spec")]"
-out="$("$CP")"; sleep 0.5
+out="$("$CP")"; wait_runs 2
 check "AC-17 exactly two started" eq "$(n_of "$out" started)" 2
 check "AC-17 oldest two" bash -c 'grep -q "started acme/a#5" <<<"$1" && grep -q "started acme/a#6" <<<"$1"' _ "$out"
 check "AC-17 cj-run called twice" eq "$(n_of "$(cat "$STUB/log")" "cj-run --report")" 2
@@ -106,12 +109,12 @@ check "AC-17 third issue keeps its label" has "$(jq -c '.[]|select(.number==9)' 
 fresh_setup; repos "$A=/x auto" "acme/b=/y auto"; vis acme/b PRIVATE; prs acme/b
 issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec"),$(issue 6 2026-01-02T00:00:00Z "$spec")]"
 issues acme/b "[$(issue 7 2026-01-01T00:00:00Z "$spec")]"
-out="$("$CP")"; sleep 0.5
+out="$("$CP")"; wait_runs 2
 check "cap counts across repos in one pass" eq "$(n_of "$out" started)" 2
 
 # AC-18: labels removed (agent-failed too) and comment posted before cj-run; failed removal -> no run; second pass lists nothing
 fresh_setup; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec" agent-failed)]"
-"$CP" >/dev/null; sleep 0.5; log="$(cat "$STUB/log")"
+"$CP" >/dev/null; wait_runs 1; log="$(cat "$STUB/log")"
 check "AC-18 edit names both labels" has "$log" "issue edit 5 --repo acme/a --remove-label ready-for-agent --remove-label agent-failed"
 check "AC-18 order: edit, comment, run" bash -c 'e=$(grep -n "issue edit" <<<"$1" | cut -d: -f1); c=$(grep -n "issue comment" <<<"$1" | cut -d: -f1); r=$(grep -n "^cj-run" <<<"$1" | cut -d: -f1); [[ $e -lt $c && $c -lt $r ]]' _ "$log"
 check "AC-18 run gets --report and the URL" has "$log" "cj-run --report https://github.com/acme/a/issues/5"
@@ -125,7 +128,7 @@ check "AC-18 failed removal: reason" has "$out" "could not remove the labels"
 
 # AC-19: poll returns fast while the started run keeps running
 fresh_setup; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec")]"
-t0=$SECONDS; STUB_RUN_SLEEP=60 "$CP" >/dev/null; dt=$((SECONDS - t0)); sleep 0.5
+t0=$SECONDS; STUB_RUN_SLEEP=60 "$CP" >/dev/null; dt=$((SECONDS - t0)); wait_pid
 check "AC-19 returns within 10 seconds" test $dt -lt 10
 check "AC-19 the run is still running" bash -c 'kill -0 "$(cat "$1")"' _ "$STUB/run.pid"
 

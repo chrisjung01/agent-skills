@@ -3,7 +3,7 @@
 # Starts cj-run --report, detached, for issues labelled ready-for-agent in the repos marked
 # `auto` in ~/.config/cj-run/repos (CJ_RUN_CONFIG_DIR overrides it). Meant for a timer.
 # Guards per issue: private repo, a comment starting with `## Spec`, and fewer than 2
-# open agent/ PRs plus fresh run markers across all repos. CJ_POLL_RUN replaces the cj-run it calls.
+# open agent/ PRs (auto repos) plus fresh run markers (all repos). CJ_POLL_RUN replaces the cj-run it calls.
 set -euo pipefail
 
 CFG="${CJ_RUN_CONFIG_DIR:-$HOME/.config/cj-run}"
@@ -23,13 +23,15 @@ MINUTES="$(sed -n 's/^minutes=//p' "$CFG/config" 2>/dev/null | tail -n 1 | tr -d
 REPOS="$(awk -F= '$1 ~ /^[^#[:space:]]/ && NF > 1 { print $1, ($0 ~ /[ \t]auto[ \t]*$/ ? "auto" : "manual") }' "$CFG/repos")"
 
 # running agents: open agent/<n>-* PRs of the auto repos plus fresh markers, one per owner__repo__n
+err="$(mktemp)"; trap 'rm -f "$err"' EXIT
 KEYS="$(
   while read -r repo mode; do
     [[ "$mode" == auto ]] || continue
     # a failed listing must not read as "no PRs": the cap guards the budget
+    # ponytail: one broken repo stops every repo; scope the stop to that repo if it ever bites
     prs="$(gh pr list --repo "$repo" --state open --limit 200 --json headRefName \
-      --jq '.[].headRefName | select(test("^agent/[0-9]+-")) | split("/")[1] | split("-")[0]' 2>&1)" \
-      || { echo "cj-poll: gh pr list failed for $repo: $(head -n 1 <<<"$prs")" >&2; exit 1; }
+      --jq '.[].headRefName | select(test("^agent/[0-9]+-")) | split("/")[1] | split("-")[0]' 2>"$err")" \
+      || { echo "cj-poll: gh pr list failed for $repo: $(head -n 1 "$err")" >&2; exit 1; }
     while IFS= read -r n; do [[ -z "$n" ]] || echo "${repo/\//__}__$n"; done <<<"$prs"
   done <<<"$REPOS"
   # a marker older than the time limit belongs to a run that died; the age is its file time
@@ -54,7 +56,7 @@ while read -r repo mode; do
     if ! gh issue edit "$n" --repo "$repo" "${args[@]}" >/dev/null 2>&1; then echo "skip $ref: could not remove the labels"; continue; fi
     gh issue comment "$n" --repo "$repo" --body "cj-run started; log in $STATE/logs/ (${repo/\//__}__$n-*)" >/dev/null 2>&1 \
       || echo "cj-poll: could not post the start comment on $ref" >&2
-    ( "$RUN" --report "https://github.com/$repo/issues/$n" </dev/null >/dev/null 2>&1 & )
+    ( nohup "$RUN" --report "https://github.com/$repo/issues/$n" </dev/null >/dev/null 2>&1 & )
     echo "started $ref"
     RUNNING=$((RUNNING + 1))
   done < <(gh issue list --repo "$repo" --label ready-for-agent --state open --limit 100 \
