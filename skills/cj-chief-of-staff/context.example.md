@@ -53,6 +53,7 @@ Projects: <folder with one folder per project, e.g. 01 Projects>
 Overview note: <per project, e.g. <project>/<project>.md>; fields: status <field> (active value <value>), next step <field>, repo <field>
 Daily note: <folder and file name, e.g. Journal/YYYY-MM-DD.md>
 Inbox: <folder>
+Tasks: <open task format, e.g. `- [ ] <task> 📅 YYYY-MM-DD`>; skip <folders, e.g. archive>
 Git: <yes or no: commit after writing; never push>
 
 ## Side projects

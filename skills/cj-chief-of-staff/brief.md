@@ -57,6 +57,7 @@ Only what `state/context.md` lists, and only the healthy sources. Each item keep
 - Active, and no file in its folder changed for more than 14 days: add "stalled?".
 - Active with an empty next step: "next step?".
 - A project whose repo field names a repo: its Git host activity in the window, read as for side projects.
+- Open tasks in the `Tasks` format, outside the skipped folders: due today or earlier, or within 3 days; overdue first. Tasks without a date are not listed.
 - Notes in the inbox folder: one count line when there are any.
 
 **Side projects** (repos under `Side projects`): pull requests and issues with activity, CI on the default branch. Nothing → one line "quiet".
@@ -72,7 +73,7 @@ One item from two sources (a bot message and the Git host, say) is one line, lin
 5. **Errors**: the error tracker.
 6. **Rest**: one line each.
 7. **Side projects.**
-8. **Projects**: the vault's active projects, stalled first, then the inbox count.
+8. **Projects**: due vault tasks first, then the active projects, stalled first, then the inbox count.
 
 An item that fits several sections stands only in the highest one. An empty section is left out. Chat messages that match nothing above are not mentioned at all, not even as "skipped".
 
@@ -98,6 +99,7 @@ Missing: <source> (<reason>)
 **Side projects**
 - <item> <link>
 **Projects**
+- Due <date>: <task> (<note>)
 - <project>: <next step> (<stalled? or next step?>)
 - Inbox: <n> notes
 **Lesson**
