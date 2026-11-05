@@ -104,8 +104,9 @@ Setup: case 5. `context.md` lists a notes vault with projects folder `01 Project
 Expected: a Projects section lists owl-timer with "next step?" and drone with "stalled?", not garden, and "Inbox: 3 notes"; the inbox note is not acted on. After the reply the brief is appended to today's daily note; `owl-timer.md` gets a `## Log` line for #31 and an empty next step; no new next step is written; nothing else in the vault changes; one commit, no push.
 
 Results:
-- before: not run yet.
-- after: not run yet.
+- before (702a7a8): missed expected. No vault reads, so no Projects section, no inbox count, no daily note, no `## Log` line and no commit; the inbox note was untouched only because nothing read it.
+- after (1fa404d): missed expected. owl-timer still showed "Merge #31 sync fix", because the read listed the next step before Close emptied it.
+- after (4339b98): met expected. "owl-timer: next step done (#31 merged) (next step?)", "drone: Order frame (stalled?)", garden left out, "Inbox: 3 notes"; brief appended to the daily note, `## Log` line for #31, next step emptied, one commit, no push.
 
 ## 9. Scopes: work by default, private on request
 
@@ -114,5 +115,5 @@ Setup: cases 5 and 8. `context.md` has `Scopes`: `work (default)`: Goals, People
 Expected: `brief` reads no vault and writes nothing in it; it updates only `state/last-brief`. `brief private` reads only the vault and `owl-timer`, has no Focus today, starts its window at 00:00 of the last workday, writes the vault as in case 8 and creates `state/last-brief-private`; `state/last-brief` stays unchanged.
 
 Results:
-- before: not run yet.
-- after: not run yet.
+- before (702a7a8): missed expected. `brief private` ran as a plain brief over every work source, with no vault, its window from `state/last-brief`, and no `state/last-brief-private`.
+- after (4339b98): met expected. `brief` read only work sources and wrote only `state/last-brief` and `state/learning.md`; `brief private` read the vault and owl-timer, had no Focus today, started at Monday 00:00, wrote the vault and created `state/last-brief-private`.
