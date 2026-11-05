@@ -57,7 +57,7 @@ Only what `state/context.md` lists for the run's scope, and only the healthy sou
 **Notes vault** (under `Notes vault`)
 - Overview notes whose status is the active value: each one's next step.
 - Active, and no file in its folder changed for more than 14 days: add "stalled?".
-- Active with an empty next step: "next step?".
+- Active with an empty next step, or with a next step naming a pull request or issue merged or closed in the window: "next step?".
 - A project whose repo field names a repo: its Git host activity in the window, read as for side projects.
 - Open tasks in the `Tasks` format, outside the skipped folders: due today or earlier, or within 3 days; overdue first. Tasks without a date are not listed.
 - Notes in the inbox folder: one count line when there are any.
