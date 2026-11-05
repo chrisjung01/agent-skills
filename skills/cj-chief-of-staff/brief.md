@@ -52,6 +52,13 @@ Only what `state/context.md` lists, and only the healthy sources. Each item keep
 - Decision log entries changed in the window; open or in clarification with the user as participant → "You block others".
 - Goals page: when `Goals checked` in `context.md` is more than 7 days old, compare the page with `context.md`, list differences under "Rest", and update `Goals checked` and the copied goals.
 
+**Notes vault** (under `Notes vault`)
+- Overview notes whose status is the active value: each one's next step.
+- Active, and no file in its folder changed for more than 14 days: add "stalled?".
+- Active with an empty next step: "next step?".
+- A project whose repo field names a repo: its Git host activity in the window, read as for side projects.
+- Notes in the inbox folder: one count line when there are any.
+
 **Side projects** (repos under `Side projects`): pull requests and issues with activity, CI on the default branch. Nothing → one line "quiet".
 
 ## Rank
@@ -65,6 +72,7 @@ One item from two sources (a bot message and the Git host, say) is one line, lin
 5. **Errors**: the error tracker.
 6. **Rest**: one line each.
 7. **Side projects.**
+8. **Projects**: the vault's active projects, stalled first, then the inbox count.
 
 An item that fits several sections stands only in the highest one. An empty section is left out. Chat messages that match nothing above are not mentioned at all, not even as "skipped".
 
@@ -89,6 +97,9 @@ Missing: <source> (<reason>)
 - <item> <link>
 **Side projects**
 - <item> <link>
+**Projects**
+- <project>: <next step> (<stalled? or next step?>)
+- Inbox: <n> notes
 **Lesson**
 Again: <principle> (<item link>), <n>th time
 <decision>, <options>, <better one and trade-off>, <principle>, <product angle>
@@ -112,3 +123,10 @@ Every brief ends with one lesson from its own items, so the user learns from rea
 Write the time the reads started to `state/last-brief`, as `YYYY-MM-DDTHH:MM`. Do this after the reply, also when nothing changed.
 
 Append to `state/learning.md` (create it when missing) one line per lesson and per `Again` line: `YYYY-MM-DD · <principle> · <item link>`.
+
+When `context.md` lists a notes vault and its health check is `ok`:
+- Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing.
+- For each project whose repo had a pull request merged or an issue closed in the window: append `- YYYY-MM-DD: <merged or closed> [#<n>](<url>) <title>` under `## Log` in its overview note, creating the heading at the end when missing.
+- When that pull request or issue is the one the next step names (its number or title), empty the next step, so the next brief asks "next step?". Never write a new next step; the user picks it.
+- Change nothing else in the vault: no other field, note, move or deletion.
+- `Git` is yes: commit only the files written, message `chief-of-staff: brief YYYY-MM-DD`; never push.

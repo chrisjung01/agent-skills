@@ -46,6 +46,15 @@ Projects: <project>
 - Project papers: <database id>; team filter <value>; statuses <draft, in progress, ...>
 - Decision log: <database id>; open statuses <open, in clarification>
 
+## Notes vault
+
+Path: <absolute path to the Markdown vault>
+Projects: <folder with one folder per project, e.g. 01 Projects>
+Overview note: <per project, e.g. <project>/<project>.md>; fields: status <field> (active value <value>), next step <field>, repo <field>
+Daily note: <folder and file name, e.g. Journal/YYYY-MM-DD.md>
+Inbox: <folder>
+Git: <yes or no: commit after writing; never push>
+
 ## Side projects
 
 - <owner/repo>

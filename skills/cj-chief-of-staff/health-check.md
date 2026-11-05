@@ -9,6 +9,7 @@ Runs first in every mode. One cheap call per source listed in `state/context.md`
 | External tracker | the tracker's current-user call |
 | Error tracker | list organisations; the one in `context.md` must be there |
 | Docs | fetch the user's own profile or the goals page from `context.md` |
+| Notes vault | the vault path and its projects folder exist |
 
 Result per source: `ok`, or `missing (<reason in a few words>)`, such as not connected, auth expired, project not found.
 
