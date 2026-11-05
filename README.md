@@ -190,7 +190,7 @@ bash scripts/test-cj-run.sh                                          # tests aga
 - A run keeps a marker in `~/.local/state/cj-run/running/` and one log per run in `.../logs/` (`CJ_RUN_STATE_DIR` moves both). The log ends with result, cost and duration.
 - A run is `done` only when `claude` exits 0 and an open PR from `agent/<n>-*` was updated after the start; the time limit ends `claude` and its child processes.
 - The issue's `<repo>-<n>-verify` worktrees are removed at the end, and every end sends a macOS notification through `osascript`.
-- `--report` (label and comment on failure) is not built yet.
+- `--report` labels a failed or timed-out run `agent-failed` and comments with duration, cost, the last 20 log lines and the log path. Create the label first: `gh label create agent-failed --repo <owner>/<repo>`. Without `--report` a run changes nothing on the issue.
 
 ## Validation
 

@@ -69,8 +69,6 @@ if [[ $DRY -eq 1 ]]; then
   exit 0
 fi
 
-[[ $REPORT -eq 0 ]] || die "--report is not built yet (part 3 of #198)"
-
 # --- a real run: marker, log, time limit, outcome, cleanup, notification ---
 STATE="${CJ_RUN_STATE_DIR:-$HOME/.local/state/cj-run}"
 KEY="${OWNER}__${REPO}__${N}"
@@ -136,4 +134,17 @@ SUMMARY="$OWNER/$REPO#$N: $RESULT${PRLINK:+ $PRLINK}${REASON:+ ($REASON)}"
 # arguments, not script text: quotes in the reason stay harmless
 osascript -e 'on run argv' -e 'display notification (item 1 of argv) with title "cj-run"' -e 'end run' -- "$SUMMARY" >/dev/null 2>&1 || true
 echo "$SUMMARY"; echo "Log: $LOG"
+
+# --report: a failed run labels and comments on its issue; a gh error here never hides the run's result
+if [[ $REPORT -eq 1 && "$RESULT" != done ]]; then
+  BODY="$(mktemp)"
+  {
+    echo "cj-run $RESULT${REASON:+: $REASON}"; echo
+    echo "- Duration: ${DUR}s"; echo "- Cost: $COST USD"; echo "- Log: \`$LOG\`"; echo
+    echo "Last 20 lines of the log:"; echo; echo '```'; tail -n 20 "$LOG"; echo '```'
+  } >"$BODY"
+  gh issue comment "$N" --repo "$OWNER/$REPO" --body-file "$BODY" >/dev/null 2>&1 || echo "cj-run: could not comment on $OWNER/$REPO#$N" >&2
+  gh issue edit "$N" --repo "$OWNER/$REPO" --add-label agent-failed >/dev/null 2>&1 || echo "cj-run: could not set agent-failed on $OWNER/$REPO#$N" >&2
+  rm -f "$BODY"
+fi
 [[ "$RESULT" == done ]]

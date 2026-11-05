@@ -116,6 +116,7 @@ EOS
 cat > "$T/bin/gh" <<'EOS'
 #!/usr/bin/env bash
 echo "$*" >> "$STUB/gh.log"
+for ((i=1; i<=$#; i++)); do [[ "${!i}" != --body-file ]] || { j=$((i+1)); cp "${!j}" "$STUB/comment-body"; }; done
 [[ "$1 $2" == "pr list" ]] || exit 0
 [[ -z "${STUB_GH_FAIL:-}" ]] || { echo "$STUB_GH_FAIL" >&2; exit 1; }
 limit="$(sed -n 's/.*--limit \([0-9]*\).*/\1/p' <<<"$*")"
@@ -126,13 +127,13 @@ cat > "$T/bin/osascript" <<'EOS'
 printf '%s\n' "$@" >> "$STUB/osa.log"
 EOS
 chmod +x "$T/bin"/*
-OLD_PATH="$PATH"; PATH="$T/bin:$PATH"
+RUN_ARGS=; OLD_PATH="$PATH"; PATH="$T/bin:$PATH"
 FRESH=2999-01-01T00:00:00Z; STALE=2000-01-01T00:00:00Z
 PR196="https://github.com/acme/Widget/pull/9"
 prs() { printf 'agent/196-fix\t%s\t%s\n' "$PR196" "$1" > "$STUB/prs"; }
 run() { # run [env...]: one cj-run for issue 196, fresh logs
-  rm -rf "$T/state/logs" "$STUB/gh.log" "$STUB/osa.log" "$STUB/child.pid"
-  OUT="$(env "$@" "$CJ" $URL 2>&1)"; RC=$?
+  rm -rf "$T/state/logs" "$STUB/gh.log" "$STUB/osa.log" "$STUB/child.pid" "$STUB/comment-body"
+  OUT="$(env "$@" "$CJ" $URL $RUN_ARGS 2>&1)"; RC=$?
   LOGF="$(ls "$T/state/logs"/* 2>/dev/null | head -n 1)"; LOGT="$(cat "$LOGF" 2>/dev/null)"
 }
 
@@ -198,6 +199,28 @@ check "AC-11 failed: reason with quote" has "$(cat "$STUB/osa.log")" 'gh pr list
 printf 'minutes=0.03\n' > "$T/cfg/config"; run STUB_SLEEP=300
 check "AC-11 timeout notified" has "$(cat "$STUB/osa.log")" "acme/Widget#196: timeout"
 rm "$T/cfg/config"
+
+# AC-12: --report on a failed run labels and comments; without it no write call on the issue
+prs $STALE; RUN_ARGS=; run STUB_COST=0.25
+check "AC-12 no report: no issue write" bash -c '! grep -qE "^issue (edit|comment)" "$1"' _ "$STUB/gh.log"
+RUN_ARGS=--report; run STUB_COST=0.25
+check "AC-12 failed run still exits non-zero" test $RC -ne 0
+check "AC-12 label set" has "$(cat "$STUB/gh.log")" "issue edit 196 --repo acme/Widget --add-label agent-failed"
+check "AC-12 comment posted" has "$(cat "$STUB/gh.log")" "issue comment 196 --repo acme/Widget"
+body="$(cat "$STUB/comment-body")"
+check "AC-12 comment: duration" grep -qE 'Duration: [0-9]+s' <<<"$body"
+check "AC-12 comment: cost" has "$body" "Cost: 0.25 USD"
+check "AC-12 comment: log path" has "$body" "$LOGF"
+check "AC-12 comment: log tail" has "$body" "no open PR from agent/196-*"
+prs $FRESH; run STUB_COST=0.25
+check "AC-12 done run with --report: no issue write" bash -c '! grep -qE "^issue (edit|comment)" "$1"' _ "$STUB/gh.log"
+RUN_ARGS=
 PATH="$OLD_PATH"
+
+# AC-13: the seven named commands are denied; no allow rule is also a deny rule
+for c in "gh pr merge 5" "git push --force origin x" "git push -f origin x" "git push --delete origin x" "gh api -X DELETE repos/o/r" "gh issue delete 5" "gh repo delete o/r"; do
+  check "AC-13 denies: $c" denied "$c"
+done
+check "AC-13 no allow rule in deny" eq "$(grep -hv -e '^#' -e '^$' "$HERE/config/cj-run/base.allow" | grep -cxFf - "$HERE/config/cj-run/base.deny")" 0
 
 exit $FAIL
