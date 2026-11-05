@@ -193,7 +193,9 @@ bash scripts/test-cj-run.sh                                          # tests aga
 - The issue's `<repo>-<n>-verify` worktrees are removed at the end, and every end sends a macOS notification through `osascript`.
 - `--report` labels a failed or timed-out run `agent-failed` and comments with duration, cost, the last 20 log lines and the log path. Create the label first: `gh label create agent-failed --repo <owner>/<repo>`. Without `--report` a run changes nothing on the issue.
 
-`bin/cj-poll [--dry-run]` starts `cj-run --report` in the background for issues labelled `ready-for-agent` in the repos that `repos` marks `auto`, and returns. It runs once per call; the timer comes with the install step.
+`bin/cj-poll [--dry-run]` starts `cj-run --report` in the background for issues labelled `ready-for-agent` in the repos that `repos` marks `auto`, and returns. It runs once per call; `./install.sh` links both scripts into `~/.local/bin`, copies missing templates to `~/.config/cj-run/` and prints a `launchd` job (every 10 minutes) and the label lines. It never overwrites, loads the job or creates a label.
+
+Timer setup, by hand: save the printed plist, run `launchctl bootstrap` on it, and run the printed `gh label create` lines. `bash scripts/test-install.sh` tests the install.
 
 - Guards per issue: the repo is private, a comment starts with `## Spec`, and open `agent/` PRs of the auto repos plus fresh run markers stay below 2. A skipped issue keeps its label and the output names the reason.
 - Before a start it removes `ready-for-agent` (and `agent-failed`) and posts a one-line comment with the log folder; if the label removal fails, nothing starts.

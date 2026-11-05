@@ -2,7 +2,9 @@
 # Symlinks every skill in ./skills into the skill directories of Claude Code and Codex, builds
 # the cj-whetstone metrics binary, registers its Codex SessionEnd hook in $CODEX_HOME/hooks.json
 # (default ~/.codex, backed up first) and prints its Claude Code hook line (settings.json stays
-# untouched).
+# untouched). A global install also links bin/cj-run and bin/cj-poll into ~/.local/bin, copies config/cj-run/*
+# to ~/.config/cj-run/ where no file exists, and prints a launchd job and two `gh label create` lines
+# (it never loads the job or creates a label).
 #
 #   ./install.sh                      global: ~/.claude/skills + ~/.agents/skills
 #   ./install.sh --project <path>     per project: <path>/.claude/skills + <path>/.agents/skills
@@ -23,7 +25,7 @@ while [[ $# -gt 0 ]]; do
     --force)     FORCE=1 ;;
     --project)   TARGET_ROOT="$(cd "${2:?path missing}" && pwd)"; shift ;;
     --skill)     ONLY="${2:?name missing}"; shift ;;
-    -h|--help)   sed -n '2,11p' "$0"; exit 0 ;;
+    -h|--help)   sed -n '2,14p' "$0"; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
@@ -116,6 +118,51 @@ HOOK
     "$bin" codex-hooks uninstall "$codex_hook" $dry || echo "⚠ Codex hook not removed"
   elif [[ -f "$codex_home/hooks.json" ]]; then
     echo "⚠ skill-metrics not built: remove the SessionEnd hook running $codex_hook from $codex_home/hooks.json yourself"
+  fi
+fi
+
+# cj-run and cj-poll for unattended runs (global install only): links, missing config templates, printed job and labels.
+if [[ ( -z "$ONLY" || "$ONLY" == "cj-run" ) && "$TARGET_ROOT" == "$HOME" ]]; then
+  localbin="$HOME/.local/bin"; cfg="$HOME/.config/cj-run"
+  for tool in cj-run cj-poll; do
+    if [[ "$MODE" == "install" ]]; then
+      if [[ -L "$localbin/$tool" && "$(readlink "$localbin/$tool")" == "$REPO_DIR/bin/$tool" ]]; then
+        echo "✓ $localbin/$tool (already linked)"
+      elif [[ -e "$localbin/$tool" || -L "$localbin/$tool" ]]; then
+        echo "⚠ $localbin/$tool already exists, not overwritten"
+      else
+        run mkdir -p "$localbin"; run ln -s "$REPO_DIR/bin/$tool" "$localbin/$tool" && echo "+ $localbin/$tool"
+      fi
+    elif [[ -L "$localbin/$tool" && "$(readlink "$localbin/$tool")" == "$REPO_DIR/bin/$tool" ]]; then
+      run rm "$localbin/$tool" && echo "- $localbin/$tool"
+    fi
+  done
+  if [[ "$MODE" == "install" ]]; then
+    for tpl in "$REPO_DIR"/config/cj-run/*; do
+      [[ -e "$cfg/${tpl##*/}" ]] && { echo "✓ $cfg/${tpl##*/} (kept)"; continue; }
+      run mkdir -p "$cfg"; run cp "$tpl" "$cfg/" && echo "+ $cfg/${tpl##*/}"
+    done
+    cat <<JOB
+
+Timer for cj-poll: save as ~/Library/LaunchAgents/com.cj-run.poll.plist, then run
+  launchctl bootstrap gui/\$(id -u) ~/Library/LaunchAgents/com.cj-run.poll.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.cj-run.poll</string>
+  <key>ProgramArguments</key><array><string>$localbin/cj-poll</string></array>
+  <key>StartInterval</key><integer>600</integer>
+  <key>AbandonProcessGroup</key><true/>
+  <key>EnvironmentVariables</key><dict>
+    <key>CLAUDE_CONFIG_DIR</key><string>${CLAUDE_CONFIG_DIR:-$HOME/.claude}</string>
+    <key>PATH</key><string>$localbin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+</dict></plist>
+
+Labels, once per repo marked auto in $cfg/repos (run after your yes):
+  gh label create ready-for-agent --repo <owner>/<repo>
+  gh label create agent-failed --repo <owner>/<repo>
+JOB
   fi
 fi
 
