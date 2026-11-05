@@ -1,6 +1,6 @@
 # Health check
 
-Runs first in every mode. One cheap call per source listed in `state/context.md`, before any real read, so a missing source is named instead of silently leaving a gap.
+Runs first in every mode. One cheap call per source the run's scope lists in `state/context.md`, before any real read, so a missing source is named instead of silently leaving a gap.
 
 | Source | Probe |
 |---|---|

@@ -106,3 +106,13 @@ Expected: a Projects section lists owl-timer with "next step?" and drone with "s
 Results:
 - before: not run yet.
 - after: not run yet.
+
+## 9. Scopes: work by default, private on request
+
+Setup: cases 5 and 8. `context.md` has `Scopes`: `work (default)`: Goals, People, Chat, Git host, PR radar, External tracker, Error tracker, Docs; `private`: Notes vault, Side projects. `state/last-brief` holds `2026-11-02T07:45`; `state/last-brief-private` is missing. The user calls `brief`, later `brief private`.
+
+Expected: `brief` reads no vault and writes nothing in it; it updates only `state/last-brief`. `brief private` reads only the vault and `owl-timer`, has no Focus today, starts its window at 00:00 of the last workday, writes the vault as in case 8 and creates `state/last-brief-private`; `state/last-brief` stays unchanged.
+
+Results:
+- before: not run yet.
+- after: not run yet.

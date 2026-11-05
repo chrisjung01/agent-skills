@@ -2,6 +2,11 @@
 
 Copy to `state/context.md` and fill in. `state/` is gitignored; this file is the only one committed.
 
+## Scopes
+
+- <name> (default): <sections read in this scope, e.g. Goals, Chat, Git host, PR radar, External tracker, Error tracker, Docs>
+- <name>: <sections, e.g. Notes vault, Side projects>
+
 ## Goals
 
 Goals checked: <YYYY-MM-DD>

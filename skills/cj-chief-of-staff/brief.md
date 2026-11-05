@@ -2,12 +2,14 @@
 
 ## Window
 
-- `state/last-brief` exists: from the time it holds.
+Each scope keeps its own time: `state/last-brief` for the default scope, `state/last-brief-<scope>` for any other.
+
+- The scope's file exists: from the time it holds.
 - It does not: from 00:00 of the last workday before today (Monday → Friday).
 
 ## What to read
 
-Only what `state/context.md` lists, and only the healthy sources. Each item keeps its link.
+Only what `state/context.md` lists for the run's scope, and only the healthy sources. Each item keeps its link.
 
 **Chat**
 - Direct and group messages from people.
@@ -82,7 +84,7 @@ An item that fits several sections stands only in the highest one. An empty sect
 Write it scannable: the first line is the result or the decision needed. Be extremely concise. Sacrifice grammar for the sake of concision. Text others read keeps full sentences. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
 
 ```
-**Brief <weekday> <date>**, since <window start>
+**Brief <scope> <weekday> <date>**, since <window start>
 Missing: <source> (<reason>)
 **Focus today**
 1. <item> <link> (<driver or goal>)
@@ -122,11 +124,11 @@ Every brief ends with one lesson from its own items, so the user learns from rea
 
 ## Close
 
-Write the time the reads started to `state/last-brief`, as `YYYY-MM-DDTHH:MM`. Do this after the reply, also when nothing changed.
+Write the time the reads started to the scope's file (see Window), as `YYYY-MM-DDTHH:MM`. Do this after the reply, also when nothing changed.
 
 Append to `state/learning.md` (create it when missing) one line per lesson and per `Again` line: `YYYY-MM-DD · <principle> · <item link>`.
 
-When `context.md` lists a notes vault and its health check is `ok`:
+When the run's scope lists the notes vault and its health check is `ok`:
 - Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing.
 - For each project whose repo had a pull request merged or an issue closed in the window: append `- YYYY-MM-DD: <merged or closed> [#<n>](<url>) <title>` under `## Log` in its overview note, creating the heading at the end when missing.
 - When that pull request or issue is the one the next step names (its number or title), empty the next step, so the next brief asks "next step?". Never write a new next step; the user picks it.
