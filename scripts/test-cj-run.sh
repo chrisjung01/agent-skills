@@ -211,7 +211,7 @@ body="$(cat "$STUB/comment-body")"
 check "AC-12 comment: duration" grep -qE 'Duration: [0-9]+s' <<<"$body"
 check "AC-12 comment: cost" has "$body" "Cost: 0.25 USD"
 check "AC-12 comment: log path" has "$body" "$LOGF"
-check "AC-12 comment: log tail" has "$body" "no open PR from agent/196-*"
+check "AC-12 comment: log tail" has "$body" "result: failed"
 prs $FRESH; run STUB_COST=0.25
 check "AC-12 done run with --report: no issue write" bash -c '! grep -qE "^issue (edit|comment)" "$1"' _ "$STUB/gh.log"
 RUN_ARGS=
