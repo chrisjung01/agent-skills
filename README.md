@@ -168,6 +168,7 @@ AGENTS.md               # skill overview and editing rules for agents
 LICENSE                 # MIT
 install.sh              # links skills for Claude Code and Codex
 bin/cj-run              # starts /cj-implement headless for one issue (see "Unattended runs")
+bin/cj-poll             # starts cj-run for issues labelled ready-for-agent in repos marked auto
 config/cj-run/          # templates for ~/.config/cj-run/: allow and deny lists, limits, repos
 scripts/validate.sh     # format check, also runs in GitHub Actions
 .githooks/pre-commit    # runs validate.sh before each commit
@@ -191,6 +192,14 @@ bash scripts/test-cj-run.sh                                          # tests aga
 - A run is `done` only when `claude` exits 0 and an open PR from `agent/<n>-*` was updated after the start; the time limit ends `claude` and its child processes.
 - The issue's `<repo>-<n>-verify` worktrees are removed at the end, and every end sends a macOS notification through `osascript`.
 - `--report` labels a failed or timed-out run `agent-failed` and comments with duration, cost, the last 20 log lines and the log path. Create the label first: `gh label create agent-failed --repo <owner>/<repo>`. Without `--report` a run changes nothing on the issue.
+
+`bin/cj-poll [--dry-run]` starts `cj-run --report` in the background for issues labelled `ready-for-agent` in the repos that `repos` marks `auto`, and returns. It runs once per call; the timer comes with the install step.
+
+- Guards per issue: the repo is private, a comment starts with `## Spec`, and open `agent/` PRs plus fresh run markers across all repos stay below 2. A skipped issue keeps its label and the output names the reason.
+- Before a start it removes `ready-for-agent` (and `agent-failed`) and posts a one-line comment with the log folder; if the label removal fails, nothing starts.
+- Fresh means the marker is younger than `minutes` in `config`; an older marker is a dead run and is ignored.
+- `--dry-run` prints `startable <owner>/<repo>#<n>` and changes nothing. `CJ_POLL_RUN` points it at another `cj-run`, for tests (`bash scripts/test-cj-poll.sh`, needs `jq`).
+- Create both labels first: `gh label create ready-for-agent --repo <owner>/<repo>`, and `agent-failed` as above.
 
 ## Validation
 
