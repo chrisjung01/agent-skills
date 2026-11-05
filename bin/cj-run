@@ -140,8 +140,9 @@ if [[ $REPORT -eq 1 && "$RESULT" != done ]]; then
   BODY="$(mktemp)"
   {
     echo "cj-run $RESULT${REASON:+: $REASON}"; echo
-    echo "- Duration: ${DUR}s"; echo "- Cost: $COST USD"; echo "- Log: \`$LOG\`"; echo
-    echo "Last 20 lines of the log:"; echo; echo '```'; tail -n 20 "$LOG"; echo '```'
+    echo "- Duration: ${DUR}s"; echo "- Cost: $COST$([[ "$COST" == unknown ]] || echo ' USD')"; echo "- Log: \`$LOG\`"; echo
+    # indented, not fenced: log text cannot close a fence; cut: claude's JSON result is one long line
+    echo "Last 20 lines of the log (each cut at 500 characters):"; echo; tail -n 20 "$LOG" | cut -c1-500 | sed 's/^/    /'
   } >"$BODY"
   gh issue comment "$N" --repo "$OWNER/$REPO" --body-file "$BODY" >/dev/null 2>&1 || echo "cj-run: could not comment on $OWNER/$REPO#$N" >&2
   gh issue edit "$N" --repo "$OWNER/$REPO" --add-label agent-failed >/dev/null 2>&1 || echo "cj-run: could not set agent-failed on $OWNER/$REPO#$N" >&2

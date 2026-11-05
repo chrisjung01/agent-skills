@@ -109,6 +109,8 @@ cat > "$T/bin/claude" <<'EOS'
 pwd > "$STUB/claude-cwd"
 ls "$CJ_RUN_STATE_DIR/running" > "$STUB/markers-during"
 [[ -z "${STUB_CHILD:-}" ]] || { sleep 300 & echo $! > "$STUB/child.pid"; }
+[[ -z "${STUB_LINES:-}" ]] || for ((i=1; i<=STUB_LINES; i++)); do echo "L$i"; done
+[[ -z "${STUB_BIG:-}" ]] || head -c 100000 /dev/zero | tr '\0' x; [[ -z "${STUB_BIG:-}" ]] || echo
 [[ -z "${STUB_COST:-}" ]] || echo "{\"type\":\"result\",\"total_cost_usd\":$STUB_COST}"
 [[ -z "${STUB_SLEEP:-}" ]] || sleep "$STUB_SLEEP"
 exit "${STUB_RC:-0}"
@@ -117,6 +119,7 @@ cat > "$T/bin/gh" <<'EOS'
 #!/usr/bin/env bash
 echo "$*" >> "$STUB/gh.log"
 for ((i=1; i<=$#; i++)); do [[ "${!i}" != --body-file ]] || { j=$((i+1)); cp "${!j}" "$STUB/comment-body"; }; done
+[[ -z "${STUB_GH_WRITE_FAIL:-}" || "$1" != issue ]] || exit 1
 [[ "$1 $2" == "pr list" ]] || exit 0
 [[ -z "${STUB_GH_FAIL:-}" ]] || { echo "$STUB_GH_FAIL" >&2; exit 1; }
 limit="$(sed -n 's/.*--limit \([0-9]*\).*/\1/p' <<<"$*")"
@@ -214,6 +217,21 @@ check "AC-12 comment: log path" has "$body" "$LOGF"
 check "AC-12 comment: log tail" has "$body" "result: failed"
 prs $FRESH; run STUB_COST=0.25
 check "AC-12 done run with --report: no issue write" bash -c '! grep -qE "^issue (edit|comment)" "$1"' _ "$STUB/gh.log"
+# report: 20-line limit, one huge line, gh failing, timeout
+prs $STALE; RUN_ARGS=--report; run STUB_LINES=30
+body="$(cat "$STUB/comment-body")"
+check "AC-12 tail keeps line 30" has "$body" "L30"
+check "AC-12 tail drops line 1" bash -c '! grep -qx "    L1" <<<"$1"' _ "$body"
+run STUB_BIG=1
+check "AC-12 huge log line is cut" test "$(wc -c < "$STUB/comment-body")" -lt 5000
+run STUB_GH_WRITE_FAIL=1
+check "AC-12 gh failure keeps exit non-zero" test $RC -ne 0
+check "AC-12 gh failure keeps summary" has "$OUT" "acme/Widget#196: failed"
+check "AC-12 gh failure says so" has "$OUT" "could not comment"
+printf 'minutes=0.03\n' > "$T/cfg/config"; run STUB_SLEEP=300
+check "AC-12 timeout is reported" has "$(cat "$STUB/gh.log")" "--add-label agent-failed"
+check "AC-12 timeout: cost without USD" has "$(cat "$STUB/comment-body")" "Cost: unknown"
+rm "$T/cfg/config"
 RUN_ARGS=
 PATH="$OLD_PATH"
 
