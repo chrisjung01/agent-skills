@@ -24,6 +24,7 @@ case "$1 $2" in
   "repo view") cat "$STUB/vis/${3//\//__}" ;;
   "pr list"|"issue list")
     key="$(repo_key "$@")"
+    [[ "$1" != pr || -z "${STUB_PR_FAIL:-}" ]] || { echo "$STUB_PR_FAIL" >&2; exit 1; }
     if [[ "$1" == issue ]]; then  # like gh: only issues that carry the label
       jq 'map(select(.labels | any(.name == "ready-for-agent")))' "$STUB/issues/$key.json" | jq -r "${@: -1}"
     else jq -r "${@: -1}" "$STUB/prs/$key.json"; fi ;;
@@ -127,5 +128,33 @@ fresh_setup; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec")]"
 t0=$SECONDS; STUB_RUN_SLEEP=60 "$CP" >/dev/null; dt=$((SECONDS - t0)); sleep 0.5
 check "AC-19 returns within 10 seconds" test $dt -lt 10
 check "AC-19 the run is still running" bash -c 'kill -0 "$(cat "$1")"' _ "$STUB/run.pid"
+
+# review fixes: no state folder yet (fresh install), minutes from config, failing PR listing, odd branch names, odd inputs
+fresh_setup; rm -rf "$T/state"; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec")]"
+out="$("$CP" --dry-run 2>&1)"
+check "fresh install: no state folder still lists" has "$out" "startable acme/a#5"
+mkdir -p "$T/state/running"
+fresh_setup; prs $A; touch -t "$(date -v-30M +%Y%m%d%H%M 2>/dev/null || date -d '30 minutes ago' +%Y%m%d%H%M)" "$T/state/running/acme__a__8" "$T/state/running/acme__a__9"
+issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec")]"
+out="$("$CP" --dry-run)"
+check "minutes default 45: 30-minute-old markers are fresh, cap reached" has "$out" "cap reached"
+mkdir -p "$T/cfg"; echo "minutes=20" > "$T/cfg/config"
+out="$("$CP" --dry-run)"
+check "minutes from config: 30-minute-old markers are dead" has "$out" "startable acme/a#5"
+rm "$T/cfg/config"
+fresh_setup; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec")]"
+out="$(STUB_PR_FAIL='HTTP 401' "$CP" --dry-run 2>&1)"; rc=$?
+check "failing PR listing: non-zero exit" test $rc -ne 0
+check "failing PR listing: reason, nothing listed" bash -c 'grep -q "gh pr list failed for acme/a: HTTP 401" <<<"$1" && ! grep -q startable <<<"$1"' _ "$out"
+fresh_setup; prs $A agent/foo agent/1-x; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec"),$(issue 6 2026-01-02T00:00:00Z "$spec")]"
+out="$("$CP" --dry-run)"
+check "branch without number is no running agent" eq "$(n_of "$out" startable)" 1
+fresh_setup; printf 'acme/a auto\n%s\n' "$A=/x auto" > "$T/cfg/repos"; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec")]"
+out="$("$CP" --dry-run)"
+check "repos line without = is skipped" eq "$out" "startable acme/a#5"
+fresh_setup; issues $A "[$(issue 5 2026-01-01T00:00:00Z "$spec" agent-failed)]"
+out="$(CJ_POLL_RUN=$T/bin/missing "$CP" 2>&1)"; rc=$?
+check "cj-run not executable: stops before any label change" bash -c '[[ $1 -eq 2 ]] && grep -q "not executable" <<<"$2" && [[ ! -s "$3" ]]' _ $rc "$out" "$STUB/log"
+check "bad argument: usage, exit 2" bash -c '"$1" --bogus >/dev/null 2>&1; [[ $? -eq 2 ]]' _ "$CP"
 
 exit $FAIL
