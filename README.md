@@ -167,9 +167,41 @@ skills/
 AGENTS.md               # skill overview and editing rules for agents
 LICENSE                 # MIT
 install.sh              # links skills for Claude Code and Codex
+bin/cj-run              # starts /cj-implement headless for one issue (see "Unattended runs")
+bin/cj-poll             # starts cj-run for issues labelled ready-for-agent in repos marked auto
+config/cj-run/          # templates for ~/.config/cj-run/: allow and deny lists, limits, repos
 scripts/validate.sh     # format check, also runs in GitHub Actions
 .githooks/pre-commit    # runs validate.sh before each commit
 ```
+
+## Unattended runs
+
+`bin/cj-run <issue URL>` starts `/cj-implement` headless for one issue, from an existing worktree on a branch `agent/<n>-*`, else from the repo's main checkout.
+
+Setup: copy `config/cj-run/*` to `~/.config/cj-run/`, then edit `repos` (`owner/repo=/absolute/path/to/main/checkout [auto]`). Add `<repo name>.allow` for repo-specific permission rules. The lists live there, never in a repo, so ordinary sessions keep asking before `git push`.
+
+```bash
+bin/cj-run --dry-run https://github.com/<owner>/<repo>/issues/<n>   # prints folder, command and limits, starts nothing
+bash scripts/test-cj-run.sh                                          # tests against a temporary config, no claude, no network
+```
+
+- `CJ_RUN_CONFIG_DIR` points `cj-run` at another config folder, for tests.
+- `base.deny` blocks merge, force-push and delete; deny wins over allow.
+- Limits default to 20 USD and 45 minutes (`config`).
+- A run keeps a marker in `~/.local/state/cj-run/running/` and one log per run in `.../logs/` (`CJ_RUN_STATE_DIR` moves both). The log ends with result, cost and duration.
+- A run is `done` only when `claude` exits 0 and an open PR from `agent/<n>-*` was updated after the start; the time limit ends `claude` and its child processes.
+- The issue's `<repo>-<n>-verify` worktrees are removed at the end, and every end sends a macOS notification through `osascript`.
+- `--report` labels a failed or timed-out run `agent-failed` and comments with duration, cost, the last 20 log lines and the log path. Create the label first: `gh label create agent-failed --repo <owner>/<repo>`. Without `--report` a run changes nothing on the issue.
+
+`bin/cj-poll [--dry-run]` starts `cj-run --report` in the background for issues labelled `ready-for-agent` in the repos that `repos` marks `auto`, and returns. It runs once per call; `./install.sh` links both scripts into `~/.local/bin`, copies missing templates to `~/.config/cj-run/` and prints a `launchd` job (every 10 minutes) and the label lines. It never overwrites, loads the job or creates a label.
+
+Timer setup, by hand: save the printed plist, run `launchctl bootstrap` on it, and run the printed `gh label create` lines. `bash scripts/test-install.sh` tests the install.
+
+- Guards per issue: the repo is private, a comment starts with `## Spec`, and open `agent/` PRs of the auto repos plus fresh run markers stay below 2. A skipped issue keeps its label and the output names the reason.
+- Before a start it removes `ready-for-agent` (and `agent-failed`) and posts a one-line comment with the log folder; if the label removal fails, nothing starts.
+- Fresh means the marker is younger than `minutes` in `config`; an older marker is a dead run and is ignored.
+- `--dry-run` prints `startable <owner>/<repo>#<n>` and changes nothing. `CJ_POLL_RUN` points it at another `cj-run`, for tests (`bash scripts/test-cj-poll.sh`, needs `jq`).
+- Create both labels first: `gh label create ready-for-agent --repo <owner>/<repo>`, and `agent-failed` as above.
 
 ## Validation
 

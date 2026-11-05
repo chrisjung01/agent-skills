@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# cj-poll [--dry-run]
+# Starts cj-run --report, detached, for issues labelled ready-for-agent in the repos marked
+# `auto` in ~/.config/cj-run/repos (CJ_RUN_CONFIG_DIR overrides it). Meant for a timer.
+# Guards per issue: private repo, a comment starting with `## Spec`, and fewer than 2
+# open agent/ PRs (auto repos) plus fresh run markers (all repos). CJ_POLL_RUN replaces the cj-run it calls.
+set -euo pipefail
+
+CFG="${CJ_RUN_CONFIG_DIR:-$HOME/.config/cj-run}"
+STATE="${CJ_RUN_STATE_DIR:-$HOME/.local/state/cj-run}"
+RUN="${CJ_POLL_RUN:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/cj-run}"
+CAP=2  # ponytail: two polls at once can double-start an issue; add a lock if timer and manual runs overlap
+DRY=0
+[[ "${1:-}" != --dry-run ]] || DRY=1
+[[ $# -eq 0 || ( $# -eq 1 && $DRY -eq 1 ) ]] || { echo "usage: cj-poll [--dry-run]" >&2; exit 2; }
+
+MINUTES="$(sed -n 's/^minutes=//p' "$CFG/config" 2>/dev/null | tail -n 1 | tr -d '[:space:]' || true)"
+[[ "${MINUTES:-}" =~ ^[0-9]+(\.[0-9]+)?$ ]] || MINUTES=45
+[[ -f "$CFG/repos" ]] || { echo "cj-poll: $CFG/repos is missing" >&2; exit 2; }
+[[ -x "$RUN" ]] || { echo "cj-poll: $RUN is not executable" >&2; exit 2; }
+
+# lines `owner/repo=/path [auto]` become `owner/repo auto|manual`; a line without `=` is skipped
+REPOS="$(awk -F= '$1 ~ /^[^#[:space:]]/ && NF > 1 { print $1, ($0 ~ /[ \t]auto[ \t]*$/ ? "auto" : "manual") }' "$CFG/repos")"
+
+# running agents: open agent/<n>-* PRs of the auto repos plus fresh markers, one per owner__repo__n
+err="$(mktemp)"; trap 'rm -f "$err"' EXIT
+KEYS="$(
+  while read -r repo mode; do
+    [[ "$mode" == auto ]] || continue
+    # a failed listing must not read as "no PRs": the cap guards the budget
+    # ponytail: one broken repo stops every repo; scope the stop to that repo if it ever bites
+    prs="$(gh pr list --repo "$repo" --state open --limit 200 --json headRefName \
+      --jq '.[].headRefName | select(test("^agent/[0-9]+-")) | split("/")[1] | split("-")[0]' 2>"$err")" \
+      || { echo "cj-poll: gh pr list failed for $repo: $(head -n 1 "$err")" >&2; exit 1; }
+    while IFS= read -r n; do [[ -z "$n" ]] || echo "${repo/\//__}__$n"; done <<<"$prs"
+  done <<<"$REPOS"
+  # a marker older than the time limit belongs to a run that died; the age is its file time
+  find "$STATE/running" -type f -mmin "-$(awk -v m="$MINUTES" 'BEGIN { printf "%d", m + 0.999 }')" 2>/dev/null | sed 's|.*/||' || true
+)"
+RUNNING="$(printf '%s\n' "$KEYS" | sort -u | grep -c . || true)"
+
+while read -r repo mode; do
+  [[ -n "$repo" ]] || continue
+  if [[ "$mode" != auto ]]; then echo "skip $repo: not marked auto"; continue; fi
+  vis="$(gh repo view "$repo" --json visibility -q .visibility 2>/dev/null || true)"
+  if [[ "$vis" != PRIVATE ]]; then echo "skip $repo: visibility is ${vis:-unknown}, only private repos run"; continue; fi
+  # oldest first; a comment counts only when its first line is `## Spec`
+  # process substitution, not a pipe: RUNNING must survive the loop
+  while IFS=$'\t' read -r n specs failed; do
+    ref="$repo#$n"
+    if [[ "$specs" -eq 0 ]]; then echo "skip $ref: no comment starting with ## Spec"; continue; fi
+    if (( RUNNING >= CAP )); then echo "skip $ref: cap reached ($RUNNING of $CAP agents running or with an open PR)"; continue; fi
+    if [[ $DRY -eq 1 ]]; then echo "startable $ref"; RUNNING=$((RUNNING + 1)); continue; fi
+    # the labels go first: a failed removal must not start a run that the next tick would start again
+    args=(--remove-label ready-for-agent); [[ "$failed" != true ]] || args+=(--remove-label agent-failed)
+    if ! gh issue edit "$n" --repo "$repo" "${args[@]}" >/dev/null 2>&1; then echo "skip $ref: could not remove the labels"; continue; fi
+    gh issue comment "$n" --repo "$repo" --body "cj-run started; log in $STATE/logs/ (${repo/\//__}__$n-*)" >/dev/null 2>&1 \
+      || echo "cj-poll: could not post the start comment on $ref" >&2
+    ( nohup "$RUN" --report "https://github.com/$repo/issues/$n" </dev/null >/dev/null 2>&1 & )
+    echo "started $ref"
+    RUNNING=$((RUNNING + 1))
+  done < <(gh issue list --repo "$repo" --label ready-for-agent --state open --limit 100 \
+      --json number,createdAt,labels,comments \
+      --jq 'sort_by(.createdAt) | .[] | [.number,
+            ([.comments[].body | split("\n")[0] | rtrimstr("\r") | select(. == "## Spec")] | length),
+            ([.labels[].name] | index("agent-failed") != null)] | @tsv' || echo "cj-poll: gh issue list failed for $repo" >&2)
+done <<<"$REPOS"

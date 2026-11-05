@@ -1,0 +1,3 @@
+# owner/repo=/absolute/path/to/main/checkout [auto]
+# "auto" lets cj-poll start issues of that repo; leave it out for manual runs only.
+# example/widgets=/path/to/widgets
