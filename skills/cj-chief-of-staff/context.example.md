@@ -2,6 +2,11 @@
 
 Copy to `state/context.md` and fill in. `state/` is gitignored; this file is the only one committed.
 
+## Scopes
+
+- <name> (default): <sections read in this scope, e.g. Goals, Chat, Git host, PR radar, External tracker, Error tracker, Docs>
+- <name>: <sections, e.g. Notes vault, Side projects>
+
 ## Goals
 
 Goals checked: <YYYY-MM-DD>
@@ -45,6 +50,16 @@ Projects: <project>
 - Team tasks: <database id>; assignee field <name>; due field <name>
 - Project papers: <database id>; team filter <value>; statuses <draft, in progress, ...>
 - Decision log: <database id>; open statuses <open, in clarification>
+
+## Notes vault
+
+Path: <absolute path to the Markdown vault>
+Projects: <folder with one folder per project, e.g. 01 Projects>
+Overview note: <per project, e.g. <project>/<project>.md>; fields: status <field> (active value <value>), next step <field>, repo <field>
+Daily note: <folder and file name, e.g. Journal/YYYY-MM-DD.md>
+Inbox: <folder>
+Tasks: <open task format, e.g. `- [ ] <task> 📅 YYYY-MM-DD`>; skip <folders, e.g. archive>
+Git: <yes or no: commit after writing; never push>
 
 ## Side projects
 
