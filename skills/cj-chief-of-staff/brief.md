@@ -130,7 +130,8 @@ Append to `state/learning.md` (create it when missing) one line per lesson and p
 
 When the run's scope lists the notes vault and its health check is `ok`:
 - Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing.
+- Decisions the user makes on this brief's items later in the same session: append them as bullets under `**Entschieden**` below that brief, then commit as below.
 - For each project whose repo had a pull request merged or an issue closed in the window: append `- YYYY-MM-DD: <merged or closed> [#<n>](<url>) <title>` under `## Log` in its overview note, creating the heading at the end when missing.
 - When that pull request or issue is the one the next step names (its number or title), empty the next step, so the next brief asks "next step?". Never write a new next step; the user picks it.
-- Change nothing else in the vault: no other field, note, move or deletion.
+- Change nothing else in the vault: no other field, note, move or deletion, unless the user asks for it.
 - `Git` is yes: commit only the files written, message `chief-of-staff: brief YYYY-MM-DD`; never push.
