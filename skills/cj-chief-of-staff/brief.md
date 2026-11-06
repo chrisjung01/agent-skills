@@ -61,6 +61,7 @@ Only what `state/context.md` lists for the run's scope, and only the healthy sou
 - A project whose repo field names a repo: its Git host activity in the window, read as for side projects.
 - Open tasks in the `Tasks` format, outside the skipped folders: due today or earlier, or within 3 days; overdue first. Tasks without a date are not listed.
 - Notes in the inbox folder: one count line when there are any.
+- The latest `## Brief` in the daily notes: a line ticked `- [x]` is done; leave its item out unless its source shows activity after that brief.
 
 **Side projects** (repos under `Side projects`): pull requests and issues with activity, CI on the default branch. Nothing → one line "quiet".
 
@@ -130,6 +131,7 @@ Append to `state/learning.md` (create it when missing) one line per lesson and p
 
 When the run's scope lists the notes vault and its health check is `ok`:
 - Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing.
+- In that copy, every line with a next move for the user (Focus today, You block others, Pull requests, Rest, Projects) starts with `- [ ] `; other lines stay as in the reply. No due date on these checkboxes.
 - Decisions the user makes on this brief's items later in the same session: append them as bullets under `**Entschieden**` below that brief, then commit as below.
 - For each project whose repo had a pull request merged or an issue closed in the window: append `- YYYY-MM-DD: <merged or closed> [#<n>](<url>) <title>` under `## Log` in its overview note, creating the heading at the end when missing.
 - When that pull request or issue is the one the next step names (its number or title), empty the next step, so the next brief asks "next step?". Never write a new next step; the user picks it.
