@@ -83,7 +83,7 @@ The day plan is what the user works on today, in working order, with an estimate
 
 **Each line** is `<n>. <estimate>, <who>: <concrete action> <link> (<reason>)`.
 
-- Estimate: a guess in minutes or hours, rounded to 5 minutes, from what the item shows (size label, spec, checklist, diff). Nothing to go by → 30 min.
+- Estimate: a guess in minutes or hours, rounded to 5 minutes, from what the item shows (size label, spec, checklist, diff). A short errand (a payment, a booking, an order, a comment) → 10 min. Nothing else to go by → 30 min.
 - Who, one of three, written in the user's language: `Claude` (the assistant can do it alone, the user checks the result), `together` (one session with the user), `you` (only the user can: a call, a payment, a decision).
 - Anything others would see (a comment, a message, a review) is `Claude` only as a draft: "draft the comment, you approve".
 - The action names what is done today, not the item's title alone. An item longer than the time left is planned as its first part, named concretely.
@@ -155,7 +155,7 @@ A section other than the day plan with more than 7 items keeps the 7 highest and
 Write the time the reads started to the scope's file (see Window), as `YYYY-MM-DDTHH:MM`. Do this after the reply, also when nothing changed.
 
 When the run's scope lists the notes vault and its health check is `ok`:
-- Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing. In that copy the section headings are one level deeper (`### Day plan`, `### Next`), so each section stays under its brief.
+- Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing. In that copy the section headings are one level deeper (`### Day plan`, `### Next`), so each section stays under its brief; the `Start:` line is left out.
 - In that copy, every line of the day plan, of You block others and of Pull requests starts with `- [ ] ` and keeps its number (`- [ ] 1. 15 min, ...`); other lines stay as in the reply. No due date on these checkboxes.
 - Plan items the user starts or finishes later in the same session: tick them in that copy.
 - Decisions the user makes on this brief's items later in the same session: append them as bullets under `**Entschieden**` below that brief, then commit as below.
