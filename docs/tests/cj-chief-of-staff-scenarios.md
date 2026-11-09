@@ -83,16 +83,6 @@ Results:
 - before (f8d30de): missed expected. "#901 by you, opened yesterday, CI green [link]": the number is bare and the link stands apart; the same for #812 and EXT-9.
 - after (a26228f): met expected. Every number is its own link, such as `[#901](<url>)`, `[#812](<url>)` and `[EXT-9](<url>)`; no separate link word.
 
-## 7. A lesson from the brief's own items
-
-Setup: case 5. `state/learning.md` holds one line from 2026-10-30: "Request a reviewer when the pull request opens, or it has no owner". The user says only "give me my morning brief".
-
-Expected: the brief ends with one lesson of at most 5 lines on an item from this brief (decision, options, better one and trade-off, principle, product angle), not on the logged principle; above it one line marks that principle as seen again, with its count; after the reply `state/learning.md` gets one line per lesson and per repeat.
-
-Results:
-- before (aaa84cb), even with the user asking for a lesson: missed expected. A lesson on dark mode against default currency, but `state/learning.md` stayed unwritten and the repeat of the logged principle on #901 had no count.
-- after (532f77b), without being asked: met expected. "Again: Request a reviewer ... (#901), 2nd time", then 5 lines on Ana's dark mode decision ending in "Separate shipping code from switching it on" and "moves Activation"; two lines appended to `state/learning.md`.
-
 ## 8. Notes vault: read projects, write brief and log
 
 Setup: case 5. `context.md` lists a notes vault with projects folder `01 Projects`, daily note `Journal/YYYY-MM-DD.md`, inbox `00 Inbox`, Git yes. Overview notes:
@@ -112,8 +102,25 @@ Results:
 
 Setup: cases 5 and 8. `context.md` has `Scopes`: `work (default)`: Goals, People, Chat, Git host, PR radar, External tracker, Error tracker, Docs; `private`: Notes vault, Side projects. `state/last-brief` holds `2026-11-02T07:45`; `state/last-brief-private` is missing. The user calls `brief`, later `brief private`.
 
-Expected: `brief` reads no vault and writes nothing in it; it updates only `state/last-brief`. `brief private` reads only the vault and `owl-timer`, has no Focus today, starts its window at 00:00 of the last workday, writes the vault as in case 8 and creates `state/last-brief-private`; `state/last-brief` stays unchanged.
+Expected: `brief` reads no vault and writes nothing in it; it updates only `state/last-brief`. `brief private` reads only the vault and `owl-timer`, starts its window at 00:00 of the last workday, writes the vault as in case 8 and creates `state/last-brief-private`; `state/last-brief` stays unchanged.
 
 Results:
 - before (702a7a8): missed expected. `brief private` ran as a plain brief over every work source, with no vault, its window from `state/last-brief`, and no `state/last-brief-private`.
 - after (4339b98): met expected. `brief` read only work sources and wrote only `state/last-brief` and `state/learning.md`; `brief private` read the vault and owl-timer, had no Focus today, started at Monday 00:00, wrote the vault and created `state/last-brief-private`.
+
+## 10. Today, and a suggested next step from the repo
+
+Setup: today is Monday 2026-11-09, 08:00. Only the `private` scope of case 9, with its window from 2026-11-08T20:00; nothing changed on any repo in the window. Overview notes, all status active:
+- `owl-timer/owl-timer.md`: next empty, repo `owl-timer`. Open issues: #40 "Docs typo" (label `low`); #41 "Start time after midnight lands in the future" (labels `bug`, `size: S`); #42 "[Epic] Sync" (updated yesterday). No open pull requests. Last commit 3 days ago.
+- `game/game.md`: next "Make the game feel good", repo `game`. Open issues: #7 "Hero health grows with level" (label `ready to implement`); #8 "Boss overlay" (updated this morning). Open pull request #9 by the user, draft. Last commit yesterday.
+- `shed/shed.md`: next "Order wood", no repo.
+
+Vault tasks: `- [ ] Pay invoice 📅 2026-11-09` in `shed/shed.md`; `- [ ] Book dentist 📅 2026-11-11` in `Aufgaben.md`.
+
+`state/learning.md` holds two lines from last week.
+
+Expected: Focus today holds Pay invoice first, with its due date as reason, and a concrete action from `game`; Book dentist stands under Today; Projects suggests #41 for `owl-timer`, with a link and a reason; #9 is the suggestion for `game`; `owl-timer` keeps "next step?"; `shed` has no suggestion; the brief has no lesson and `state/learning.md` is not written; no next step is written to a note.
+
+Results:
+- before (ff5ffce): missed expected. No Focus today and no Today section; no suggestion in Projects, #9 not mentioned; #41 only inside a mandatory lesson, one line appended to `state/learning.md`.
+- after (uncommitted): met expected. Focus today holds Pay invoice (due date) and draft #9; Book dentist under Today; Projects suggests #41 "bug, size S" and #9; `owl-timer` keeps "next step?"; `shed` has no suggestion; no lesson, `state/learning.md` not written, no note's next step changed.
