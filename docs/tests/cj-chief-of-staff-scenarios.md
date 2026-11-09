@@ -123,4 +123,4 @@ Expected: Focus today holds Pay invoice first, with its due date as reason, and 
 
 Results:
 - before (ff5ffce): missed expected. No Focus today and no Today section; no suggestion in Projects, #9 not mentioned; #41 only inside a mandatory lesson, one line appended to `state/learning.md`.
-- after (uncommitted): met expected. Focus today holds Pay invoice (due date) and draft #9; Book dentist under Today; Projects suggests #41 "bug, size S" and #9; `owl-timer` keeps "next step?"; `shed` has no suggestion; no lesson, `state/learning.md` not written, no note's next step changed.
+- after (b2e4bec): met expected. Focus today holds Pay invoice (due date) and draft #9; Book dentist under Today; Projects suggests #41 "bug, size S" and #9; `owl-timer` keeps "next step?"; `shed` has no suggestion; no lesson, `state/learning.md` not written, no note's next step changed.
