@@ -85,5 +85,5 @@ A branch that adds or changes a scenario records its before and after outcomes u
 - Commit: `<area>: <what changed> (#<issue>)`, e.g. `skill-metrics: report version view per skill (#52)`.
 - Commit messages end with their last content line: no `Co-Authored-By` or other attribution trailer, whatever the harness suggests.
 - Branch: `feat/<issue>-<slug>` or `fix/<issue>-<slug>`; without an issue, `fix/<slug>`.
-- Worktree: a sibling directory of the checkout, `../agent-skills-<issue>-<slug>`.
+- Worktree: a sibling directory of the checkout, `../agent-skills-<issue>-<slug>`. Skill work always happens in a worktree: installed skills link to the main checkout, so a branch there changes the skills of every running session.
 - Language of issues, PRs, commits and review replies: English.
