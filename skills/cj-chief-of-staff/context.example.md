@@ -7,6 +7,13 @@ Copy to `state/context.md` and fill in. `state/` is gitignored; this file is the
 - <name> (default): <sections read in this scope, e.g. Goals, Chat, Git host, PR radar, External tracker, Error tracker, Docs>
 - <name>: <sections, e.g. Notes vault, Side projects>
 
+## Day plan
+
+Time per day for plannable work, without meetings and breaks; a duration in the call overrides it for one run.
+
+- <scope>: <e.g. 6h>
+- <scope>: <e.g. 2h>
+
 ## Goals
 
 Goals checked: <YYYY-MM-DD>

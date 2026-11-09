@@ -30,7 +30,7 @@ Decisions are recorded in [docs/adr/](docs/adr/README.md); check its index befor
 | `cj-posting` | The one gate for anything others see or that changes shared state: draft, clean, show, ask, then act |
 | `cj-lint-from-findings` | Turn a mechanical review finding into a lint rule, pattern rule or grep check, proven to fire, placed where the user picks |
 | `cj-static-analysis` | Who calls a symbol, which symbols a diff orphans, which findings the linter already blocks; code index, then analyzer, then `grep`, each answer naming its source |
-| `cj-chief-of-staff` | Personal brief: what changed across chat, Git host, trackers, error tracker, docs and notes vault, ranked by the user's goals; values only in its gitignored `state/` |
+| `cj-chief-of-staff` | Personal brief: a day plan with estimates and who does what, from what is due and what changed across chat, Git host, trackers, error tracker, docs and notes vault, the user's goals first; values only in its gitignored `state/` |
 | `cj-project-context` | Find project and organisation facts at runtime (commands, labels, channels, goals) instead of hard-coding them |
 
 ## When something becomes a skill

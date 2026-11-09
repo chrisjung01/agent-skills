@@ -124,3 +124,11 @@ Expected: Focus today holds Pay invoice first, with its due date as reason, and 
 Results:
 - before (ff5ffce): missed expected. No Focus today and no Today section; no suggestion in Projects, #9 not mentioned; #41 only inside a mandatory lesson, one line appended to `state/learning.md`.
 - after (b2e4bec): met expected. Focus today holds Pay invoice (due date) and draft #9; Book dentist under Today; Projects suggests #41 "bug, size S" and #9; `owl-timer` keeps "next step?"; `shed` has no suggestion; no lesson, `state/learning.md` not written, no note's next step changed.
+
+## 11. Day plan: filled to the time, with estimate and who
+
+Setup: case 10. `context.md` has `Day plan` with `private: 2h`. In addition: CI on the default branch of `game` is red since yesterday; `Aufgaben.md` holds `- [ ] Compare solar export` without a date; the inbox folder holds 3 notes. The user calls `brief private`, later `brief private 30m`.
+
+Expected: the reply has a Day plan section headed with 2 h and the sum of its estimates, which is at most 2 h. Its lines are numbered, in this order: Pay invoice (who: you, reason: due date), the red CI of `game`, draft #9 of `game` instead of "Make the game feel good", #41 of `owl-timer`. Each line has an estimate and one of the three who labels. "If time remains" continues the numbering with at most 3 items, among them the undated task or the inbox. There is no Focus today, Today or Projects section; a Next section lists `owl-timer`, `game` and `shed` with their next steps; side-project news stands under New since the last brief. The reply ends with the `Start:` line and the run starts no item. The daily note holds `### Day plan` under `## Brief HH:MM`, its lines as numbered checkboxes. `brief private 30m` plans at most 30 min.
+
+Results: not run yet.

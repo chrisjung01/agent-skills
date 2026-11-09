@@ -52,7 +52,7 @@ Only what `state/context.md` lists for the run's scope, and only the healthy sou
 - Team tasks assigned to the user and open; overdue or due within 3 days first.
 - Project papers of the user's team changed in the window; owner, responsible or writer is the user → higher.
 - Decision log entries changed in the window; open or in clarification with the user as participant → "You block others".
-- Goals page: when `Goals checked` in `context.md` is more than 7 days old, compare the page with `context.md`, list differences under "Rest", and update `Goals checked` and the copied goals.
+- Goals page: when `Goals checked` in `context.md` is more than 7 days old, compare the page with `context.md`, list differences under "New since the last brief", and update `Goals checked` and the copied goals.
 
 **Notes vault** (under `Notes vault`)
 - Overview notes whose status is the active value: each one's next step.
@@ -60,27 +60,51 @@ Only what `state/context.md` lists for the run's scope, and only the healthy sou
 - Active with an empty next step, or with a next step naming a pull request or issue merged or closed in the window: "next step?".
 - Active with a repo, and the next step names no open pull request or issue: read the repo's open pull requests and issues and suggest one to do next, with a reason of a few words. Take the first that fits: the user's own open pull request, ready before draft; an issue marked ready to implement or in the earliest milestone; a defect by label or title; the smallest; the most recently updated. Epics, parent issues and issues labelled as deferred count only when nothing else is left. Nothing open → no suggestion.
 - A project whose repo field names a repo: its Git host activity in the window, read as for side projects.
-- Open tasks in the `Tasks` format, outside the skipped folders: due today or earlier, or within 3 days; overdue first. Tasks without a date are not listed.
+- Open tasks in the `Tasks` format, outside the skipped folders: due today or earlier, or within 3 days; overdue first. Tasks without a date are read too; they only fill the day plan.
 - Notes in the inbox folder: one count line when there are any.
 - The latest `## Brief` in the daily notes: a line ticked `- [x]` is done; leave its item out unless its source shows activity after that brief.
 
 **Side projects** (repos under `Side projects`): pull requests and issues with activity, CI on the default branch. Nothing → one line "quiet".
 
-## Rank
+## Day plan
+
+The day plan is what the user works on today, in working order, with an estimate and who does it. It is filled until the estimates add up to the time for the day.
+
+**Time for the day.** A duration after the scope in the call (`brief <scope> 4h`, `90m`), else the scope's value under `Day plan` in `context.md`, else 2 hours.
+
+**Fill order.** Take items step by step until the time is full; inside a step, most overdue or oldest first.
+
+1. Waits on the user AND (a driver is involved OR it moves a goal). The line ends with its reason: the driver's name or the goal's short name. Only in a scope with `Goals` and `People`; an item with neither reason never enters through this step, however urgent it sounds.
+2. Tasks overdue or due today: personal to-dos, team tasks, vault tasks. The line ends with the due date.
+3. What blocks other work: red CI on a default branch, review requests to the user, open decisions with the user, questions to the user in chat, the user's own pull requests whose next move is the user's.
+4. The next step of each active project, or its suggestion when the next step is empty or not something to do in a day; most recently active project first.
+5. More from the same sources: tasks due within 3 days, to-dos in progress or planned this week, further open issues and pull requests of the active projects, picked like the suggestion.
+6. Vault tasks without a date, and clearing the inbox folder.
+
+**Each line** is `<n>. <estimate>, <who>: <concrete action> <link> (<reason>)`.
+
+- Estimate: a guess in minutes or hours, rounded to 5 minutes, from what the item shows (size label, spec, checklist, diff). Nothing to go by → 30 min.
+- Who, one of three, written in the user's language: `Claude` (the assistant can do it alone, the user checks the result), `together` (one session with the user), `you` (only the user can: a call, a payment, a decision).
+- Anything others would see (a comment, a message, a review) is `Claude` only as a draft: "draft the comment, you approve".
+- The action names what is done today, not the item's title alone. An item longer than the time left is planned as its first part, named concretely.
+- A next step too vague to act on today ("make the game feel good") is not a plan line; the suggestion for that project takes its place.
+- Small items of one kind and place are one line ("3 tax tasks").
+
+At most 7 lines. Below them `If time remains:` with up to 3 more items in fill order, same shape, numbering continued, so the user can pick any line by number.
+
+## Sections
 
 One item from two sources (a bot message and the Git host, say) is one line, linked to the source of truth `context.md` names.
 
-1. **Focus today**, at most 3: waits on the user AND (a driver is involved OR it moves a goal). Each line ends with its reason: the driver's name or the goal's short name. An item with neither reason is never here, however urgent it sounds. In a scope without `Goals` and `People`: overdue tasks, then tasks due today, then the next step or suggestion of the most recently active project; the reason is the due date or `active <date>`. Each line names the concrete action for today.
-2. **Today**: personal to-dos, team tasks and vault tasks not in Focus today; overdue first, then by due date, then undated ones in progress or planned this week.
+1. **Day plan**: as above.
+2. **Next**: every active project, one line each with its next step, stalled first; also when the same step is in the day plan.
 3. **You block others**: review requests, open decisions with the user, questions to the user in chat.
 4. **Pull requests**: the radar, longest idle first; the user's own first, then the ones the user is involved in, then the team's.
 5. **Waiting on others**: the external tracker.
 6. **Errors**: the error tracker.
-7. **Rest**: one line each.
-8. **Side projects.**
-9. **Projects**: the active projects, stalled first, then the inbox count.
+7. **New since the last brief**: what changed and needs no action today, one line each: merged and closed work, CI state, side projects, changed papers and decisions, the inbox count.
 
-An item that fits several sections stands only in the highest one. An empty section is left out. Chat messages that match nothing above are not mentioned at all, not even as "skipped".
+Apart from Next, an item that fits several sections stands only in the highest one. An empty section is left out. Chat messages that match nothing above are not mentioned at all, not even as "skipped".
 
 ## Reply
 
@@ -89,38 +113,51 @@ Write it scannable: the first line is the result or the decision needed. Be extr
 ```
 **Brief <scope> <weekday> <date>**, since <window start>
 Missing: <source> (<reason>)
-**Focus today**
-1. <item> <link> (<driver or goal>)
-**Today**
-- <due date or status>: <task> <link>
-**You block others**
-- <item> <link>
-**Pull requests**
-- [#<number>](<url>) <title>, idle <days> days: <next move>
-**Waiting on others**
-- <item> <link>
-**Errors**
-- <item> <link>
-**Rest**
-- <item> <link>
-**Side projects**
-- <item> <link>
-**Projects**
+
+## Day plan (<time>, planned <sum of estimates>)
+1. <estimate>, <who>: <action> <link> (<reason>)
+
+If time remains:
+2. <estimate>, <who>: <action> <link>
+
+## Next
 - <project>: <next step> (<stalled? or next step?>); suggested [#<n>](<url>) <title>: <reason>
+
+## You block others
+- <item> <link>
+
+## Pull requests
+- [#<number>](<url>) <title>, idle <days> days: <next move>
+
+## Waiting on others
+- <item> <link>
+
+## Errors
+- <item> <link>
+
+## New since the last brief
+- <item> <link>
 - Inbox: <n> notes
+
+Start: reply with the numbers, such as "do 1 and 3".
 ```
+
+Headings and labels are written in the user's language.
+
+The reply ends with the `Start:` line. The run itself starts no plan item: work begins only when the user answers, and is then ordinary work under the rules of the place it happens in, outside this skill's read-only rule.
 
 Every pull request, issue, ticket and error number is itself a markdown link to its page, such as `[#812](<url>)` or `[EXT-9](<url>)`; never a bare number, never a separate link word.
 
-A section with more than 7 items keeps the 7 highest and ends with `+<n> more`.
+A section other than the day plan with more than 7 items keeps the 7 highest and ends with `+<n> more`.
 
 ## Close
 
 Write the time the reads started to the scope's file (see Window), as `YYYY-MM-DDTHH:MM`. Do this after the reply, also when nothing changed.
 
 When the run's scope lists the notes vault and its health check is `ok`:
-- Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing.
-- In that copy, every line with a next move for the user (Focus today, Today, You block others, Pull requests, Rest, Projects) starts with `- [ ] `; other lines stay as in the reply. No due date on these checkboxes.
+- Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing. In that copy the section headings are one level deeper (`### Day plan`, `### Next`), so each section stays under its brief.
+- In that copy, every line of the day plan, of You block others and of Pull requests starts with `- [ ] ` and keeps its number (`- [ ] 1. 15 min, ...`); other lines stay as in the reply. No due date on these checkboxes.
+- Plan items the user starts or finishes later in the same session: tick them in that copy.
 - Decisions the user makes on this brief's items later in the same session: append them as bullets under `**Entschieden**` below that brief, then commit as below.
 - For each project whose repo had a pull request merged or an issue closed in the window: append `- YYYY-MM-DD: <merged or closed> [#<n>](<url>) <title>` under `## Log` in its overview note, creating the heading at the end when missing.
 - When that pull request or issue is the one the next step names (its number or title), empty the next step, so the next brief asks "next step?". Never write a new next step; the user picks it.
