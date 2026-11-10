@@ -56,3 +56,7 @@ Before: `main` at 858518c. After: commit 2307217 on `fix/teach-walkthrough`, aft
 4. Recall, prediction and why-question: before missed expected, after met expected. Earlier after-runs missed twice: no required why-question in chat, then prediction only preferred; both now required.
 5. Session close asks what was missing: before missed expected, after met expected.
 6. Topic starts with the mission: before met expected, after met expected; regression guard.
+
+Scenario 7, added later. After: commit cdff1f2 on `fix/teach-change-review`, a fresh paper-exercise agent.
+
+7. Finished change, change review: before not run, the run on `main` at 93d9987 stopped with an API error before it reported. After met expected: no workspace or mission question, page at `~/learning/skills-repo/changes/0001-<slug>.html`, decisions with alternatives and sources, the 10 min rule tied to the test note, the cap of 7 marked "not recorded" with the agent's reading labelled, nothing approved or posted, the PR 210 line ticked and the cron line untouched.
