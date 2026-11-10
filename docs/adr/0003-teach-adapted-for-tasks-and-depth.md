@@ -33,3 +33,7 @@ Upstream changes to `teach` no longer arrive by copying; compare by hand and por
 - `docs/tests/cj-teach-scenarios.md`
 - [Anthropic: How AI assistance impacts the formation of coding skills](https://www.anthropic.com/research/AI-assistance-coding-skills)
 - [4C/ID](https://edutechwiki.unige.ch/en/4C-ID), [First Principles of Instruction](https://en.wikipedia.org/wiki/First_Principles_of_Instruction)
+
+## Changelog
+
+- 2026-11-10: A third request, a finished change, gets a change review (`CHANGE-FORMAT.md`: what changed, before and after, decisions with alternatives and reasons, questions to expect, why-questions), so the user can defend work the assistant did. A teaching workspace named in the user's instructions is used without asking, with one subfolder per repository, and a finished session ticks its line in the user's list of open recommendations. Rejected: explaining changes as walkthroughs, because a walkthrough leads through steps the user still does, while a change is already made.

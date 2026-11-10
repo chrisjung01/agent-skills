@@ -13,7 +13,7 @@ Decisions are recorded in [docs/adr/](docs/adr/README.md); check its index befor
 | `cj-implement` | Flow 4: one small reviewed PR per ticket (draft, unless small and auto-merge is allowed), stacked while a blocker is open; a multi-layer ticket as a stack of part PRs; `one-pr` mode for one PR per spec |
 | `cj-accept` | Flow 5: the user checks every AC and edge case of a spec by hand on its last open PR; posts an `## Acceptance` comment, files the kill-criterion issue, records deviations as ADR or glossary; only the records when the spec says verified is enough |
 | `cj-retro` | Flow 6: propose changes to the worked-in repo's environment after a session |
-| `cj-teach` | Teach a topic over several sessions in a workspace of lessons, references and learning records, or walk the user through a real task with the why behind every step |
+| `cj-teach` | Teach a topic over several sessions in a workspace of lessons, references and learning records, walk the user through a real task with the why behind every step, or explain a finished change with its decisions and alternatives |
 | `cj-bug-triage` | Verdict and issue for an error-tracker issue or a human bug report |
 | `cj-review-loop` | Review your own branch: one pass, or fix in rounds until no high or medium findings remain |
 | `cj-reviewing` | The reviewer brief (CORRECTNESS, STANDARDS, SPEC) and the one severity scale every review uses |

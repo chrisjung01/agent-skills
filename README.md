@@ -46,7 +46,7 @@ The last `Acceptance:` line of every spec, `Acceptance: by hand` or `Acceptance:
 | [`cj-retro`](skills/cj-retro/SKILL.md) | **Flow 6.** Turns a session's friction into checks, standards or agent-doc pointers in the worked-in repo; skill findings go to `cj-whetstone`. |
 | [`cj-whetstone`](skills/cj-whetstone/SKILL.md) | Improves a skill from the skill calls the whetstone metrics store, after reading their windows. |
 | [`cj-architecture-scan`](skills/cj-architecture-scan/SKILL.md) | You suspect the architecture of a repo hurts but cannot name a decision yet. Scans the hot spots (or the area you name), shows up to five refactoring candidates as cards on a page, and files the one you pick as an issue for `/cj-grill-with-docs`. |
-| [`cj-teach`](skills/cj-teach/SKILL.md) | Teaches a topic over several sessions (mission, sources, HTML lessons from worked example to exercise, reference sheets, learning records), or walks the user through a real task with the why behind every step. Adapted from mattpocock/skills. |
+| [`cj-teach`](skills/cj-teach/SKILL.md) | Teaches a topic over several sessions (mission, sources, HTML lessons from worked example to exercise, reference sheets, learning records), walks the user through a real task with the why behind every step, or explains a finished change (a pull request, a branch) with its decisions, alternatives and reasons so you can defend it. Adapted from mattpocock/skills. |
 
 **Day to day** (the model picks them up from your words, or you type `/name`):
 
