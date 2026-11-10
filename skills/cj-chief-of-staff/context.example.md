@@ -61,6 +61,9 @@ Projects: <project>
 - Team tasks: <database id>; assignee field <name>; due field <name>
 - Project papers: <database id>; team filter <value>; statuses <draft, in progress, ...>
 - Decision log: <database id>; open statuses <open, in clarification>
+- Projects (optional): <database id>; fields: status <field> (active value <value>), next step <field>, repo <field>
+- Inbox (optional): <page link>; its child pages are the inbox notes
+- Daily note (optional): <database id>; one entry per day, title YYYY-MM-DD, date field <name>
 
 ## Notes vault
 

@@ -52,6 +52,8 @@ Only what `state/context.md` lists for the run's scope, and only the healthy sou
 - Team tasks assigned to the user and open; overdue or due within 3 days first.
 - Project papers of the user's team changed in the window; owner, responsible or writer is the user → higher.
 - Decision log entries changed in the window; open or in clarification with the user as participant → "You block others".
+- Projects, Inbox and Daily note, when `context.md` lists them under `Docs`: read like their counterparts under Notes vault. A project is a row of the projects database; "no file in its folder changed" means neither the row nor its page was edited.
+- A ticked line in the latest brief of the daily entry that links a personal to-do whose status is still open: one line under "New since the last brief", `<to-do> ticked, still <status>`; the to-do stays out of the day plan.
 - Goals page: when `Goals checked` in `context.md` is more than 7 days old, compare the page with `context.md`, list differences under "New since the last brief", and update `Goals checked` and the copied goals.
 
 **Notes vault** (under `Notes vault`)
@@ -182,3 +184,9 @@ When the run's scope lists the notes vault and its health check is `ok`:
 - When that pull request or issue is the one the next step names (its number or title), empty the next step, so the next brief asks "next step?". Never write a new next step; the user picks it.
 - Change nothing else in the vault: no other field, note, move or deletion, unless the user asks for it.
 - `Git` is yes: commit only the files written, message `chief-of-staff: brief YYYY-MM-DD`; never push.
+
+When the run's scope lists `Docs` with a `Daily note` and its health check is `ok`:
+- Write the brief to today's entry of the daily note database as the vault rules above say for the daily note: same heading, checkboxes, ticks and decisions; create the entry when missing, its title `YYYY-MM-DD` and its date field today.
+- A line from a personal to-do keeps its link to the to-do's page.
+- The `## Log` and next-step rules apply to the rows of the docs projects database: the log goes on the row's page, the emptied next step is the row's field.
+- Change nothing else in the docs: no to-do status, no other field, page, move or deletion, unless the user asks for it. No commit.
