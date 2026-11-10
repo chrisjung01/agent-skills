@@ -63,6 +63,7 @@ Only what `state/context.md` lists for the run's scope, and only the healthy sou
 - Open tasks in the `Tasks` format, outside the skipped folders: due today or earlier, or within 3 days; overdue first. Tasks without a date are read too; they only fill the day plan.
 - Notes in the inbox folder: one count line when there are any.
 - The latest `## Brief` in the daily notes: a line ticked `- [x]` is done; leave its item out unless its source shows activity after that brief.
+- Unticked lines under `### Weitere Tasks` of that same brief are the user's own open tasks, carried into the new brief.
 
 **Learning** (under `Learning`): the unticked lines of the list of open learning recommendations.
 
@@ -117,7 +118,8 @@ One item from two sources (a bot message and the Git host, say) is one line, lin
 5. **Pull requests**: the radar, longest idle first; the user's own first, then the ones the user is involved in, then the team's.
 6. **Waiting on others**: the external tracker.
 7. **Errors**: the error tracker.
-8. **New since the last brief**: what changed and needs no action today, one line each: merged and closed work, CI state, side projects, changed papers and decisions, the inbox count.
+8. **Weitere Tasks**: the carried open tasks, one line each, each ending with the question `done or unimportant?`.
+9. **New since the last brief**: what changed and needs no action today, one line each: merged and closed work, CI state, side projects, changed papers and decisions, the inbox count.
 
 Apart from Next, an item that fits several sections stands only in the highest one. An empty section is left out. Chat messages that match nothing above are not mentioned at all, not even as "skipped".
 
@@ -154,6 +156,9 @@ If time remains:
 ## Errors
 - <item> <link>
 
+## Weitere Tasks
+- <task>: done or unimportant?
+
 ## New since the last brief
 - <item> <link>
 - Inbox: <n> notes
@@ -176,6 +181,7 @@ Write the time the reads started to the scope's file (see Window), as `YYYY-MM-D
 When the run's scope lists the notes vault and its health check is `ok`:
 - Append the brief to today's daily note under `## Brief HH:MM`; create the note when missing. In that copy the section headings are one level deeper (`### Day plan`, `### Worth learning today`, `### Next`), so each section stays under its brief; the `Start:` line is left out.
 - In that copy, every line of the day plan, of You block others and of Pull requests starts with `- [ ] ` and keeps its number (`- [ ] 1. 15 min, ...`); other lines stay as in the reply. No due date on these checkboxes.
+- In that copy, after the day plan (and its `If time remains:`), add the heading `### Weitere Tasks` (in the user's language) followed by the carried open tasks as `- [ ] <task>` lines and one empty `- [ ] ` line, for the user's own extra tasks. The reply does not show it.
 - Plan items the user starts or finishes later in the same session: tick them in that copy.
 - Decisions the user makes on this brief's items later in the same session: append them as bullets under `**Entschieden**` below that brief, then commit as below.
 - For each project whose repo had a pull request merged or an issue closed in the window: append `- YYYY-MM-DD: <merged or closed> [#<n>](<url>) <title>` under `## Log` in its overview note, creating the heading at the end when missing.
