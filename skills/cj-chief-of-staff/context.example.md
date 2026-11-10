@@ -14,6 +14,10 @@ Time per day for plannable work, without meetings and breaks; a duration in the 
 - <scope>: <e.g. 6h>
 - <scope>: <e.g. 2h>
 
+## Learning
+
+Open list: <path to the Markdown file of open learning recommendations, one per line: `- [ ] YYYY-MM-DD · /cj-teach <call> · <reason>`>
+
 ## Goals
 
 Goals checked: <YYYY-MM-DD>
