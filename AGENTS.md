@@ -78,12 +78,12 @@ cargo test -- --ignored      # manual, not in CI, after a report layout change: 
 
 Skills are installed as symlinks. Edits here take effect immediately, no reinstall needed.
 A skill change is tried with the scenarios in `docs/tests/` (rules in its README): a fresh agent runs `<skill>-scenarios.md` against the text before and after the change.
-A branch that adds or changes a scenario records its before and after outcomes under Results before the PR opens, each naming the commit the run read.
+A branch that adds or changes a scenario records its before and after outcomes under Results before the PR opens, each naming the commit the run read. Commit the skill change first, run the scenario against that commit, then record the results in a second commit.
 
 ## Conventions
 
 - Commit: `<area>: <what changed> (#<issue>)`, e.g. `skill-metrics: report version view per skill (#52)`.
 - Commit messages end with their last content line: no `Co-Authored-By` or other attribution trailer, whatever the harness suggests.
 - Branch: `feat/<issue>-<slug>` or `fix/<issue>-<slug>`; without an issue, `fix/<slug>`.
-- Worktree: a sibling directory of the checkout, `../agent-skills-<issue>-<slug>`.
+- Worktree: a sibling directory of the checkout, `../agent-skills-<issue>-<slug>`. Skill work always happens in a worktree: installed skills link to the main checkout, so a branch there changes the skills of every running session.
 - Language of issues, PRs, commits and review replies: English.
