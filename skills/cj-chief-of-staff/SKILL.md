@@ -10,7 +10,7 @@ Turns the user's sources into one ranked list, ranked by the goals the user set,
 
 ## Modes
 
-- `brief` (default, also a bare call): a day plan filled to the time you have, each line with an estimate and who does it, then what changed since the last brief.
+- `brief` (default, also a bare call): a day plan filled to the time you have, each line with an estimate and who does it, what pays to learn for it today, then what changed since the last brief.
 
 A word after the mode names a scope from `Scopes` in `context.md`, such as `brief <scope>`; none → the scope marked default. A run health-checks, reads and ranks only the sections its scope lists. A duration after the scope (`brief <scope> 4h`) sets the time for this run's day plan. A scope without `Goals` and `People` fills its day plan by date and recent activity. No `Scopes` section → one scope with every section.
 - `weekly`: not built yet. Say so in one line and stop.
