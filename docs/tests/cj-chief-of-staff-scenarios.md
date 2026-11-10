@@ -124,3 +124,24 @@ Expected: Focus today holds Pay invoice first, with its due date as reason, and 
 Results:
 - before (ff5ffce): missed expected. No Focus today and no Today section; no suggestion in Projects, #9 not mentioned; #41 only inside a mandatory lesson, one line appended to `state/learning.md`.
 - after (b2e4bec): met expected. Focus today holds Pay invoice (due date) and draft #9; Book dentist under Today; Projects suggests #41 "bug, size S" and #9; `owl-timer` keeps "next step?"; `shed` has no suggestion; no lesson, `state/learning.md` not written, no note's next step changed.
+
+## 11. Day plan: filled to the time, with estimate and who
+
+Setup: case 10. `context.md` has `Day plan` with `private: 2h`. In addition: CI on the default branch of `game` is red since yesterday; `Aufgaben.md` holds `- [ ] Compare solar export` without a date; the inbox folder holds 3 notes; a file in the `shed` folder changed 2 days ago. The user calls `brief private`, later `brief private 30m`.
+
+Expected: the reply has a Day plan section headed with 2 h and the sum of its estimates, which is at most 2 h. Its lines are numbered, in this order: Pay invoice (who: you, reason: due date), the red CI of `game`, draft #9 of `game` instead of "Make the game feel good", then Order wood before #41 of `owl-timer`. Each line has an estimate and one of the three who labels; the errands (invoice, wood, dentist) are estimated shorter than the code work. "If time remains" continues the numbering with at most 3 items. There is no Focus today, Today or Projects section; a Next section lists `owl-timer`, `game` and `shed` with their next steps; the inbox count stands under New since the last brief. The reply ends with the `Start:` line and the run starts no item. The daily note holds `### Day plan` under `## Brief HH:MM`, its lines as numbered checkboxes, without the `Start:` line. `brief private 30m` plans at most 30 min.
+
+Results:
+- before (caad872): missed expected. Focus today, Today, Side projects and Projects sections; no day plan, no estimate, no who label, no `Start:` line; `30m` changed nothing.
+- after (1916912): missed expected. Day plan, Next and the `Start:` line as expected, but every line estimated at 30 min, errands included, and the `Start:` line copied into the daily note.
+- after (5d4f332): met expected. Day plan (2 h, planned 2 h): Pay invoice 10 min (you), red CI of `game` 30 min (Claude), draft #9 (together), Order wood 10 min, #41 30 min (Claude), Book dentist 10 min; "If time remains" 7 to 9; Next lists the three projects; inbox count under New since the last brief; reply ends with `Start:`, the daily note has numbered checkboxes without it; nothing started. `30m`: Pay invoice 10 min and the first 20 min of the red CI.
+
+## 12. Worth learning today: a pointer, not a lesson
+
+Setup: case 11, the call `brief private`. Later a second call on a day whose only open items are the three errands (Pay invoice, Order wood, Book dentist): no repo has open issues or pull requests, CI is green.
+
+Expected: the first reply has a Worth learning today section between the day plan and Next, with 1 or 2 lines. Each line names what the user can do or judge afterwards, the number of the plan line it helps with, and ends with a `/cj-teach <topic or task>` call. The lines come from the code work in the plan (the red CI of `game`, draft #9, #41 of `owl-timer`); none comes from Pay invoice, Order wood or Book dentist. The brief explains none of the subjects itself, `state/learning.md` is not written, and no teaching session is started. The daily note holds the section as `### Worth learning today`, its lines without checkboxes. The second reply has no Worth learning today section.
+
+Results:
+- before (5d4f332): missed expected. No Worth learning today section in the first reply and no `/cj-teach` call anywhere; the second reply has none either; nothing started.
+- after (f882081): met expected. Between the day plan and Next, two lines: "Read a red CI run and judge the fix (for 2)" and "Judge date and time handling around midnight (for 5)", each ending with its `/cj-teach` call; none from the errands; no subject explained, `state/learning.md` not written, no teaching session started; the daily note has `### Worth learning today` without checkboxes. Errands-only day: no section.
