@@ -28,7 +28,8 @@ Done when the frontier is empty and the closing reply ends with the next step: `
 
 `auto` after the issue or idea starts it. The run asks the user nothing and takes every recommendation, for changes the user would wave through anyway.
 
-- **Tier:** settled as step 2 says, without the tier question. Big, whether proposed now, settled earlier or proposed again in step 3: say so in one line, then go on without auto mode from that question on. Its next step is `/cj-to-spec <issue>` without `auto`.
+- **Tier:** a tier step 2 finds settled stands; otherwise the tier step 2 would propose stands, without the tier question, and goes into the list. Small: as step 2 says; nothing is posted, since a small tier with a stake needs the user.
+- **Big:** big settled, big proposed in step 2, or a big sign in an auto-decided answer (step 3): one line says the change is big and auto mode ends, then the run asks as written, starting with the question step 2 or 3 asks. Its `Next:` command is `/cj-to-spec <issue>` without `auto`.
 - **Grill:** call the Skill tool with "cj-grilling" in auto mode.
 - **Author questions:** step 4 posts nothing and does not stop; the proposed answer is the decision, marked `author question, assumed`.
-- **Close:** step 5 as written, the decisions in the shape of the auto mode in `cj-grilling`. The `Next:` command is `/cj-to-spec <issue> auto`; running it confirms the list.
+- **Close:** step 5 as written, the decisions in the shape of the auto mode in `cj-grilling`. The `Next:` command is `/cj-to-spec <issue> auto`, or `/cj-to-spec auto` for an idea without an issue; running it confirms the list.

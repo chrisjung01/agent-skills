@@ -32,10 +32,10 @@ Give a summary of the decisions, numbered, before anything acts on them. The cov
 
 The calling skill says when it runs in auto mode. Then this skill asks the user nothing:
 
-- Every frontier decision, every Partial or Missing coverage row and every term question is settled with the recommended option and recorded as auto-decided. The frontier, the three predicted decisions and the coverage table run as above.
+- Every question this skill would ask the user (frontier decisions, Partial or Missing coverage rows, term questions, a missing premise, a glossary context) is settled with the recommended option and recorded as auto-decided. The frontier, the three predicted decisions and the coverage table run as above.
 - A settled term goes into the glossary right away; an ADR the rules below would offer is written without the yes. Both are listed in the summary.
-- Every subagent runs on the session's model and effort, as far as they are known, in place of a model or effort a step names; pass whichever the harness takes.
-- The summary lists every auto-decided item, numbered, one line each: `<question> → <decision>: <reason>`.
+- Every subagent gets the session's model and effort when the system or harness context states them; pass whichever the harness takes.
+- The summary lists every auto-decided item, numbered, one line each: `<question> → <decision>: <reason>`. A marker (predicted, or one the calling skill names) follows the decision in parentheses, in the reply's language.
 - The user's confirmation is the one the calling skill names.
 
 ## Domain language

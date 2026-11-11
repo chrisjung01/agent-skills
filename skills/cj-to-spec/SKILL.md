@@ -43,13 +43,14 @@ Done when the spec is posted, its link is in the reply, and the reply ends with 
 
 ## Auto mode
 
-`auto` after the issue starts it; `cj-grill-with-docs` names it after an auto run. The user is asked only before posting.
+`auto` in the prompt starts it; `cj-grill-with-docs` names it after an auto run. The user is asked only before posting. On a big tier (the latest `Tier:` line, a `## Challenge` comment, or this session's grill) one line says auto mode ends, and the run asks as written.
 
 - **Step 1:** an auto grill in this session is the decision list. No grill: call the Skill tool with "cj-grilling" in auto mode.
-- **Step 2:** the seams are shown above the draft, not confirmed.
+- **Step 2:** the seams are not confirmed; each joins the decision list of step 6 as one line.
 - **Step 3:** two goals: go on with the first; the other goes into the decision list as a second spec.
-- **Step 5:** the reader runs on the session's model and effort, as far as they are known, in place of Opus with effort high. A finding that changes behaviour or scope is settled with the recommended answer, not asked.
-- **Step 6:** above the ticket-count line stand every auto decision of the grill and this run, numbered, one line each: `<question> → <decision>: <reason>`. The `cj-posting` confirm is the one stop; a reply that changes a decision by number updates the draft and shows it again.
+- **Step 5:** the reader runs on the session's model and effort, known as step 5 defines it, in place of Opus with effort high; a part not known stays as step 5 names it. A finding that changes behaviour or scope is settled with the recommended answer, not asked.
+- **Step 4:** a decision marked `author question, assumed` goes into the spec's decisions marked as assumed, so the author sees it.
+- **Step 6:** first every auto decision of the grill and this run, numbered, one line each: `<question> → <decision>: <reason>`, then the ticket-count line and the draft. The `cj-posting` confirm is the one stop; a reply that changes a decision by number updates the draft and shows it again.
 - **Step 7** and changing a posted spec keep their questions.
 
 ## Changing a posted spec
