@@ -310,3 +310,16 @@ Results:
 
 - 2026-10-25, before the change (text of `ecea187`): one fresh grader on paper. The draft ACs listed visible nodes and the disabled Attack button only; the grader settled none of the three points (separation, purpose lines, reason next to the locked button) and quoted no line that would have made it. Missed expected.
 - 2026-10-25, after the change: one fresh grader on paper, seams assumed confirmed. The new check in `SPEC.md` stopped the draft, and one question asked all three points with a proposal. Met expected. Verify in next real run: the next whetstone run checks later `cj-to-spec` windows for a screen spec after which the user asks for titles, hints or a reason text.
+
+## 33. Auto mode confirms the seams itself and stops only before posting
+
+**Setup:** issue #642 "Sort the task list by due date" was grilled in this session with `/cj-grill-with-docs #642 auto`; its closing reply lists five auto decisions, each with question, decision and reason. The conversation is in German.
+**Prompt:** "/cj-to-spec #642 auto" (write the run up to the first message that waits for the user).
+**Expected:** the run asks no seam confirm. The first message that waits shows the decision list (question, decision, reason; the grill's decisions plus the seams), then the draft, then the posting confirm from `cj-posting`. A seam confirm question before the draft fails.
+
+## 34. Auto mode runs the fresh reader on the session's model
+
+**Setup:** as scenario 33. The system context says the session runs on Sonnet with effort medium.
+**Prompt:** "/cj-to-spec #642 auto" (name the model and effort the fresh reader is dispatched with).
+**Expected:** the reader is dispatched on Sonnet with effort medium. Opus with effort high fails.
+**Origin:** session 7c9b97ce, the user: "das gleiche model nutzen, in dem wir gerade laufen".
