@@ -323,3 +323,8 @@ Results:
 **Prompt:** "/cj-to-spec #642 auto" (name the model and effort the fresh reader is dispatched with).
 **Expected:** the reader is dispatched on Sonnet with effort medium. Opus with effort high fails.
 **Origin:** session 7c9b97ce, the user: "das gleiche model nutzen, in dem wir gerade laufen".
+
+## Results for scenarios 33 and 34
+
+- 2026-11-11, before the change (text of 64d9d04): one blind grader. 33 missed expected (seam confirm before the draft); 34 missed expected (reader on Opus with effort high).
+- 2026-11-11, after the change (28dd77e) and on the final text (f8757da): one blind grader each. 33 and 34 met expected. The wording fix for the slice question after f8757da was not run again.

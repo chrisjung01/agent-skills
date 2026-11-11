@@ -193,6 +193,12 @@ Skill under test: `cj-grill-with-docs`.
 **Prompt:** "/cj-grill-with-docs #643 auto" (write the closing reply).
 **Expected:** the run posts no comment on the issue and does not stop. The closing reply's decision list holds the archive delay with the proposed value, marked as an author question that was assumed, and ends with `/cj-to-spec #643 auto`. A comment with questions for the author, or a run that stops there, fails.
 
+## Runs, scenarios 25 to 27
+
+- 2026-11-11, before the change (text of 64d9d04): one blind grader. 25, 26 and 27 missed expected; `auto` is read as noise, 26 asks the tier but without the line that auto mode ends.
+- 2026-11-11, after the change (28dd77e): one blind grader. 25, 26 and 27 met expected; it named eleven ambiguities, fixed in f8757da.
+- 2026-11-11, final text (f8757da): one blind grader. 4 (regression guard), 25, 26 and 27 met expected. Two wording fixes after it (slice question, decisions before a big sign) were not run again.
+
 ## Runs, scenarios 2 to 13
 
 - 2026-10-16, before the change (#96): one fresh grader. 2 to 13 missed expected; only a variant of 9 met ("two tickets" proposes no tier), because the old text has no tier at all, so the variant was dropped. The first versions of 7 and 10 met expected on the old text, so both were rewritten.

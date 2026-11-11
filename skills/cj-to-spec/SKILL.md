@@ -43,7 +43,7 @@ Done when the spec is posted, its link is in the reply, and the reply ends with 
 
 ## Auto mode
 
-`auto` in the prompt starts it; `cj-grill-with-docs` names it after an auto run. The user is asked only before posting. On a big tier (the latest `Tier:` line, a `## Challenge` comment, or this session's grill) one line says auto mode ends, and the run asks as written.
+`auto` in the prompt starts it; `cj-grill-with-docs` names it after an auto run. The user is asked only before posting and, after it, for a slice. On a big tier (the latest `Tier:` line, a `## Challenge` comment, or this session's grill) one line says auto mode ends, and the run asks as written.
 
 - **Step 1:** an auto grill in this session is the decision list. No grill: call the Skill tool with "cj-grilling" in auto mode.
 - **Step 2:** the seams are not confirmed; each joins the decision list of step 6 as one line.
