@@ -92,6 +92,10 @@ _Avoid_: Building block (a skill only other skills call), Slice (a ticket cut fr
 The amount of flow a change runs, picked from its stakes: small, normal, or big or risky. The README names each tier's signs and commands; the grill proposes one and the user confirms it, and `cj-implement` asks once for a stake on an issue without a spec. A confirmed tier stands on the issue as a `Tier: <tier>, confirmed` line; the latest one counts.
 _Avoid_: Lane, Size class, Track
 
+**Auto mode**:
+A run of `cj-grill-with-docs` or `cj-to-spec` started with `auto`: every decision takes the recommendation and is listed with question, decision and reason. The run asks only before posting the spec; a big tier falls back to asking.
+_Avoid_: Autopilot, Yolo mode
+
 **Coverage table**:
 The table `cj-grilling` shows before it closes a session: one row per category of a plan, each rated Clear, Partial, Missing or Out of scope.
 _Avoid_: Clarify gate (a mandatory step, which this is not), Checklist

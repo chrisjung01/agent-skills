@@ -1,6 +1,6 @@
 ---
 name: cj-to-spec
-description: Turn the grilled conversation into a spec, post it as a "## Spec" comment on the issue (or as a new issue), and slice a spec that needs more than one ticket into sub-issues. Step 2 of the spec-driven flow.
+description: Turn the grilled conversation into a spec, post it as a "## Spec" comment on the issue (or as a new issue), and slice a spec that needs more than one ticket into sub-issues. Step 2 of the spec-driven flow; `auto` takes every recommendation and asks only before posting.
 disable-model-invocation: true
 ---
 
@@ -40,6 +40,18 @@ Call the Skill tool with "cj-project-context" for: repos, glossary, issue-tracke
 7. **Slice**, only when the posted spec needs more than one ticket: follow [TICKETS.md](TICKETS.md). The slice and the Epic title preview are a question of their own after the spec is posted; the yes for the spec does not cover them, and nothing is filed before their yes. The user rejects the slice as a whole, not one ticket or edge of it: ask whether to revise it (recommended) or build everything in one PR. Revise runs the slicing again from its step 4; one PR files nothing, proposes no title change, and ends with the one-PR next step. Write it scannable: the first line is the result or the decision needed. Be extremely concise. Sacrifice grammar for the sake of concision. Text others read keeps full sentences. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
 
 Done when the spec is posted, its link is in the reply, and the reply ends with the next step. One ticket: `/clear`, then `/cj-implement <issue>` (`cj-implement` reads the issue and the spec comment itself and needs a fresh context window). More than one ticket: the next step [TICKETS.md](TICKETS.md) names once the slice is filed. Slice rejected and one PR chosen: `/clear`, then `/cj-implement <issue> one-pr`; never `/cj-implement <issue>` without `one-pr` for that spec. Write the next step under a bold "Next:" (in the reply's language) as a numbered list, one command per line, each followed by ` · ` and its reason in a few words. A step that names a PR, issue or comment carries its full link, even when the link appears earlier in the reply. No table.
+
+## Auto mode
+
+`auto` in the prompt starts it; `cj-grill-with-docs` names it after an auto run. The user is asked only before posting and, after it, for a slice. On a big tier (the latest `Tier:` line, a `## Challenge` comment, or this session's grill) one line says auto mode ends, and the run asks as written.
+
+- **Step 1:** an auto grill in this session is the decision list. No grill: call the Skill tool with "cj-grilling" in auto mode.
+- **Step 2:** the seams are not confirmed; each joins the decision list of step 6 as one line.
+- **Step 3:** two goals: go on with the first; the other goes into the decision list as a second spec.
+- **Step 5:** the reader runs on the session's model and effort, known as step 5 defines it, in place of Opus with effort high; a part not known stays as step 5 names it. A finding that changes behaviour or scope is settled with the recommended answer, not asked.
+- **Step 4:** a decision marked `author question, assumed` goes into the spec's decisions marked as assumed, so the author sees it.
+- **Step 6:** first every auto decision of the grill and this run, numbered, one line each: `<question> → <decision>: <reason>`, then the ticket-count line and the draft. The `cj-posting` confirm is the one stop; a reply that changes a decision by number updates the draft and shows it again.
+- **Step 7** and changing a posted spec keep their questions.
 
 ## Changing a posted spec
 

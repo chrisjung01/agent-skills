@@ -28,6 +28,16 @@ Then rate the **coverage table**, one row per category in this order: functional
 
 Give a summary of the decisions, numbered, before anything acts on them. The coverage table stands above the numbered list, not repeated elsewhere in the reply, one line per row, category names and ratings in the user's language; no row reads Partial or Missing there. Write it scannable: the first line is the result or the decision needed. Be extremely concise. Sacrifice grammar for the sake of concision. Text others read keeps full sentences. One sentence per bullet, at most 25 words. A list has 3 to 5 items, never more than 7; a longer one splits under two headings or goes onto a page. Three or more items go one per line, never inside a sentence. No nested lists, and no tables unless this skill names one; code, log and command blocks and the `Next:` block keep their own shape. Bold only as a label at the start of a line, code font for paths and commands. Headings name the topic in the reader's terms, not generic labels like Scope or Process. No made-up abbreviations: write glossary terms out unless the glossary defines the abbreviation as the term; code identifiers, paths and issue or PR numbers stay. Before the first question to the user, call the Skill tool with `cj-asking` and ask as it says.
 
+## Auto mode
+
+The calling skill says when it runs in auto mode. Then this skill asks the user nothing:
+
+- Every question this skill would ask the user (frontier decisions, Partial or Missing coverage rows, term questions, a missing premise, a glossary context) is settled with the recommended option and recorded as auto-decided. The frontier, the three predicted decisions and the coverage table run as above.
+- A settled term goes into the glossary right away; an ADR the rules below would offer is written without the yes. Both are listed in the summary.
+- Every subagent gets the session's model and effort when the system or harness context states them; pass whichever the harness takes.
+- The summary lists every auto-decided item, numbered, one line each: `<question> → <decision>: <reason>`. A marker (predicted, or one the calling skill names) follows the decision in parentheses, in the reply's language.
+- The user's confirmation is the one the calling skill names.
+
 ## Domain language
 
 Call the Skill tool with "cj-project-context" for: glossary.

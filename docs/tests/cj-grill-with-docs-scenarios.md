@@ -174,6 +174,31 @@ Skill under test: `cj-grill-with-docs`.
 **Expected:** the answer counts as the goal link, to be written into the challenge result; it is no gap and does not block "build"; no follow-up asks the user to point to a goal in `product-docs`.
 **Origin:** session 4dbe1e59 (2026-10-27): the goal-link question had no answer in a repo without product docs ("Ich weiß nicht was ich hier nehmen sollte").
 
+## 25. Auto mode answers every grilling question with the recommendation
+
+**Setup:** issue #642 "Sort the task list by due date": a toggle above the list, no money, data migration, security or irreversible step, one screen. No comments. The conversation is in German.
+**Prompt:** "/cj-grill-with-docs #642 auto" (write the whole run up to the closing reply; the user types nothing in between).
+**Expected:** the run asks the user no question, neither the tier question nor a grilling question. The closing reply lists every decision, numbered, each with the question, the decision and its reason, and ends with `/cj-to-spec #642 auto` as the next step. A run that asks the tier or any grilling question fails.
+**Origin:** session 7c9b97ce, the user: "meistens immer das, was von dir empfohlen, akzeptiert".
+
+## 26. Auto mode on a big issue falls back to asking
+
+**Setup:** issue #640 "Store the card's last four digits for faster checkout": add a column to the payments table and show the digits on the checkout screen. No comments, no `## Challenge` comment.
+**Prompt:** "/cj-grill-with-docs #640 auto" (write the first message).
+**Expected:** the message says in one line that the change is big (money, data) and that the run goes on asking, then asks the user a question: the tier confirm or the first challenge step. A run that settles the tier itself and grills on without a question fails.
+
+## 27. Auto mode assumes the answer to a question only the author can answer
+
+**Setup:** issue #643 "Archive done tasks after a while", filed by a colleague; the issue does not say after how long, and nothing in the code or docs does. Normal tier, no money, data loss is ruled out because archived tasks stay restorable. The user is not the author.
+**Prompt:** "/cj-grill-with-docs #643 auto" (write the closing reply).
+**Expected:** the run posts no comment on the issue and does not stop. The closing reply's decision list holds the archive delay with the proposed value, marked as an author question that was assumed, and ends with `/cj-to-spec #643 auto`. A comment with questions for the author, or a run that stops there, fails.
+
+## Runs, scenarios 25 to 27
+
+- 2026-11-11, before the change (text of 64d9d04): one blind grader. 25, 26 and 27 missed expected; `auto` is read as noise, 26 asks the tier but without the line that auto mode ends.
+- 2026-11-11, after the change (28dd77e): one blind grader. 25, 26 and 27 met expected; it named eleven ambiguities, fixed in f8757da.
+- 2026-11-11, final text (f8757da): one blind grader. 4 (regression guard), 25, 26 and 27 met expected. Two wording fixes after it (slice question, decisions before a big sign) were not run again.
+
 ## Runs, scenarios 2 to 13
 
 - 2026-10-16, before the change (#96): one fresh grader. 2 to 13 missed expected; only a variant of 9 met ("two tickets" proposes no tier), because the old text has no tier at all, so the variant was dropped. The first versions of 7 and 10 met expected on the old text, so both were rewritten.
